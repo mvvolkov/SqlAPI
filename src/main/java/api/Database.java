@@ -1,12 +1,17 @@
 package api;
 
+import api.exceptions.NoSuchTableException;
+import api.exceptions.TableAlreadyExistsException;
+
 public interface Database {
 
     String getName();
 
-    SqlTable getTableOrNull(String tableName);
+    Table getTableOrNull(String tableName);
 
-    void createTable(SqlTableDescription td);
+    Table getTable(String tableName) throws NoSuchTableException;
+
+    void createTable(TableDescription description) throws TableAlreadyExistsException;
 
     void dropTable(String tableName);
 }
