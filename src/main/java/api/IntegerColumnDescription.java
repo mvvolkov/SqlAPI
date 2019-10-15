@@ -2,9 +2,9 @@ package api;
 
 import org.jetbrains.annotations.NotNull;
 
-public class IntegerColumnDescription extends ColumnDescription {
+public final class IntegerColumnDescription extends ColumnDescription {
 
-    private static final String TYPE_NAME = "VARCHAR";
+    public static final String TYPE_NAME = "VARCHAR";
 
     private IntegerColumnDescription(@NotNull Builder builder) {
         super(builder);

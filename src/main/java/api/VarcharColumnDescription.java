@@ -2,18 +2,22 @@ package api;
 
 import org.jetbrains.annotations.NotNull;
 
-public class VarcharColumnDescription extends ColumnDescription {
+public final class VarcharColumnDescription extends ColumnDescription {
 
     /**
      * Maximal number of characters.
      */
     private final int maxLength;
 
-    private static final String TYPE_NAME = "VARCHAR";
+    public static final String TYPE_NAME = "VARCHAR";
 
     private VarcharColumnDescription(@NotNull Builder builder) {
         super(builder);
         this.maxLength = builder.maxLength;
+    }
+
+    public int getMaxLength() {
+        return maxLength;
     }
 
     @NotNull
