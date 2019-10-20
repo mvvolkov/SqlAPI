@@ -1,12 +1,12 @@
-package api;
+package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class IntegerColumnDescription extends ColumnDescription {
+public final class IntegerColumnMetadata extends ColumnMetadata {
 
     public static final String TYPE_NAME = "VARCHAR";
 
-    private IntegerColumnDescription(@NotNull Builder builder) {
+    private IntegerColumnMetadata(@NotNull Builder builder) {
         super(builder);
     }
 
@@ -16,7 +16,7 @@ public final class IntegerColumnDescription extends ColumnDescription {
     }
 
 
-    public static class Builder extends ColumnDescription.Builder<Builder> {
+    public static class Builder extends ColumnMetadata.Builder<Builder> {
 
         public Builder(@NotNull String name) {
             super(name);
@@ -28,8 +28,8 @@ public final class IntegerColumnDescription extends ColumnDescription {
         }
 
         @Override
-        public ColumnDescription build() {
-            return new IntegerColumnDescription(this);
+        public ColumnMetadata build() {
+            return new IntegerColumnMetadata(this);
         }
     }
 }

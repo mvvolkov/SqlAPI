@@ -1,8 +1,9 @@
 package SimplePrintOutImpl;
 
-import api.*;
-import api.exceptions.DatabaseAlreadyExistsException;
-import api.exceptions.NoSuchDatabaseException;
+import sqlapi.*;
+import sqlapi.exceptions.DatabaseAlreadyExistsException;
+import sqlapi.exceptions.NoSuchDatabaseException;
+import sqlapi.SelectionCriteria;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +24,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public void openDatabaseWithTables(String dbName, List<TableDescription> tables) {
+    public void openDatabaseWithTables(String dbName, List<TableMetadata> tables) {
     }
 
     @Override
@@ -50,7 +51,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SqlSelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SqlSelectionCondition selectionCondition) {
+    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria) {
         return null;
     }
 }

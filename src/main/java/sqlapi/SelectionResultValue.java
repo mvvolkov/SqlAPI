@@ -1,6 +1,6 @@
-package api;
+package sqlapi;
 
-public interface SqlSelectionResultValue {
+public interface SelectionResultValue {
     String getColumnName();
     Integer getInteger();
     String getString();

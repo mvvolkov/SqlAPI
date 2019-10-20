@@ -1,7 +1,7 @@
-package api;
+package sqlapi;
 
-import api.exceptions.DatabaseAlreadyExistsException;
-import api.exceptions.NoSuchDatabaseException;
+import sqlapi.exceptions.DatabaseAlreadyExistsException;
+import sqlapi.exceptions.NoSuchDatabaseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,7 @@ public interface SqlManager {
 
     void createDatabase(String dbName) throws DatabaseAlreadyExistsException;
 
-    void openDatabaseWithTables(String dbName, List<TableDescription> tables);
+    void openDatabaseWithTables(String dbName, List<TableMetadata> tables);
 
     void persistDatabase(String dbName);
 
@@ -21,5 +21,5 @@ public interface SqlManager {
     @NotNull
     Database getDatabase(String dbName) throws NoSuchDatabaseException;
 
-    List<SqlSelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SqlSelectionCondition selectionCondition);
+    List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria);
 }

@@ -1,4 +1,4 @@
-package api;
+package sqlapi;
 
 public abstract class JoinTableOperand {
 }

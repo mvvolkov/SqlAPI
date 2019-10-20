@@ -1,9 +1,9 @@
-package api;
+package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class ColumnDescription {
+public abstract class ColumnMetadata {
 
     @NotNull
     private final String columnName;
@@ -13,7 +13,7 @@ public abstract class ColumnDescription {
     private final boolean isPrimaryKey;
 
 
-    protected ColumnDescription(@NotNull Builder<?> builder) {
+    protected ColumnMetadata(@NotNull Builder<?> builder) {
         this.columnName = builder.columnName;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
@@ -81,6 +81,6 @@ public abstract class ColumnDescription {
         // Subclasses must override this method to return "this"
         protected abstract T self();
 
-        abstract ColumnDescription build();
+        abstract ColumnMetadata build();
     }
 }

@@ -1,4 +1,4 @@
-package api;
+package sqlapi;
 
 public class SingleTableJoinOperand extends JoinTableOperand {
 

@@ -1,7 +1,7 @@
 package SqlManagerFactory;
 
 import SimplePrintOutImpl.SqlManagerImpl;
-import api.SqlManager;
+import sqlapi.SqlManager;
 
 public class SqlManagerFactory {
 

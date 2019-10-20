@@ -1,10 +1,10 @@
-package api;
+package sqlapi;
 
 public abstract class SelectionUnit {
 
     private final Type type;
 
-    public SelectionUnit(Type type) {
+    protected SelectionUnit(Type type) {
         this.type = type;
     }
 
@@ -14,13 +14,24 @@ public abstract class SelectionUnit {
         SELECT_COLUMN_EXPRESSION
     }
 
+    public abstract String toString();
+
     public Type getType() {
         return type;
+    }
+
+    public static SelectionUnit all() {
+        return new SelectAll();
     }
 
     public static class SelectAll extends SelectionUnit {
         public SelectAll() {
             super(Type.SELECT_ALL);
+        }
+
+        @Override
+        public String toString() {
+            return "*";
         }
     }
 
@@ -31,6 +42,11 @@ public abstract class SelectionUnit {
         public SelectTable(String table) {
             super(Type.SELECT_ALL_FROM_TABLE);
             this.table = table;
+        }
+
+        @Override
+        public String toString() {
+            return "";
         }
     }
 
@@ -43,6 +59,12 @@ public abstract class SelectionUnit {
             super(Type.SELECT_COLUMN_EXPRESSION);
             this.expression = expression;
             this.alias = alias;
+        }
+
+
+        @Override
+        public String toString() {
+            return "";
         }
     }
 }

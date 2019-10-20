@@ -1,8 +1,8 @@
-package api;
+package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class VarcharColumnDescription extends ColumnDescription {
+public final class VarcharColumnMetadata extends ColumnMetadata {
 
     /**
      * Maximal number of characters.
@@ -11,7 +11,7 @@ public final class VarcharColumnDescription extends ColumnDescription {
 
     public static final String TYPE_NAME = "VARCHAR";
 
-    private VarcharColumnDescription(@NotNull Builder builder) {
+    private VarcharColumnMetadata(@NotNull Builder builder) {
         super(builder);
         this.maxLength = builder.maxLength;
     }
@@ -32,7 +32,7 @@ public final class VarcharColumnDescription extends ColumnDescription {
         return "(" + String.valueOf(maxLength) + ")";
     }
 
-    public static class Builder extends ColumnDescription.Builder<Builder> {
+    public static class Builder extends ColumnMetadata.Builder<Builder> {
 
         private final int maxLength;
 
@@ -47,8 +47,8 @@ public final class VarcharColumnDescription extends ColumnDescription {
         }
 
         @Override
-        public ColumnDescription build() {
-            return new VarcharColumnDescription(this);
+        public ColumnMetadata build() {
+            return new VarcharColumnMetadata(this);
         }
     }
 }

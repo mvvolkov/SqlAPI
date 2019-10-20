@@ -1,4 +1,4 @@
-package api.exceptions;
+package sqlapi.exceptions;
 
 public class SqlException extends Exception {
 }

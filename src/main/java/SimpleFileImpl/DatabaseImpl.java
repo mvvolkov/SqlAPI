@@ -1,10 +1,10 @@
 package SimpleFileImpl;
 
-import api.Database;
-import api.Table;
-import api.TableDescription;
-import api.exceptions.NoSuchTableException;
-import api.exceptions.TableAlreadyExistsException;
+import sqlapi.Database;
+import sqlapi.Table;
+import sqlapi.TableMetadata;
+import sqlapi.exceptions.NoSuchTableException;
+import sqlapi.exceptions.TableAlreadyExistsException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +27,7 @@ public class DatabaseImpl implements Database {
     @Override
     public Table getTableOrNull(String tableName) {
         for (Table table : tables) {
-            if (table.getDescription().getName().equals(tableName)) {
+            if (table.getMetadata().getName().equals(tableName)) {
                 return table;
             }
         }
@@ -40,8 +40,8 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void createTable(TableDescription tableDescription) throws TableAlreadyExistsException {
-        tables.add(new SqlTableImpl(this, tableDescription));
+    public void createTable(TableMetadata tableMetadata) throws TableAlreadyExistsException {
+        tables.add(new TableImpl(this, tableMetadata));
     }
 
     @Override

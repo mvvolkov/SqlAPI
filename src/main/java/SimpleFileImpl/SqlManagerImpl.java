@@ -1,7 +1,8 @@
 package SimpleFileImpl;
 
-import api.*;
-import api.exceptions.NoSuchDatabaseException;
+import sqlapi.*;
+import sqlapi.exceptions.NoSuchDatabaseException;
+import sqlapi.SelectionCriteria;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public void openDatabaseWithTables(String dbName, List<TableDescription> tables) {
+    public void openDatabaseWithTables(String dbName, List<TableMetadata> tables) {
 
     }
 
@@ -40,7 +41,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SqlSelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SqlSelectionCondition selectionCondition) {
+    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria) {
         return null;
     }
 
