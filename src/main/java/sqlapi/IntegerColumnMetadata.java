@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class IntegerColumnMetadata extends ColumnMetadata {
 
-    public static final String TYPE_NAME = "VARCHAR";
+    public static final String TYPE_NAME = "INTEGER";
 
     private IntegerColumnMetadata(@NotNull Builder builder) {
         super(builder);

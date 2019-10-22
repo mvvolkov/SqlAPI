@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public abstract class SelectionCriteria {
 
-    protected final Type type;
+    public final Type type;
 
     protected SelectionCriteria(Type type) {
         this.type = type;
@@ -29,13 +29,7 @@ public abstract class SelectionCriteria {
     }
 
     protected static String getSqlString(Object value) {
-        String result = null;
-        if (value instanceof String) {
-            result = "'" + value + "'";
-        } else {
-            result = String.valueOf(value);
-        }
-        return result;
+        return (value instanceof String) ? "'" + value + "'" : String.valueOf(value);
     }
 
     /**
@@ -150,6 +144,7 @@ public abstract class SelectionCriteria {
 
     public static final class BinaryPredicate extends SelectionCriteria {
 
+
         /**
          * Left operand of the binary expression.
          */
@@ -175,6 +170,14 @@ public abstract class SelectionCriteria {
             this.right = right;
         }
 
+        public Object getLeft() {
+            return left;
+        }
+
+        public Object getRight() {
+            return right;
+        }
+
 
         @Override
         public String toString() {
@@ -183,6 +186,14 @@ public abstract class SelectionCriteria {
     }
 
     public static final class CombinedPredicate extends SelectionCriteria {
+
+        public SelectionCriteria getLeft() {
+            return left;
+        }
+
+        public SelectionCriteria getRight() {
+            return right;
+        }
 
         /**
          * Left predicate.

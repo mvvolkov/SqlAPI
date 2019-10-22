@@ -6,7 +6,7 @@ public interface Table {
     
     TableMetadata getMetadata();
 
-    void insert(List<Object> values);
+    void insert(List<Object> values) throws Exception;
 
     void insert(List<String> columns, List<Object> values);
 
