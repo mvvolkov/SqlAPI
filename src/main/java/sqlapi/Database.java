@@ -1,5 +1,6 @@
 package sqlapi;
 
+import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
 

@@ -1,5 +1,8 @@
 import SqlManagerFactory.SqlManagerFactory;
 import sqlapi.*;
+import sqlapi.dbMetadata.IntegerColumnMetadata;
+import sqlapi.dbMetadata.TableMetadata;
+import sqlapi.dbMetadata.VarcharColumnMetadata;
 import sqlapi.exceptions.*;
 
 import java.util.Arrays;

@@ -1,6 +1,6 @@
 package sqlapi;
 
-public class AssignmentOperation {
+public final class AssignmentOperation {
 
     private final String columnName;
     private final Object value;

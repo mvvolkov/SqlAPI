@@ -1,9 +1,12 @@
 package SimplePrintOutImpl;
 
 import sqlapi.*;
+import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
-import sqlapi.SelectionCriteria;
+import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.join.JoinTableOperation;
+import sqlapi.selectionResult.SelectionResultRow;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +54,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria) {
+    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
         return null;
     }
 }

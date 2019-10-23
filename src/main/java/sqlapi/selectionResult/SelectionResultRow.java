@@ -1,4 +1,4 @@
-package sqlapi;
+package sqlapi.selectionResult;
 
 public interface SelectionResultRow {
     SelectionResultValue getValue(String columnName);

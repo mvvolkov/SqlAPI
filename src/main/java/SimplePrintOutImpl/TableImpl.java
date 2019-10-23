@@ -1,7 +1,10 @@
 package SimplePrintOutImpl;
 
 import sqlapi.*;
-import sqlapi.SelectionCriteria;
+import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.dbMetadata.TableMetadata;
+import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.selectionResult.SelectionResultSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,42 +69,42 @@ public class TableImpl implements Table {
 
 
     @Override
-    public void delete(SelectionCriteria selectionCriteria) {
+    public void delete(AbstractPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(metadata.getName());
-        if (selectionCriteria.isNotEmpty()) {
+        if (selectionPredicate.isNotEmpty()) {
             sb.append(" WHERE ");
-            sb.append(selectionCriteria.toString());
+            sb.append(selectionPredicate.toString());
         }
         System.out.println(sb);
     }
 
     @Override
-    public void update(List<AssignmentOperation> assignmentOperations, SelectionCriteria selectionCriteria) {
+    public void update(List<AssignmentOperation> assignmentOperations, AbstractPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(metadata.getName());
         sb.append(" SET ");
         String assignmetns = assignmentOperations.stream().map(AssignmentOperation::toString)
                 .collect(Collectors.joining(", "));
         sb.append(assignmetns);
-        if (selectionCriteria.isNotEmpty()) {
+        if (selectionPredicate.isNotEmpty()) {
             sb.append(" WHERE ");
-            sb.append(selectionCriteria.toString());
+            sb.append(selectionPredicate.toString());
         }
         System.out.println(sb);
     }
 
     @Override
-    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria) {
+    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
         String from = selectionUnits.stream().map(SelectionUnit::toString).collect(Collectors.joining(", "));
         sb.append(from);
         sb.append(" FROM ");
         sb.append(metadata.getName());
         System.out.println(sb);
-        if (selectionCriteria.isNotEmpty()) {
+        if (selectionPredicate.isNotEmpty()) {
             sb.append(" WHERE ");
-            sb.append(selectionCriteria.toString());
+            sb.append(selectionPredicate.toString());
         }
         return null;
     }

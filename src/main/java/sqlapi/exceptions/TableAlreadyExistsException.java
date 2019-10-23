@@ -1,6 +1,6 @@
 package sqlapi.exceptions;
 
-import sqlapi.TableMetadata;
+import sqlapi.dbMetadata.TableMetadata;
 
 public class TableAlreadyExistsException extends SqlException {
 

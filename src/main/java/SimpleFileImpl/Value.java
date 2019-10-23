@@ -1,7 +1,7 @@
 package SimpleFileImpl;
 
-import sqlapi.SelectionCriteria;
-import sqlapi.SelectionResultValue;
+import sqlapi.selectionPredicate.BinaryPredicate;
+import sqlapi.selectionResult.SelectionResultValue;
 import sqlapi.exceptions.WrongValueTypeException;
 
 import java.io.Serializable;
@@ -17,7 +17,7 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
         this.value = this.javaClass.cast(value);
     }
 
-    public boolean evaluate(SelectionCriteria.BinaryPredicate bp) throws WrongValueTypeException {
+    public boolean evaluate(BinaryPredicate bp) throws WrongValueTypeException {
 
         if (value == null){
 

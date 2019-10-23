@@ -1,4 +1,4 @@
-package sqlapi;
+package sqlapi.dbMetadata;
 
 import org.jetbrains.annotations.NotNull;
 

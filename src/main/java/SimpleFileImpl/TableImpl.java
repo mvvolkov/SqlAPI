@@ -1,8 +1,13 @@
 package SimpleFileImpl;
 
 import sqlapi.*;
+import sqlapi.dbMetadata.ColumnMetadata;
+import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.ConstraintException;
 import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.selectionResult.SelectionResultSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,17 +77,17 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void delete(SelectionCriteria selectionCriteria) {
+    public void delete(AbstractPredicate selectionPredicate) {
 
     }
 
     @Override
-    public void update(List<AssignmentOperation> newValues, SelectionCriteria selectionCriteria) {
+    public void update(List<AssignmentOperation> newValues, AbstractPredicate selectionPredicate) {
 
     }
 
     @Override
-    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, SelectionCriteria selectionCriteria) {
+    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
         return null;
     }
 }

@@ -2,7 +2,7 @@ package SimpleFileImpl;
 
 import sqlapi.Database;
 import sqlapi.Table;
-import sqlapi.TableMetadata;
+import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
 

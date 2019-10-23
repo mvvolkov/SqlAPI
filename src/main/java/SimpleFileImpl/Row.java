@@ -1,6 +1,8 @@
 package SimpleFileImpl;
 
-import sqlapi.SelectionCriteria;
+import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.BinaryPredicate;
+import sqlapi.selectionPredicate.CombinedPredicate;
 
 import java.util.Map;
 
@@ -12,19 +14,19 @@ public final class Row {
         this.values = values;
     }
 
-    public boolean evaluate(SelectionCriteria sc) throws Exception {
+    public boolean evaluate(AbstractPredicate sc) throws Exception {
 
         switch (sc.getType()) {
             case AND:
-                SelectionCriteria.CombinedPredicate cp1 = (SelectionCriteria.CombinedPredicate) sc;
-                return evaluate(((SelectionCriteria.CombinedPredicate) sc).getLeft()) &&
-                        evaluate(((SelectionCriteria.CombinedPredicate) sc).getRight());
+                CombinedPredicate cp1 = (CombinedPredicate) sc;
+                return evaluate(((CombinedPredicate) sc).getLeft()) &&
+                        evaluate(((CombinedPredicate) sc).getRight());
             case OR:
-                SelectionCriteria.CombinedPredicate cp2 = (SelectionCriteria.CombinedPredicate) sc;
-                return evaluate(((SelectionCriteria.CombinedPredicate) sc).getLeft()) ||
-                        evaluate(((SelectionCriteria.CombinedPredicate) sc).getRight());
+                CombinedPredicate cp2 = (CombinedPredicate) sc;
+                return evaluate(((CombinedPredicate) sc).getLeft()) ||
+                        evaluate(((CombinedPredicate) sc).getRight());
             case EQUALS:
-                SelectionCriteria.BinaryPredicate bp = (SelectionCriteria.BinaryPredicate) sc;
+                BinaryPredicate bp = (BinaryPredicate) sc;
                 return this.getValue(bp.getColumnReference().getColumnName()).evaluate(bp);
 
         }

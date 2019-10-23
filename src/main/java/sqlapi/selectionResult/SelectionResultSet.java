@@ -1,4 +1,4 @@
-package sqlapi;
+package sqlapi.selectionResult;
 
 import java.util.List;
 

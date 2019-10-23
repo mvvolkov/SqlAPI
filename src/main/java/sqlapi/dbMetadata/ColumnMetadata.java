@@ -1,4 +1,4 @@
-package sqlapi;
+package sqlapi.dbMetadata;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,11 +10,12 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     @NotNull
     private final String columnName;
 
+    @NotNull
+    private final Class<V> javaClass;
+
     private final boolean isNotNull;
 
     private final boolean isPrimaryKey;
-
-    private final Class<V> javaClass;
 
 
     protected ColumnMetadata(@NotNull Builder<?, V> builder) {
@@ -59,6 +60,7 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
         return "";
     }
 
+    @NotNull
     public Class<V> getJavaClass() {
         return javaClass;
     }
@@ -68,11 +70,13 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
         @NotNull
         private final String columnName;
 
+        @NotNull
+        private Class<V> javaClass;
+
         private boolean isNotNull = false;
 
         private boolean isPrimaryKey = false;
 
-        private Class<V> javaClass;
 
         public Builder(@NotNull String columnName, Class<V> javaClass) {
             this.columnName = columnName;
