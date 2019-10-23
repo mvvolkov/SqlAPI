@@ -36,11 +36,20 @@ public class DatabaseImpl implements Database {
 
     @Override
     public Table getTable(String tableName) throws NoSuchTableException {
-        return null;
+        Table table = this.getTableOrNull(tableName);
+        if (table == null) {
+            throw new NoSuchTableException(tableName);
+        }
+        return table;
     }
 
     @Override
     public void createTable(TableMetadata tableMetadata) throws TableAlreadyExistsException {
+        for (Table table : tables) {
+            if (table.getMetadata().getName().equals(tableMetadata.getName())) {
+                throw new TableAlreadyExistsException(tableMetadata, table.getMetadata());
+            }
+        }
         tables.add(new TableImpl(this, tableMetadata));
     }
 

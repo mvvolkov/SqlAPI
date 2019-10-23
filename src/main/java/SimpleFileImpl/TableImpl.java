@@ -1,7 +1,8 @@
 package SimpleFileImpl;
 
 import sqlapi.*;
-import sqlapi.SelectionCriteria;
+import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.WrongValueTypeException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,40 +25,44 @@ public class TableImpl implements Table {
 
     @Override
     public TableMetadata getMetadata() {
-        return null;
+        return description;
+    }
+
+    private ColumnReference createColumnReference(ColumnMetadata columnMetadata) {
+        return new ColumnReference(columnMetadata.getColumnName(), description.getName(), database.getName());
     }
 
     @Override
-    public void insert(List<Object> values) throws Exception {
+    public void insert(List<Object> values) throws WrongValueTypeException, ConstraintException {
 
         List<ColumnMetadata> columnsMetadata = description.getColumnMetadata();
-        if (columnsMetadata.size() != values.size()) {
-            throw new Exception("");
-        }
-
         Map<String, Value> map = new HashMap<>();
-
         for (int i = 0; i < columnsMetadata.size(); i++) {
             ColumnMetadata columnMetadata = columnsMetadata.get(i);
-            Object obj = values.get(i);
-            Value value;
-            switch (columnMetadata.getTypeName()) {
-                case "INTEGER":
-                    value = new IntegerValue(obj);
-                    break;
-                case "VARCHAR":
-                    value = new VarcharValue(obj);
-                    break;
-                default:
-                    throw new Exception("");
+
+            Object obj = null;
+            if (values.size() > i) {
+                obj = values.get(i);
             }
+            if (obj == null && columnMetadata.isNotNull()) {
+                throw new ConstraintException(this.createColumnReference(columnMetadata));
+            }
+            if (obj != null && !columnMetadata.getJavaClass().isInstance(obj)) {
+                throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
+                        columnMetadata.getJavaClass(), obj.getClass());
+            }
+            Value value = new Value(columnMetadata.getJavaClass(), obj);
             map.put(columnMetadata.getColumnName(), value);
         }
         rows.add(new Row(map));
     }
 
     @Override
-    public void insert(List<String> columns, List<Object> values) {
+    public void insert(List<String> columns, List<Object> values) throws WrongValueTypeException, ConstraintException {
+
+        if (columns.size() != values.size()) {
+//            throw new Exception("");
+        }
 
     }
 

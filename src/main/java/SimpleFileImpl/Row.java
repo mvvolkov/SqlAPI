@@ -4,7 +4,7 @@ import sqlapi.SelectionCriteria;
 
 import java.util.Map;
 
-public class Row {
+public final class Row {
 
     private final Map<String, Value> values;
 
@@ -25,7 +25,7 @@ public class Row {
                         evaluate(((SelectionCriteria.CombinedPredicate) sc).getRight());
             case EQUALS:
                 SelectionCriteria.BinaryPredicate bp = (SelectionCriteria.BinaryPredicate) sc;
-                return this.getValue((String) bp.getLeft()).evaluate(bp);
+                return this.getValue(bp.getColumnReference().getColumnName()).evaluate(bp);
 
         }
         return false;

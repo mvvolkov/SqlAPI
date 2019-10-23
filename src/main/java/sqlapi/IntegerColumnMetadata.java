@@ -2,7 +2,7 @@ package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class IntegerColumnMetadata extends ColumnMetadata {
+public final class IntegerColumnMetadata extends ColumnMetadata<Integer> {
 
     public static final String TYPE_NAME = "INTEGER";
 
@@ -16,10 +16,10 @@ public final class IntegerColumnMetadata extends ColumnMetadata {
     }
 
 
-    public static class Builder extends ColumnMetadata.Builder<Builder> {
+    public static class Builder extends ColumnMetadata.Builder<Builder, Integer> {
 
         public Builder(@NotNull String name) {
-            super(name);
+            super(name, Integer.class);
         }
 
         @Override

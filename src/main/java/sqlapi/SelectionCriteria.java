@@ -94,28 +94,28 @@ public abstract class SelectionCriteria {
         return new CombinedPredicate(Type.OR, left, right);
     }
 
-    public static SelectionCriteria equals(Object left, Object right) {
-        return new BinaryPredicate(Type.EQUALS, left, right);
+    public static SelectionCriteria equals(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.EQUALS, columnReference, value);
     }
 
-    public static SelectionCriteria notEquals(Object left, Object right) {
-        return new BinaryPredicate(Type.NOT_EQUALS, left, right);
+    public static SelectionCriteria notEquals(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.NOT_EQUALS, columnReference, value);
     }
 
-    public static SelectionCriteria greaterThan(Object left, Object right) {
-        return new BinaryPredicate(Type.GREATER_THAN, left, right);
+    public static SelectionCriteria greaterThan(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.GREATER_THAN, columnReference, value);
     }
 
-    public static SelectionCriteria greaterThanOrEquals(Object left, Object right) {
-        return new BinaryPredicate(Type.GREATER_THAN_OR_EQUALS, left, right);
+    public static SelectionCriteria greaterThanOrEquals(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.GREATER_THAN_OR_EQUALS, columnReference, value);
     }
 
-    public static SelectionCriteria lessThan(Object left, Object right) {
-        return new BinaryPredicate(Type.LESS_THAN, left, right);
+    public static SelectionCriteria lessThan(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.LESS_THAN, columnReference, value);
     }
 
-    public static SelectionCriteria lessThanOrEquals(Object left, Object right) {
-        return new BinaryPredicate(Type.LESS_THAN_OR_EQUALS, left, right);
+    public static SelectionCriteria lessThanOrEquals(ColumnReference columnReference, Object value) {
+        return new BinaryPredicate(Type.LESS_THAN_OR_EQUALS, columnReference, value);
     }
 
     public static SelectionCriteria in(ColumnReference columnReference, List<?> values) {
@@ -149,39 +149,33 @@ public abstract class SelectionCriteria {
          * Left operand of the binary expression.
          */
         @NotNull
-        private final Object left;
+        private final ColumnReference columnReference;
 
         /**
          * Right operand of the binary expression.
          */
         @NotNull
-        private final Object right;
+        private final Object value;
 
-        /**
-         * Instance of this type can be obtained with static method only.
-         *
-         * @param type  - binary operation type.
-         * @param left  - left operand.
-         * @param right - right operand.
-         */
-        private BinaryPredicate(Type type, Object left, Object right) {
+
+        private BinaryPredicate(Type type, ColumnReference columnReference, Object value) {
             super(type);
-            this.left = left;
-            this.right = right;
+            this.columnReference = columnReference;
+            this.value = value;
         }
 
-        public Object getLeft() {
-            return left;
+        public ColumnReference getColumnReference() {
+            return columnReference;
         }
 
-        public Object getRight() {
-            return right;
+        public Object getValue() {
+            return value;
         }
 
 
         @Override
         public String toString() {
-            return getSqlString(left) + " " + this.getTypeString() + " " + getSqlString(right);
+            return columnReference + " " + this.getTypeString() + " " + getSqlString(value);
         }
     }
 

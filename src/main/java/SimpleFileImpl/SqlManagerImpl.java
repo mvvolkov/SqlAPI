@@ -1,9 +1,9 @@
 package SimpleFileImpl;
 
-import sqlapi.*;
-import sqlapi.exceptions.NoSuchDatabaseException;
-import sqlapi.SelectionCriteria;
 import org.jetbrains.annotations.NotNull;
+import sqlapi.*;
+import sqlapi.exceptions.DatabaseAlreadyExistsException;
+import sqlapi.exceptions.NoSuchDatabaseException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +14,12 @@ public class SqlManagerImpl implements SqlManager {
     private final Collection<Database> databases = new ArrayList<>();
 
     @Override
-    public void createDatabase(String dbName) {
-        Database database = new DatabaseImpl(dbName);
+    public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
+        for (Database database : databases) {
+            if (database.getName().equals(dbName)) {
+                throw new DatabaseAlreadyExistsException(dbName);
+            }
+        }
         databases.add(new DatabaseImpl(dbName));
     }
 
@@ -32,12 +36,21 @@ public class SqlManagerImpl implements SqlManager {
 
     @Override
     public Database getDatabaseOrNull(String dbName) {
+        for (Database database : databases) {
+            if (database.getName().equals(dbName)) {
+                return database;
+            }
+        }
         return null;
     }
 
     @Override
     public @NotNull Database getDatabase(String dbName) throws NoSuchDatabaseException {
-        return null;
+        Database database = this.getDatabaseOrNull(dbName);
+        if (database == null) {
+            throw new NoSuchDatabaseException(dbName);
+        }
+        return database;
     }
 
     @Override

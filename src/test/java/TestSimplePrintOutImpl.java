@@ -45,6 +45,8 @@ public class TestSimplePrintOutImpl {
             System.out.println(e.getMessage());
         } catch (NoSuchTableException e) {
             System.out.println(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         try {
@@ -54,6 +56,8 @@ public class TestSimplePrintOutImpl {
             System.out.println(e.getMessage());
         } catch (NoSuchTableException e) {
             System.out.println(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         try {

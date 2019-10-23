@@ -2,7 +2,7 @@ package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class VarcharColumnMetadata extends ColumnMetadata {
+public final class VarcharColumnMetadata extends ColumnMetadata<String> {
 
     /**
      * Maximal number of characters.
@@ -32,12 +32,12 @@ public final class VarcharColumnMetadata extends ColumnMetadata {
         return "(" + String.valueOf(maxLength) + ")";
     }
 
-    public static class Builder extends ColumnMetadata.Builder<Builder> {
+    public static class Builder extends ColumnMetadata.Builder<Builder, String> {
 
         private final int maxLength;
 
         public Builder(@NotNull String name, int maxLength) {
-            super(name);
+            super(name, String.class);
             this.maxLength = maxLength;
         }
 

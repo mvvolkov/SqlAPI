@@ -1,14 +1,17 @@
 package sqlapi;
 
+import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.WrongValueTypeException;
+
 import java.util.List;
 
 public interface Table {
-    
+
     TableMetadata getMetadata();
 
-    void insert(List<Object> values) throws Exception;
+    void insert(List<Object> values) throws WrongValueTypeException, ConstraintException;
 
-    void insert(List<String> columns, List<Object> values);
+    void insert(List<String> columns, List<Object> values) throws WrongValueTypeException, ConstraintException;
 
     void insert(SelectionResultSet rows);
 

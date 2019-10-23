@@ -2,8 +2,10 @@ package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 
-public abstract class ColumnMetadata {
+
+public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> implements Serializable {
 
     @NotNull
     private final String columnName;
@@ -12,11 +14,14 @@ public abstract class ColumnMetadata {
 
     private final boolean isPrimaryKey;
 
+    private final Class<V> javaClass;
 
-    protected ColumnMetadata(@NotNull Builder<?> builder) {
+
+    protected ColumnMetadata(@NotNull Builder<?, V> builder) {
         this.columnName = builder.columnName;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
+        this.javaClass = builder.javaClass;
     }
 
     @NotNull
@@ -54,7 +59,11 @@ public abstract class ColumnMetadata {
         return "";
     }
 
-    public abstract static class Builder<T extends Builder<T>> {
+    public Class<V> getJavaClass() {
+        return javaClass;
+    }
+
+    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V> & Serializable> {
 
         @NotNull
         private final String columnName;
@@ -63,9 +72,11 @@ public abstract class ColumnMetadata {
 
         private boolean isPrimaryKey = false;
 
+        private Class<V> javaClass;
 
-        public Builder(@NotNull String columnName) {
+        public Builder(@NotNull String columnName, Class<V> javaClass) {
             this.columnName = columnName;
+            this.javaClass = javaClass;
         }
 
         public T notNull() {
