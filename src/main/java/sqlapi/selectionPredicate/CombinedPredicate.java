@@ -1,41 +1,36 @@
 package sqlapi.selectionPredicate;
 
+import org.jetbrains.annotations.NotNull;
+
 public final class CombinedPredicate extends AbstractPredicate {
 
 
-    /**
-     * Left predicate.
-     */
-    protected final AbstractPredicate left;
+    @NotNull
+    protected final AbstractPredicate leftPredicate;
 
-    /**
-     * Right predicate.
-     */
-    protected final AbstractPredicate right;
+    @NotNull
+    protected final AbstractPredicate rightPredicate;
 
-    /**
-     * Instance of this type can be obtained with static method only.
-     *
-     * @param type  - binary operation type.
-     * @param left  - left predicate.
-     * @param right - right predicate.
-     */
-    CombinedPredicate(Type type, AbstractPredicate left, AbstractPredicate right) {
+
+    CombinedPredicate(@NotNull Type type, @NotNull AbstractPredicate leftPredicate,
+                      @NotNull AbstractPredicate rightPredicate) {
         super(type);
-        this.left = left;
-        this.right = right;
+        this.leftPredicate = leftPredicate;
+        this.rightPredicate = rightPredicate;
     }
 
-    public AbstractPredicate getLeft() {
-        return left;
+    @NotNull
+    public AbstractPredicate getLeftPredicate() {
+        return leftPredicate;
     }
 
-    public AbstractPredicate getRight() {
-        return right;
+    @NotNull
+    public AbstractPredicate getRightPredicate() {
+        return rightPredicate;
     }
 
     @Override
     public String toString() {
-        return "(" + left + ") " + this.getOperatorString() + " (" + right + ")";
+        return "(" + leftPredicate + ") " + this.getOperatorString() + " (" + rightPredicate + ")";
     }
 }

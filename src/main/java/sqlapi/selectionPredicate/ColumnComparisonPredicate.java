@@ -1,18 +1,20 @@
 package sqlapi.selectionPredicate;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sqlapi.ColumnReference;
 
-public final class BinaryPredicate extends AbstractPredicate {
-
+public final class ColumnComparisonPredicate extends AbstractPredicate {
 
     @NotNull
     private final ColumnReference columnReference;
 
+    @Nullable
     private final Object value;
 
 
-    BinaryPredicate(@NotNull Type type, @NotNull ColumnReference columnReference, Object value) {
+    public ColumnComparisonPredicate(@NotNull Type type, @NotNull ColumnReference columnReference,
+                                     @Nullable Object value) {
         super(type);
         this.columnReference = columnReference;
         this.value = value;
@@ -24,6 +26,7 @@ public final class BinaryPredicate extends AbstractPredicate {
     }
 
 
+    @Nullable
     public Object getValue() {
         return value;
     }

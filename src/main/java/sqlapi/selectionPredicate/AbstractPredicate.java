@@ -3,9 +3,10 @@ package sqlapi.selectionPredicate;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.ColumnReference;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractPredicate {
+public abstract class AbstractPredicate implements Serializable {
 
     @NotNull
     public final Type type;
@@ -80,11 +81,11 @@ public abstract class AbstractPredicate {
     }
 
     public static AbstractPredicate isNull(ColumnReference columnReference) {
-        return new IsNullPredicate(Type.IS_NULL, columnReference);
+        return new ColumnIsNullPredicate(Type.IS_NULL, columnReference);
     }
 
     public static AbstractPredicate isNotNull(ColumnReference columnReference) {
-        return new IsNullPredicate(Type.IS_NOT_NULL, columnReference);
+        return new ColumnIsNullPredicate(Type.IS_NOT_NULL, columnReference);
     }
 
     public static AbstractPredicate and(AbstractPredicate left, AbstractPredicate right) {
@@ -96,31 +97,31 @@ public abstract class AbstractPredicate {
     }
 
     public static AbstractPredicate equals(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.EQUALS, columnReference, value);
+        return new ColumnComparisonPredicate(Type.EQUALS, columnReference, value);
     }
 
     public static AbstractPredicate notEquals(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.NOT_EQUALS, columnReference, value);
+        return new ColumnComparisonPredicate(Type.NOT_EQUALS, columnReference, value);
     }
 
     public static AbstractPredicate greaterThan(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.GREATER_THAN, columnReference, value);
+        return new ColumnComparisonPredicate(Type.GREATER_THAN, columnReference, value);
     }
 
     public static AbstractPredicate greaterThanOrEquals(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.GREATER_THAN_OR_EQUALS, columnReference, value);
+        return new ColumnComparisonPredicate(Type.GREATER_THAN_OR_EQUALS, columnReference, value);
     }
 
     public static AbstractPredicate lessThan(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.LESS_THAN, columnReference, value);
+        return new ColumnComparisonPredicate(Type.LESS_THAN, columnReference, value);
     }
 
     public static AbstractPredicate lessThanOrEquals(ColumnReference columnReference, Object value) {
-        return new BinaryPredicate(Type.LESS_THAN_OR_EQUALS, columnReference, value);
+        return new ColumnComparisonPredicate(Type.LESS_THAN_OR_EQUALS, columnReference, value);
     }
 
     public static AbstractPredicate in(ColumnReference columnReference, List<?> values) {
-        return new InPredicate(columnReference, values);
+        return new ColumnInPredicate(columnReference, values);
     }
 
 

@@ -18,17 +18,17 @@ public class TestSimpleFileImpl {
             System.out.println(e.getMessage());
         }
 
-//        try {
-//            sqlManager.createDatabase("DB1");
-//        } catch (DatabaseAlreadyExistsException e) {
-//            System.out.println(e.getMessage());
-//        }
+        try {
+            sqlManager.createDatabase("DB1");
+        } catch (DatabaseAlreadyExistsException e) {
+            System.out.println(e.getMessage());
+        }
 
         try {
             sqlManager.getDatabase("DB1").createTable(new TableMetadata("table1",
-                    Arrays.asList(new IntegerColumnMetadata.Builder("column1").notNull().primaryKey().build(),
-                            new IntegerColumnMetadata.Builder("column2").build(),
-                            new VarcharColumnMetadata.Builder("column3", 20).notNull().build())));
+                    Arrays.asList(IntegerColumnMetadata.builder("column1").notNull().primaryKey().build(),
+                            IntegerColumnMetadata.builder("column2").build(),
+                            VarcharColumnMetadata.builder("column3", 20).notNull().build())));
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
         } catch (TableAlreadyExistsException e) {
@@ -36,8 +36,9 @@ public class TestSimpleFileImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").getTable("table1").insert(Arrays.asList(10,
-                    20, "test"));
+            Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
+            table1.insert(Arrays.asList(10, 20, "test1"));
+            table1.insert(Arrays.asList(11, 20, "test2"));
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
         } catch (NoSuchTableException e) {

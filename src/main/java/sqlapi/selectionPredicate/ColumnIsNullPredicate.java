@@ -1,17 +1,25 @@
 package sqlapi.selectionPredicate;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.ColumnReference;
 
 /**
  * The predicate for checking whether the column value is NULL or NOT NULL.
  */
-public class IsNullPredicate extends AbstractPredicate {
+public class ColumnIsNullPredicate extends AbstractPredicate {
 
+
+    @NotNull
     private final ColumnReference columnReference;
 
-    IsNullPredicate(Type type, ColumnReference columnReference) {
+    ColumnIsNullPredicate(Type type, ColumnReference columnReference) {
         super(type);
         this.columnReference = columnReference;
+    }
+
+    @NotNull
+    public ColumnReference getColumnReference() {
+        return columnReference;
     }
 
     @Override

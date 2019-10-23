@@ -7,6 +7,7 @@ import sqlapi.selectionPredicate.AbstractPredicate;
 import sqlapi.selectionResult.SelectionResultRow;
 import sqlapi.selectionResult.SelectionResultSet;
 
+import java.io.Serializable;
 import java.util.List;
 
 public interface Table {
@@ -15,7 +16,8 @@ public interface Table {
 
     void insert(List<Object> values) throws WrongValueTypeException, ConstraintException;
 
-    void insert(List<String> columns, List<Object> values) throws WrongValueTypeException, ConstraintException;
+    void insert(List<String> columns, List<Object> values)
+            throws WrongValueTypeException, ConstraintException;
 
     void insert(SelectionResultSet rows);
 

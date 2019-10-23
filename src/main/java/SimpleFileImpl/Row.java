@@ -1,12 +1,13 @@
 package SimpleFileImpl;
 
 import sqlapi.selectionPredicate.AbstractPredicate;
-import sqlapi.selectionPredicate.BinaryPredicate;
+import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 import sqlapi.selectionPredicate.CombinedPredicate;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public final class Row {
+public final class Row implements Serializable {
 
     private final Map<String, Value> values;
 
@@ -19,14 +20,14 @@ public final class Row {
         switch (sc.getType()) {
             case AND:
                 CombinedPredicate cp1 = (CombinedPredicate) sc;
-                return evaluate(((CombinedPredicate) sc).getLeft()) &&
-                        evaluate(((CombinedPredicate) sc).getRight());
+                return evaluate(((CombinedPredicate) sc).getLeftPredicate()) &&
+                        evaluate(((CombinedPredicate) sc).getRightPredicate());
             case OR:
                 CombinedPredicate cp2 = (CombinedPredicate) sc;
-                return evaluate(((CombinedPredicate) sc).getLeft()) ||
-                        evaluate(((CombinedPredicate) sc).getRight());
+                return evaluate(((CombinedPredicate) sc).getLeftPredicate()) ||
+                        evaluate(((CombinedPredicate) sc).getRightPredicate());
             case EQUALS:
-                BinaryPredicate bp = (BinaryPredicate) sc;
+                ColumnComparisonPredicate bp = (ColumnComparisonPredicate) sc;
                 return this.getValue(bp.getColumnReference().getColumnName()).evaluate(bp);
 
         }
@@ -36,5 +37,4 @@ public final class Row {
     public Value getValue(String columnName) {
         return values.get(columnName);
     }
-
 }

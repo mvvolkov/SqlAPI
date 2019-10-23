@@ -32,6 +32,10 @@ public final class VarcharColumnMetadata extends ColumnMetadata<String> {
         return "(" + String.valueOf(maxLength) + ")";
     }
 
+    public static Builder builder(String name, int maxLength) {
+        return new Builder(name, maxLength);
+    }
+
     public static class Builder extends ColumnMetadata.Builder<Builder, String> {
 
         private final int maxLength;

@@ -6,6 +6,7 @@ import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.selectionResult.SelectionResultRow;
 import sqlapi.selectionResult.SelectionResultSet;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,8 @@ public class TableImpl implements Table {
         sb.append(" (");
         sb.append(columns.stream().collect(Collectors.joining(", ")));
         sb.append(") VALUES (");
-        String valuesString = values.stream().map(this::getStringFromNewValue).collect(Collectors.joining(", "));
+        String valuesString = values.stream().
+                map(this::getStringFromNewValue).collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
         System.out.println(sb);

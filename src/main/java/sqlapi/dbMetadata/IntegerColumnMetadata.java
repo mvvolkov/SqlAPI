@@ -15,6 +15,10 @@ public final class IntegerColumnMetadata extends ColumnMetadata<Integer> {
         return TYPE_NAME;
     }
 
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
 
     public static class Builder extends ColumnMetadata.Builder<Builder, Integer> {
 

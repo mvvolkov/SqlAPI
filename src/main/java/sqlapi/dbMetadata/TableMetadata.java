@@ -2,10 +2,11 @@ package sqlapi.dbMetadata;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class TableMetadata {
+public final class TableMetadata implements Serializable {
 
     @NotNull
     private final String name;
@@ -19,6 +20,7 @@ public final class TableMetadata {
         this.columnMetadata = columnMetadata;
     }
 
+    @NotNull
     public List<ColumnMetadata> getColumnMetadata() {
         return columnMetadata;
     }

@@ -1,6 +1,7 @@
 package SimpleFileImpl;
 
-import sqlapi.selectionPredicate.BinaryPredicate;
+import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 import sqlapi.selectionResult.SelectionResultValue;
 import sqlapi.exceptions.WrongValueTypeException;
 
@@ -17,9 +18,9 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
         this.value = this.javaClass.cast(value);
     }
 
-    public boolean evaluate(BinaryPredicate bp) throws WrongValueTypeException {
+    public boolean evaluate(ColumnComparisonPredicate bp) throws WrongValueTypeException {
 
-        if (value == null){
+        if (value == null) {
 
         }
 
@@ -31,6 +32,9 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
 //        }
         T other = javaClass.cast(obj);
         int compResult = value.compareTo(other);
+        if (bp.getType().equals(AbstractPredicate.Type.EQUALS)) {
+            return compResult == 0;
+        }
         return false;
     }
 

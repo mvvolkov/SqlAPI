@@ -1,22 +1,24 @@
 package sqlapi.selectionPredicate;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.ColumnReference;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class InPredicate extends AbstractPredicate {
+public class ColumnInPredicate extends AbstractPredicate {
 
+    @NotNull
     private final ColumnReference columnReference;
 
+    @NotNull
     private final List<?> values;
 
-    public InPredicate(ColumnReference columnReference, List<?> values) {
+    public ColumnInPredicate(ColumnReference columnReference, List<?> values) {
         super(Type.IN);
         this.columnReference = columnReference;
         this.values = values;
     }
-
 
     @Override
     public String toString() {
