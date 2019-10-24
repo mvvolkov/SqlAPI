@@ -55,9 +55,9 @@ public class TableImpl implements Table, Serializable {
 
     protected void checkConstraints(ColumnMetadata columnMetadata, Object value)
             throws WrongValueTypeException, ConstraintException {
-        if (value != null && !columnMetadata.getJavaClass().isInstance(value)) {
+        if (value != null && !columnMetadata.getType().isInstance(value)) {
             throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
-                    columnMetadata.getJavaClass(), value.getClass());
+                    columnMetadata.getType(), value.getClass());
         }
         if (value == null && columnMetadata.isNotNull()) {
             throw new ConstraintException(this.createColumnReference(columnMetadata), "NOT NULL");
@@ -85,7 +85,7 @@ public class TableImpl implements Table, Serializable {
             ColumnMetadata columnMetadata = columnsMetadata.get(i);
             Object value = values.size() > i ? values.get(i) : null;
             this.checkConstraints(columnMetadata, value);
-            map.put(columnMetadata.getColumnName(), new Value(columnMetadata.getJavaClass(), value));
+            map.put(columnMetadata.getColumnName(), new Value(columnMetadata.getType(), value));
         }
         rows.add(new Row(map));
 

@@ -11,7 +11,7 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     private final String columnName;
 
     @NotNull
-    private final Class<V> javaClass;
+    private final Class<V> type;
 
     private final boolean isNotNull;
 
@@ -22,7 +22,7 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
         this.columnName = builder.columnName;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
-        this.javaClass = builder.javaClass;
+        this.type = builder.javaClass;
     }
 
     @NotNull
@@ -61,8 +61,8 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     }
 
     @NotNull
-    public Class<V> getJavaClass() {
-        return javaClass;
+    public Class<V> getType() {
+        return type;
     }
 
     public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V> & Serializable> {

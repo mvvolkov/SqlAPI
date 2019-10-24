@@ -1,21 +1,20 @@
 package SimpleFileImpl;
 
+import sqlapi.exceptions.WrongValueTypeException;
 import sqlapi.selectionPredicate.AbstractPredicate;
 import sqlapi.selectionPredicate.ColumnComparisonPredicate;
-import sqlapi.selectionResult.SelectionResultValue;
-import sqlapi.exceptions.WrongValueTypeException;
 
 import java.io.Serializable;
 
-public final class Value<T extends Comparable<T> & Serializable> implements Serializable, SelectionResultValue {
+public final class Value<T extends Comparable<T> & Serializable> implements Serializable {
 
     private final T value;
 
-    private final Class<T> javaClass;
+    private final Class<T> type;
 
-    public Value(Class<T> javaClass, Object value) {
-        this.javaClass = javaClass;
-        this.value = this.javaClass.cast(value);
+    public Value(Class<T> type, Object value) {
+        this.type = type;
+        this.value = this.type.cast(value);
     }
 
     public boolean evaluate(ColumnComparisonPredicate bp) throws WrongValueTypeException {
@@ -30,7 +29,7 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
 //        if (!javaClass.isInstance(obj)) {
 //            throw new WrongValueTypeException(this.javaClass, value.getClass());
 //        }
-        T other = javaClass.cast(obj);
+        T other = type.cast(obj);
         int compResult = value.compareTo(other);
         if (bp.getType().equals(AbstractPredicate.Type.EQUALS)) {
             return compResult == 0;
@@ -40,24 +39,8 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
 
     @Override
     public String toString() {
-        return javaClass.getSimpleName() + ": " + value;
+        return type.getSimpleName() + ": " + value;
     }
 
-    @Override
-    public String getColumnName() {
-        return null;
-    }
 
-    @Override
-    public Integer getInteger() {
-//        if (!javaClass.isInstance(obj)) {
-//            throw new WrongValueTypeException(this.javaClass, value.getClass());
-//        }
-        return (Integer) value;
-    }
-
-    @Override
-    public String getString() {
-        return null;
-    }
 }
