@@ -6,7 +6,7 @@ import sqlapi.ColumnReference;
 /**
  * The predicate for checking whether the column value is NULL or NOT NULL.
  */
-public class ColumnIsNullPredicate extends AbstractPredicate {
+public class ColumnIsNullPredicate extends SelectionPredicate {
 
 
     @NotNull

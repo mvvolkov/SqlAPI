@@ -1,7 +1,7 @@
 package SimpleFileImpl;
 
 import sqlapi.exceptions.WrongValueTypeException;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 
 import java.io.Serializable;
@@ -31,7 +31,7 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
 //        }
         T other = type.cast(obj);
         int compResult = value.compareTo(other);
-        if (bp.getType().equals(AbstractPredicate.Type.EQUALS)) {
+        if (bp.getType().equals(SelectionPredicate.Type.EQUALS)) {
             return compResult == 0;
         }
         return false;

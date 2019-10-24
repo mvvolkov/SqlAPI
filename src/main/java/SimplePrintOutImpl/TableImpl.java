@@ -1,12 +1,11 @@
 package SimplePrintOutImpl;
 
 import sqlapi.*;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.selectionResult.SelectionResultRow;
 import sqlapi.selectionResult.SelectionResultSet;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,7 +70,7 @@ public class TableImpl implements Table {
 
 
     @Override
-    public void delete(AbstractPredicate selectionPredicate) {
+    public void delete(SelectionPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(metadata.getName());
         if (selectionPredicate.isNotEmpty()) {
@@ -82,7 +81,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void update(List<AssignmentOperation> assignmentOperations, AbstractPredicate selectionPredicate) {
+    public void update(List<AssignmentOperation> assignmentOperations, SelectionPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(metadata.getName());
         sb.append(" SET ");
@@ -97,7 +96,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
+    public SelectionResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
         String from = selectionUnits.stream().map(SelectionUnit::toString).collect(Collectors.joining(", "));
         sb.append(from);

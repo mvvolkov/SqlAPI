@@ -5,7 +5,7 @@ import sqlapi.dbMetadata.ColumnMetadata;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.ConstraintException;
 import sqlapi.exceptions.WrongValueTypeException;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 import sqlapi.selectionResult.SelectionResultRow;
 import sqlapi.selectionResult.SelectionResultSet;
@@ -66,7 +66,7 @@ public class TableImpl implements Table, Serializable {
 
             for (Row row : rows) {
                 Value v2 = row.getValue(columnMetadata.getColumnName());
-                boolean b = v2.evaluate((ColumnComparisonPredicate) AbstractPredicate.equals(
+                boolean b = v2.evaluate((ColumnComparisonPredicate) SelectionPredicate.equals(
                         this.createColumnReference(columnMetadata), value));
                 if (b) {
                     throw new ConstraintException(this.createColumnReference(columnMetadata), "PRIMARY KEY");
@@ -105,17 +105,47 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public void delete(AbstractPredicate selectionPredicate) {
+    public void delete(SelectionPredicate selectionPredicate) {
 
     }
 
     @Override
-    public void update(List<AssignmentOperation> newValues, AbstractPredicate selectionPredicate) {
+    public void update(List<AssignmentOperation> newValues, SelectionPredicate selectionPredicate) {
 
     }
 
+    private SelectionResultRow getSelectionResultRow(Row row, List<SelectionUnit> selectionUnits) {
+        List<SelectionResultValueImpl> values = new ArrayList<>();
+        for (SelectionUnit selectionUnit : selectionUnits) {
+            switch (selectionUnit.getType()) {
+                case SELECT_ALL:
+                    for (ColumnMetadata columnMetadata : description.getColumnMetadata()) {
+                        Value tableValue = row.getValue(columnMetadata.getColumnName());
+                        SelectionResultValueImpl value = new SelectionResultValueImpl();
+                        values.add(value);
+                    }
+                    break;
+                case SELECT_ALL_FROM_TABLE:
+                    break;
+                case SELECT_COLUMN_EXPRESSION:
+                    break;
+            }
+
+
+        }
+        return new SelectionResultRowImpl(values);
+    }
+
     @Override
-    public List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
-        return null;
+    public SelectionResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate)
+            throws Exception {
+
+        List<SelectionResultRow> resultRows = new ArrayList<>();
+        for (Row row : rows) {
+            if (row.evaluate(selectionPredicate)) {
+                resultRows.add(this.getSelectionResultRow(row, selectionUnits));
+            }
+        }
+        return new SelectionResultSetImpl(resultRows);
     }
 }

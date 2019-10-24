@@ -6,12 +6,12 @@ import sqlapi.ColumnReference;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractPredicate implements Serializable {
+public abstract class SelectionPredicate implements Serializable {
 
     @NotNull
     public final Type type;
 
-    protected AbstractPredicate(@NotNull Type type) {
+    protected SelectionPredicate(@NotNull Type type) {
         this.type = type;
     }
 
@@ -76,51 +76,51 @@ public abstract class AbstractPredicate implements Serializable {
 
     // Static methods for creating new selection criteria.
 
-    public static AbstractPredicate empty() {
+    public static SelectionPredicate empty() {
         return new EmptyPredicate();
     }
 
-    public static AbstractPredicate isNull(ColumnReference columnReference) {
+    public static SelectionPredicate isNull(ColumnReference columnReference) {
         return new ColumnIsNullPredicate(Type.IS_NULL, columnReference);
     }
 
-    public static AbstractPredicate isNotNull(ColumnReference columnReference) {
+    public static SelectionPredicate isNotNull(ColumnReference columnReference) {
         return new ColumnIsNullPredicate(Type.IS_NOT_NULL, columnReference);
     }
 
-    public static AbstractPredicate and(AbstractPredicate left, AbstractPredicate right) {
+    public static SelectionPredicate and(SelectionPredicate left, SelectionPredicate right) {
         return new CombinedPredicate(Type.AND, left, right);
     }
 
-    public static AbstractPredicate or(AbstractPredicate left, AbstractPredicate right) {
+    public static SelectionPredicate or(SelectionPredicate left, SelectionPredicate right) {
         return new CombinedPredicate(Type.OR, left, right);
     }
 
-    public static AbstractPredicate equals(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate equals(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.EQUALS, columnReference, value);
     }
 
-    public static AbstractPredicate notEquals(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate notEquals(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.NOT_EQUALS, columnReference, value);
     }
 
-    public static AbstractPredicate greaterThan(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate greaterThan(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.GREATER_THAN, columnReference, value);
     }
 
-    public static AbstractPredicate greaterThanOrEquals(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate greaterThanOrEquals(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.GREATER_THAN_OR_EQUALS, columnReference, value);
     }
 
-    public static AbstractPredicate lessThan(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate lessThan(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.LESS_THAN, columnReference, value);
     }
 
-    public static AbstractPredicate lessThanOrEquals(ColumnReference columnReference, Object value) {
+    public static SelectionPredicate lessThanOrEquals(ColumnReference columnReference, Object value) {
         return new ColumnComparisonPredicate(Type.LESS_THAN_OR_EQUALS, columnReference, value);
     }
 
-    public static AbstractPredicate in(ColumnReference columnReference, List<?> values) {
+    public static SelectionPredicate in(ColumnReference columnReference, List<?> values) {
         return new ColumnInPredicate(columnReference, values);
     }
 

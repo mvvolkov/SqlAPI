@@ -4,7 +4,7 @@ import sqlapi.*;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.join.JoinTableOperation;
 import sqlapi.selectionResult.SelectionResultRow;
 
@@ -54,7 +54,7 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate) {
+    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
         return null;
     }
 }

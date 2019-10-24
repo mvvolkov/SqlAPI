@@ -1,6 +1,6 @@
 package SimpleFileImpl;
 
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 import sqlapi.selectionPredicate.CombinedPredicate;
 
@@ -9,13 +9,14 @@ import java.util.Map;
 
 public final class Row implements Serializable {
 
+
     private final Map<String, Value> values;
 
     public Row(Map<String, Value> values) {
         this.values = values;
     }
 
-    public boolean evaluate(AbstractPredicate sc) throws Exception {
+    public boolean evaluate(SelectionPredicate sc) throws Exception {
 
         switch (sc.getType()) {
             case AND:
@@ -33,6 +34,11 @@ public final class Row implements Serializable {
         }
         return false;
     }
+
+    public Map<String, Value> getValues() {
+        return values;
+    }
+
 
     public Value getValue(String columnName) {
         return values.get(columnName);

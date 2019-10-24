@@ -2,30 +2,30 @@ package sqlapi.selectionPredicate;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class CombinedPredicate extends AbstractPredicate {
+public final class CombinedPredicate extends SelectionPredicate {
 
 
     @NotNull
-    protected final AbstractPredicate leftPredicate;
+    protected final SelectionPredicate leftPredicate;
 
     @NotNull
-    protected final AbstractPredicate rightPredicate;
+    protected final SelectionPredicate rightPredicate;
 
 
-    CombinedPredicate(@NotNull Type type, @NotNull AbstractPredicate leftPredicate,
-                      @NotNull AbstractPredicate rightPredicate) {
+    CombinedPredicate(@NotNull Type type, @NotNull SelectionPredicate leftPredicate,
+                      @NotNull SelectionPredicate rightPredicate) {
         super(type);
         this.leftPredicate = leftPredicate;
         this.rightPredicate = rightPredicate;
     }
 
     @NotNull
-    public AbstractPredicate getLeftPredicate() {
+    public SelectionPredicate getLeftPredicate() {
         return leftPredicate;
     }
 
     @NotNull
-    public AbstractPredicate getRightPredicate() {
+    public SelectionPredicate getRightPredicate() {
         return rightPredicate;
     }
 

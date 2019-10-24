@@ -3,11 +3,9 @@ package sqlapi;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.ConstraintException;
 import sqlapi.exceptions.WrongValueTypeException;
-import sqlapi.selectionPredicate.AbstractPredicate;
-import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionResult.SelectionResultSet;
 
-import java.io.Serializable;
 import java.util.List;
 
 public interface Table {
@@ -21,9 +19,9 @@ public interface Table {
 
     void insert(SelectionResultSet rows);
 
-    void delete(AbstractPredicate selectionPredicate);
+    void delete(SelectionPredicate selectionPredicate);
 
-    void update(List<AssignmentOperation> assignmentOperations, AbstractPredicate selectionPredicate);
+    void update(List<AssignmentOperation> assignmentOperations, SelectionPredicate selectionPredicate);
 
-    List<SelectionResultRow> select(List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate);
+    SelectionResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) throws Exception;
 }

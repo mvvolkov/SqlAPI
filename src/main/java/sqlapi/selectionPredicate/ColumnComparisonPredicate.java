@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.ColumnReference;
 
-public final class ColumnComparisonPredicate extends AbstractPredicate {
+public final class ColumnComparisonPredicate extends SelectionPredicate {
 
     @NotNull
     private final ColumnReference columnReference;

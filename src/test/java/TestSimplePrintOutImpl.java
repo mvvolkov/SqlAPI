@@ -7,7 +7,7 @@ import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 
 
 import java.util.Arrays;
@@ -64,7 +64,7 @@ public class TestSimplePrintOutImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").getTable("table1").delete(AbstractPredicate.empty());
+            sqlManager.getDatabase("DB1").getTable("table1").delete(SelectionPredicate.empty());
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
         } catch (NoSuchTableException e) {
@@ -72,9 +72,9 @@ public class TestSimplePrintOutImpl {
         }
         try {
             sqlManager.getDatabase("DB1").getTable("table1").
-                    delete(AbstractPredicate.and(AbstractPredicate.or(AbstractPredicate.equals(new ColumnReference("column1"), 3),
-                            AbstractPredicate.greaterThan(new ColumnReference("column2"), "12")),
-                            AbstractPredicate.isNull(new ColumnReference("column3")))
+                    delete(SelectionPredicate.and(SelectionPredicate.or(SelectionPredicate.equals(new ColumnReference("column1"), 3),
+                            SelectionPredicate.greaterThan(new ColumnReference("column2"), "12")),
+                            SelectionPredicate.isNull(new ColumnReference("column3")))
                     );
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
@@ -86,12 +86,12 @@ public class TestSimplePrintOutImpl {
             sqlManager.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            AbstractPredicate.lessThan(new ColumnReference("column3"), "abs"));
+                            SelectionPredicate.lessThan(new ColumnReference("column3"), "abs"));
 
             sqlManager.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            AbstractPredicate.in(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
+                            SelectionPredicate.in(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         } catch (NoSuchDatabaseException e) {
@@ -100,10 +100,12 @@ public class TestSimplePrintOutImpl {
 
         try {
             sqlManager.getDatabase("DB1").getTable("table1").
-                    select(Arrays.asList(SelectionUnit.all()), AbstractPredicate.empty());
+                    select(Arrays.asList(SelectionUnit.all()), SelectionPredicate.empty());
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         } catch (NoSuchDatabaseException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -6,7 +6,7 @@ import sqlapi.exceptions.NoSuchDatabaseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.join.JoinTableOperation;
-import sqlapi.selectionPredicate.AbstractPredicate;
+import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionResult.SelectionResultRow;
 
 import java.util.List;
@@ -25,5 +25,5 @@ public interface SqlManager {
     @NotNull
     Database getDatabase(String dbName) throws NoSuchDatabaseException;
 
-    List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, AbstractPredicate selectionPredicate);
+    List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate);
 }
