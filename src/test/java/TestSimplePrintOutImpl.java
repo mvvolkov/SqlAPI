@@ -8,6 +8,7 @@ import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
 import sqlapi.selectionPredicate.SelectionPredicate;
+import sqlapi.selectionResult.ResultSet;
 
 
 import java.util.Arrays;
@@ -99,8 +100,9 @@ public class TestSimplePrintOutImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").getTable("table1").
+            ResultSet resultSet = sqlManager.getDatabase("DB1").getTable("table1").
                     select(Arrays.asList(SelectionUnit.all()), SelectionPredicate.empty());
+            System.out.println(resultSet);
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         } catch (NoSuchDatabaseException e) {

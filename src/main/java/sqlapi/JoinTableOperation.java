@@ -1,12 +1,12 @@
-package sqlapi.join;
+package sqlapi;
 
 import sqlapi.selectionPredicate.SelectionPredicate;
 
-public class JoinTableOperation extends JoinTableOperand {
+public class JoinTableOperation extends TableReference {
 
     private final Type type;
-    private final JoinTableOperand left;
-    private final JoinTableOperand right;
+    private final TableReference left;
+    private final TableReference right;
     private final SelectionPredicate selectionPredicate;
 
     public enum Type {
@@ -15,7 +15,8 @@ public class JoinTableOperation extends JoinTableOperand {
         RIGHT_OUTER_JOIN
     }
 
-    private JoinTableOperation(Type type, JoinTableOperand left, JoinTableOperand right, SelectionPredicate selectionPredicate) {
+    private JoinTableOperation(Type type, TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
+        super(null);
         this.type = type;
         this.left = left;
         this.right = right;
@@ -26,11 +27,11 @@ public class JoinTableOperation extends JoinTableOperand {
         return type;
     }
 
-    public final JoinTableOperand getLeft() {
+    public final TableReference getLeft() {
         return left;
     }
 
-    public final JoinTableOperand getRight() {
+    public final TableReference getRight() {
         return right;
     }
 
@@ -38,15 +39,15 @@ public class JoinTableOperation extends JoinTableOperand {
         return selectionPredicate;
     }
 
-    public static JoinTableOperation newInnerJoin(JoinTableOperand left, JoinTableOperand right, SelectionPredicate selectionPredicate) {
+    public static JoinTableOperation newInnerJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
         return new JoinTableOperation(Type.INNER_JOIN, left, right, selectionPredicate);
     }
 
-    public static JoinTableOperation newLeftOuterJoin(JoinTableOperand left, JoinTableOperand right, SelectionPredicate selectionPredicate) {
+    public static JoinTableOperation newLeftOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
         return new JoinTableOperation(Type.LEFT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
-    public static JoinTableOperation newRightOuterJoin(JoinTableOperand left, JoinTableOperand right, SelectionPredicate selectionPredicate) {
+    public static JoinTableOperation newRightOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
         return new JoinTableOperation(Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
     }
 }

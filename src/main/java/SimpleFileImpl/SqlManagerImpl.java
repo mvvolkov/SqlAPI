@@ -5,9 +5,9 @@ import sqlapi.*;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
-import sqlapi.join.JoinTableOperation;
-import sqlapi.selectionPredicate.SelectionPredicate;
-import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.exceptions.NoSuchTableException;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionResult.ResultSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +58,21 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
-        return null;
-    }
+    public @NotNull ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException {
 
+        for (TableReference tableReference : selectExpression.getTableReferences()) {
+            if (tableReference instanceof BaseTableReference) {
+                BaseTableReference btr = (BaseTableReference) tableReference;
+                for (Database database : databases) {
+                    if (database.getName().equals(btr.getDbName())) {
+                        TableImpl table = (TableImpl) database.getTable(btr.getTableName());
+                        return table.select(selectExpression.getSelectionUnits(),
+                                selectExpression.getSelectionPredicate());
+                    }
+                }
+            }
+        }
+        return new ResultSetImpl(new ArrayList<>(), new ArrayList<>());
+    }
 
 }

@@ -3,8 +3,7 @@ package SimplePrintOutImpl;
 import sqlapi.*;
 import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.dbMetadata.TableMetadata;
-import sqlapi.selectionResult.SelectionResultRow;
-import sqlapi.selectionResult.SelectionResultSet;
+import sqlapi.selectionResult.ResultSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,7 +63,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void insert(SelectionResultSet rows) {
+    public void insert(ResultSet rows) {
 
     }
 
@@ -96,7 +95,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public SelectionResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
+    public ResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
         String from = selectionUnits.stream().map(SelectionUnit::toString).collect(Collectors.joining(", "));
         sb.append(from);

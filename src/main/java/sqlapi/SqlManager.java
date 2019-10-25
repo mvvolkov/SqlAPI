@@ -1,13 +1,13 @@
 package sqlapi;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import sqlapi.join.JoinTableOperation;
-import sqlapi.selectionPredicate.SelectionPredicate;
-import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.exceptions.NoSuchTableException;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionResult.ResultSet;
 
 import java.util.List;
 
@@ -25,5 +25,6 @@ public interface SqlManager {
     @NotNull
     Database getDatabase(String dbName) throws NoSuchDatabaseException;
 
-    List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate);
+    @NotNull
+    ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException;
 }

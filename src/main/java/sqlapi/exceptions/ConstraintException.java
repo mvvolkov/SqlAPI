@@ -2,9 +2,7 @@ package sqlapi.exceptions;
 
 import sqlapi.ColumnReference;
 
-import java.sql.SQLException;
-
-public class ConstraintException extends SQLException {
+public class ConstraintException extends SqlException {
 
     private final ColumnReference columnReference;
 

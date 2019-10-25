@@ -1,7 +1,9 @@
 package sqlapi.selectionResult;
 
-public interface SelectionResultValue {
+public interface ResultValue {
     String getColumnName();
+
     Integer getInteger();
+
     String getString();
 }

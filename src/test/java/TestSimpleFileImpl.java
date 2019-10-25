@@ -4,6 +4,8 @@ import sqlapi.dbMetadata.IntegerColumnMetadata;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.dbMetadata.VarcharColumnMetadata;
 import sqlapi.exceptions.*;
+import sqlapi.selectionPredicate.SelectionPredicate;
+import sqlapi.selectionResult.ResultSet;
 
 import java.util.Arrays;
 
@@ -14,13 +16,13 @@ public class TestSimpleFileImpl {
 
         try {
             sqlManager.createDatabase("DB1");
-        } catch (DatabaseAlreadyExistsException e) {
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
         try {
             sqlManager.createDatabase("DB1");
-        } catch (DatabaseAlreadyExistsException e) {
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
@@ -29,77 +31,82 @@ public class TestSimpleFileImpl {
                     Arrays.asList(IntegerColumnMetadata.builder("column1").notNull().primaryKey().build(),
                             IntegerColumnMetadata.builder("column2").build(),
                             VarcharColumnMetadata.builder("column3", 20).notNull().build())));
-        } catch (NoSuchDatabaseException e) {
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
-        } catch (TableAlreadyExistsException e) {
+        }
+
+        try {
+            sqlManager.getDatabase("DB1").createTable(new TableMetadata("table1",
+                    Arrays.asList(IntegerColumnMetadata.builder("column11").notNull().primaryKey().build(),
+                            IntegerColumnMetadata.builder("column12").build(),
+                            VarcharColumnMetadata.builder("column13", 20).notNull().build())));
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            sqlManager.getDatabase("DB2").createTable(new TableMetadata("table2",
+                    Arrays.asList(IntegerColumnMetadata.builder("column11").notNull().primaryKey().build(),
+                            IntegerColumnMetadata.builder("column12").build(),
+                            VarcharColumnMetadata.builder("column13", 20).notNull().build())));
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
+            table1.insert(Arrays.asList(10, 20, null));
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
         try {
             Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
             table1.insert(Arrays.asList(10, 20, "test1"));
-            table1.insert(Arrays.asList(11, 20, "test2"));
-        } catch (NoSuchDatabaseException e) {
-            System.out.println(e.getMessage());
-        } catch (NoSuchTableException e) {
-            System.out.println(e.getMessage());
-        } catch (WrongValueTypeException e) {
-            System.out.println(e.getMessage());
-        } catch (ConstraintException e) {
+            table1.insert(Arrays.asList(11, 20, "test1"));
+            table1.insert(Arrays.asList(10, 20, "test1"));
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
-//        try {
-//            sqlManager.getDatabase("DB1").getTable("table1").insert(Arrays.asList("column1", "column2", "column3"), Arrays.asList(10,
-//                    null, "test"));
-//        } catch (NoSuchDatabaseException e) {
-//            System.out.println(e.getMessage());
-//        } catch (NoSuchTableException e) {
-//            System.out.println(e.getMessage());
-//        }
-//
-//        try {
-//            sqlManager.getDatabase("DB1").getTable("table1").delete(SelectionCriteria.empty());
-//        } catch (NoSuchDatabaseException e) {
-//            System.out.println(e.getMessage());
-//        } catch (NoSuchTableException e) {
-//            System.out.println(e.getMessage());
-//        }
-//        try {
-//            sqlManager.getDatabase("DB1").getTable("table1").
-//                    delete(SelectionCriteria.and(SelectionCriteria.or(SelectionCriteria.equals(new ColumnReference("column1"), 3),
-//                            SelectionCriteria.greaterThan(new ColumnReference("column2"), "12")),
-//                            SelectionCriteria.isNull(new ColumnReference("column3")))
-//                    );
-//        } catch (NoSuchDatabaseException e) {
-//            System.out.println(e.getMessage());
-//        } catch (NoSuchTableException e) {
-//            System.out.println(e.getMessage());
-//        }
-//
-//        try {
-//            sqlManager.getDatabase("DB1").getTable("table1").
-//                    update(Arrays.asList(new AssignmentOperation("column1", 10),
-//                            new AssignmentOperation("column2", "test3")),
-//                            SelectionCriteria.lessThan(new ColumnReference("column3"), "abs"));
-//
-//            sqlManager.getDatabase("DB1").getTable("table1").
-//                    update(Arrays.asList(new AssignmentOperation("column1", 10),
-//                            new AssignmentOperation("column2", "test3")),
-//                            SelectionCriteria.in(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
-//        } catch (NoSuchTableException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchDatabaseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            sqlManager.getDatabase("DB1").getTable("table1").
-//                    select(Arrays.asList(SelectionUnit.all()), SelectionCriteria.empty());
-//        } catch (NoSuchTableException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchDatabaseException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
+            table1.insert(Arrays.asList(12, 20, "test1"));
+            table1.insert(Arrays.asList(13, 20, "test2"));
+            table1.insert(Arrays.asList(15, 21, "test1"));
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            ResultSet resultSet = sqlManager.select(SelectExpression.builder(
+                    BaseTableReference.newTableReference("table1", "DB1"))
+                    .addPredicateWithAnd(SelectionPredicate.equals(
+                            new ColumnReference("column3"), 10)).build());
+            System.out.println(resultSet);
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            ResultSet resultSet = sqlManager.select(SelectExpression.builder(
+                    BaseTableReference.newTableReference("table1", "DB1"))
+                    .build());
+            System.out.println(resultSet);
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            ResultSet resultSet = sqlManager.select(SelectExpression.builder(
+                    BaseTableReference.newTableReference("table1", "DB1"))
+                    .addPredicateWithAnd(SelectionPredicate.equals(
+                            new ColumnReference("column3"), "test1")).build());
+            System.out.println(resultSet);
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+
     }
 }

@@ -1,12 +1,15 @@
 package SimplePrintOutImpl;
 
-import sqlapi.*;
+import org.jetbrains.annotations.NotNull;
+import sqlapi.Database;
+import sqlapi.SelectExpression;
+import sqlapi.SqlManager;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
-import sqlapi.selectionPredicate.SelectionPredicate;
-import sqlapi.join.JoinTableOperation;
-import sqlapi.selectionResult.SelectionResultRow;
+import sqlapi.exceptions.NoSuchTableException;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionResult.ResultSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +57,9 @@ public class SqlManagerImpl implements SqlManager {
     }
 
     @Override
-    public List<SelectionResultRow> select(JoinTableOperation joinOperation, List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
+    public @NotNull ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException {
         return null;
     }
+
+
 }

@@ -7,8 +7,8 @@ import sqlapi.exceptions.ConstraintException;
 import sqlapi.exceptions.WrongValueTypeException;
 import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionPredicate.ColumnComparisonPredicate;
-import sqlapi.selectionResult.SelectionResultRow;
-import sqlapi.selectionResult.SelectionResultSet;
+import sqlapi.selectionResult.ResultRow;
+import sqlapi.selectionResult.ResultSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,11 +23,16 @@ public class TableImpl implements Table, Serializable {
 
     private final TableMetadata description;
 
+
     private final List<Row> rows = new ArrayList<>();
 
     public TableImpl(Database database, TableMetadata description) {
         this.database = database;
         this.description = description;
+    }
+
+    public List<Row> getRows() {
+        return rows;
     }
 
     private void printOut() {
@@ -88,8 +93,6 @@ public class TableImpl implements Table, Serializable {
             map.put(columnMetadata.getColumnName(), new Value(columnMetadata.getType(), value));
         }
         rows.add(new Row(map));
-
-        this.printOut();
     }
 
     @Override
@@ -100,7 +103,7 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public void insert(SelectionResultSet rows) {
+    public void insert(ResultSet rows) {
 
     }
 
@@ -114,14 +117,21 @@ public class TableImpl implements Table, Serializable {
 
     }
 
-    private SelectionResultRow getSelectionResultRow(Row row, List<SelectionUnit> selectionUnits) {
-        List<SelectionResultValueImpl> values = new ArrayList<>();
+    private ResultRow getSelectionResultRow(Row row, List<SelectionUnit> selectionUnits) {
+        List<ResultValueImpl> values = new ArrayList<>();
+        if (selectionUnits.isEmpty()) {
+            for (ColumnMetadata columnMetadata : description.getColumnMetadata()) {
+                Value tableValue = row.getValue(columnMetadata.getColumnName());
+                ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getColumnName());
+                values.add(value);
+            }
+        }
         for (SelectionUnit selectionUnit : selectionUnits) {
             switch (selectionUnit.getType()) {
                 case SELECT_ALL:
                     for (ColumnMetadata columnMetadata : description.getColumnMetadata()) {
                         Value tableValue = row.getValue(columnMetadata.getColumnName());
-                        SelectionResultValueImpl value = new SelectionResultValueImpl();
+                        ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getColumnName());
                         values.add(value);
                     }
                     break;
@@ -133,19 +143,18 @@ public class TableImpl implements Table, Serializable {
 
 
         }
-        return new SelectionResultRowImpl(values);
+        return new ResultRowImpl(values);
     }
 
     @Override
-    public SelectionResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate)
-            throws Exception {
+    public ResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) throws WrongValueTypeException {
 
-        List<SelectionResultRow> resultRows = new ArrayList<>();
+        List<ResultRow> resultRows = new ArrayList<>();
         for (Row row : rows) {
             if (row.evaluate(selectionPredicate)) {
                 resultRows.add(this.getSelectionResultRow(row, selectionUnits));
             }
         }
-        return new SelectionResultSetImpl(resultRows);
+        return new ResultSetImpl(resultRows, new ArrayList<>(description.getColumnMetadata()));
     }
 }
