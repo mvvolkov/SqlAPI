@@ -12,4 +12,8 @@ public interface ResultSet {
 
     List<ResultRow> getFirstRows(int numberOfRows);
 
+    ResultRow getRow(int index);
+
+    int getSize();
+
 }

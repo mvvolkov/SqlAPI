@@ -16,7 +16,8 @@ public abstract class SelectionPredicate implements Serializable {
     }
 
     public enum Type {
-        EMPTY,
+        TRUE,
+        FALSE,
         IS_NULL,
         IS_NOT_NULL,
         EQUALS,
@@ -77,7 +78,7 @@ public abstract class SelectionPredicate implements Serializable {
     // Static methods for creating new selection criteria.
 
     public static SelectionPredicate empty() {
-        return new EmptyPredicate();
+        return new TruePredicate();
     }
 
     public static SelectionPredicate isNull(ColumnReference columnReference) {
@@ -96,28 +97,41 @@ public abstract class SelectionPredicate implements Serializable {
         return new CombinedPredicate(Type.OR, left, right);
     }
 
-    public static SelectionPredicate equals(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.EQUALS, columnReference, value);
+    private static SelectionPredicate getPredicate(SelectionPredicate.Type type, Object leftValue, Object rightValue) {
+        if (leftValue instanceof ColumnReference) {
+            if (rightValue instanceof ColumnReference) {
+                return new TwoColumnsPredicate(type, (ColumnReference) leftValue, (ColumnReference) rightValue);
+            }
+            return new OneColumnPredicate(type, (ColumnReference) leftValue, (Comparable) rightValue);
+        }
+        if (rightValue instanceof ColumnReference) {
+            return new OneColumnPredicate(type, (ColumnReference) rightValue, (Comparable) leftValue);
+        }
+        return leftValue.equals(rightValue) ? new TruePredicate() : new FalsePredicate();
     }
 
-    public static SelectionPredicate notEquals(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.NOT_EQUALS, columnReference, value);
+    public static SelectionPredicate equals(Object leftValue, Object rightValue) {
+        return getPredicate(Type.EQUALS, leftValue, rightValue);
     }
 
-    public static SelectionPredicate greaterThan(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.GREATER_THAN, columnReference, value);
+    public static SelectionPredicate notEquals(Object leftValue, Object rightValue) {
+        return getPredicate(Type.NOT_EQUALS, leftValue, rightValue);
     }
 
-    public static SelectionPredicate greaterThanOrEquals(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.GREATER_THAN_OR_EQUALS, columnReference, value);
+    public static SelectionPredicate greaterThan(Object leftValue, Object rightValue) {
+        return getPredicate(Type.GREATER_THAN, leftValue, rightValue);
     }
 
-    public static SelectionPredicate lessThan(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.LESS_THAN, columnReference, value);
+    public static SelectionPredicate greaterThanOrEquals(Object leftValue, Object rightValue) {
+        return getPredicate(Type.GREATER_THAN_OR_EQUALS, leftValue, rightValue);
     }
 
-    public static SelectionPredicate lessThanOrEquals(ColumnReference columnReference, Object value) {
-        return new ColumnComparisonPredicate(Type.LESS_THAN_OR_EQUALS, columnReference, value);
+    public static SelectionPredicate lessThan(Object leftValue, Object rightValue) {
+        return getPredicate(Type.LESS_THAN, leftValue, rightValue);
+    }
+
+    public static SelectionPredicate lessThanOrEquals(Object leftValue, Object rightValue) {
+        return getPredicate(Type.LESS_THAN_OR_EQUALS, leftValue, rightValue);
     }
 
     public static SelectionPredicate in(ColumnReference columnReference, List<?> values) {
@@ -126,7 +140,7 @@ public abstract class SelectionPredicate implements Serializable {
 
 
     public boolean isEmpty() {
-        return type == Type.EMPTY;
+        return type == Type.TRUE;
     }
 
 

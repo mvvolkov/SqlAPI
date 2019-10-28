@@ -8,9 +8,10 @@ import java.util.List;
 
 public class ResultRowImpl implements ResultRow {
 
-    private final List<ResultValueImpl> values;
 
-    public ResultRowImpl(List<ResultValueImpl> values) {
+    private final List<ResultValue> values;
+
+    public ResultRowImpl(List<ResultValue> values) {
         this.values = values;
     }
 
@@ -26,13 +27,18 @@ public class ResultRowImpl implements ResultRow {
 
     @Override
     public ResultValue getValueOrNull(String columnName) {
-        for (ResultValueImpl value : values) {
+        for (ResultValue value : values) {
             if (value.getColumnName().equals(columnName)) {
                 return value;
             }
         }
         return null;
     }
+
+    public List<ResultValue> getValues() {
+        return values;
+    }
+
 
     @Override
     public ResultValue getValue(int index) {

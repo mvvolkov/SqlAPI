@@ -1,51 +1,38 @@
 package SimpleFileImpl;
 
-import sqlapi.*;
+import sqlapi.AssignmentOperation;
+import sqlapi.ColumnReference;
+import sqlapi.SelectedColumn;
+import sqlapi.Table;
 import sqlapi.dbMetadata.ColumnMetadata;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.NoSuchDatabaseException;
+import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionPredicate.OneColumnPredicate;
 import sqlapi.selectionPredicate.SelectionPredicate;
-import sqlapi.selectionPredicate.ColumnComparisonPredicate;
 import sqlapi.selectionResult.ResultRow;
 import sqlapi.selectionResult.ResultSet;
+import sqlapi.selectionResult.ResultValue;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class TableImpl implements Table, Serializable {
 
-    private final Database database;
+    private final DatabaseImpl database;
 
     private final TableMetadata description;
 
-
     private final List<Row> rows = new ArrayList<>();
 
-    public TableImpl(Database database, TableMetadata description) {
+    public TableImpl(DatabaseImpl database, TableMetadata description) {
         this.database = database;
         this.description = description;
-    }
-
-    public List<Row> getRows() {
-        return rows;
-    }
-
-    private void printOut() {
-        List<ColumnMetadata> columns = description.getColumnMetadata();
-        String tableString = columns.stream().map(ColumnMetadata::getColumnName)
-                .collect(Collectors.joining(", "));
-        System.out.println("\nTable " + description.getName() + ": ");
-        System.out.println(tableString);
-        for (Row row : rows) {
-            String rowString = columns.stream().map(c -> row.getValue(c.getColumnName()).toString())
-                    .collect(Collectors.joining(", "));
-            System.out.println(rowString);
-        }
     }
 
 
@@ -71,7 +58,7 @@ public class TableImpl implements Table, Serializable {
 
             for (Row row : rows) {
                 Value v2 = row.getValue(columnMetadata.getColumnName());
-                boolean b = v2.evaluate((ColumnComparisonPredicate) SelectionPredicate.equals(
+                boolean b = v2.evaluate((OneColumnPredicate) SelectionPredicate.equals(
                         this.createColumnReference(columnMetadata), value));
                 if (b) {
                     throw new ConstraintException(this.createColumnReference(columnMetadata), "PRIMARY KEY");
@@ -93,12 +80,23 @@ public class TableImpl implements Table, Serializable {
             map.put(columnMetadata.getColumnName(), new Value(columnMetadata.getType(), value));
         }
         rows.add(new Row(map));
+
+        try {
+            this.getLoggerTable().insert(values);
+        } catch (NoSuchTableException e) {
+            e.printStackTrace();
+        } catch (NoSuchDatabaseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Table getLoggerTable() throws NoSuchDatabaseException, NoSuchTableException {
+        return database.getLoggerDatabase().getTable(description.getName());
     }
 
     @Override
     public void insert(List<String> columns, List<Object> values)
             throws WrongValueTypeException, ConstraintException {
-
 
     }
 
@@ -117,17 +115,17 @@ public class TableImpl implements Table, Serializable {
 
     }
 
-    private ResultRow getSelectionResultRow(Row row, List<SelectionUnit> selectionUnits) {
-        List<ResultValueImpl> values = new ArrayList<>();
-        if (selectionUnits.isEmpty()) {
+    private ResultRow getSelectionResultRow(Row row, List<SelectedColumn> selectedColumns) {
+        List<ResultValue> values = new ArrayList<>();
+        if (selectedColumns.isEmpty()) {
             for (ColumnMetadata columnMetadata : description.getColumnMetadata()) {
                 Value tableValue = row.getValue(columnMetadata.getColumnName());
                 ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getColumnName());
                 values.add(value);
             }
         }
-        for (SelectionUnit selectionUnit : selectionUnits) {
-            switch (selectionUnit.getType()) {
+        for (SelectedColumn selectedColumn : selectedColumns) {
+            switch (selectedColumn.getType()) {
                 case SELECT_ALL:
                     for (ColumnMetadata columnMetadata : description.getColumnMetadata()) {
                         Value tableValue = row.getValue(columnMetadata.getColumnName());
@@ -147,13 +145,14 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public ResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) throws WrongValueTypeException {
+    public ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicate selectionPredicate) throws WrongValueTypeException {
+
 
         List<ResultRow> resultRows = new ArrayList<>();
         for (Row row : rows) {
-            if (row.evaluate(selectionPredicate)) {
-                resultRows.add(this.getSelectionResultRow(row, selectionUnits));
-            }
+
+            resultRows.add(this.getSelectionResultRow(row, selectedColumns));
+
         }
         return new ResultSetImpl(resultRows, new ArrayList<>(description.getColumnMetadata()));
     }

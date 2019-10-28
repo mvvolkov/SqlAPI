@@ -1,10 +1,10 @@
 package sqlapi;
 
-public abstract class SelectionUnit {
+public abstract class SelectedColumn {
 
     private final Type type;
 
-    protected SelectionUnit(Type type) {
+    protected SelectedColumn(Type type) {
         this.type = type;
     }
 
@@ -20,11 +20,11 @@ public abstract class SelectionUnit {
         return type;
     }
 
-    public static SelectionUnit all() {
+    public static SelectedColumn all() {
         return new SelectAll();
     }
 
-    public static class SelectAll extends SelectionUnit {
+    public static class SelectAll extends SelectedColumn {
         public SelectAll() {
             super(Type.SELECT_ALL);
         }
@@ -35,7 +35,7 @@ public abstract class SelectionUnit {
         }
     }
 
-    public static class SelectTable extends SelectionUnit {
+    public static class SelectTable extends SelectedColumn {
 
         private final String table;
 
@@ -50,7 +50,7 @@ public abstract class SelectionUnit {
         }
     }
 
-    public static class SelectColumnExpression extends SelectionUnit {
+    public static class SelectColumnExpression extends SelectedColumn {
 
         private final ColumnExpression expression;
         private final String alias;

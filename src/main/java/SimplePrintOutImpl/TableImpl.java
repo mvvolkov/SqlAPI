@@ -95,9 +95,9 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public ResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) {
+    public ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
-        String from = selectionUnits.stream().map(SelectionUnit::toString).collect(Collectors.joining(", "));
+        String from = selectedColumns.stream().map(SelectedColumn::toString).collect(Collectors.joining(", "));
         sb.append(from);
         sb.append(" FROM ");
         sb.append(metadata.getName());

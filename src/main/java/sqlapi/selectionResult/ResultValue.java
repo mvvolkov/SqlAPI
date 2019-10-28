@@ -6,4 +6,10 @@ public interface ResultValue {
     Integer getInteger();
 
     String getString();
+
+    <T> Comparable<T> getValue();
+
+    boolean isNull();
+
+    boolean isNotNull();
 }

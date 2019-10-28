@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class SqlManagerImpl implements SqlManager {
+public class SqlManagerPrintOutImpl implements SqlManager {
 
     private final Collection<Database> databases = new ArrayList<>();
 

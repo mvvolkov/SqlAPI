@@ -3,6 +3,7 @@ package SimpleFileImpl;
 import sqlapi.Database;
 import sqlapi.Table;
 import sqlapi.dbMetadata.TableMetadata;
+import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
 
@@ -11,11 +12,15 @@ import java.util.Collection;
 
 public class DatabaseImpl implements Database {
 
+
+    private final SqlManagerImpl sqlManager;
+
     private final String name;
 
     private final Collection<Table> tables = new ArrayList<>();
 
-    public DatabaseImpl(String name) {
+    public DatabaseImpl(SqlManagerImpl sqlManager, String name) {
+        this.sqlManager = sqlManager;
         this.name = name;
     }
 
@@ -51,9 +56,22 @@ public class DatabaseImpl implements Database {
             }
         }
         tables.add(new TableImpl(this, tableMetadata));
+        try {
+            this.getLoggerDatabase().createTable(tableMetadata);
+        } catch (NoSuchDatabaseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    Database getLoggerDatabase() throws NoSuchDatabaseException {
+        return this.getSqlManager().getLogger().getDatabase(name);
     }
 
     @Override
     public void dropTable(String tableName) {
+    }
+
+    public SqlManagerImpl getSqlManager() {
+        return sqlManager;
     }
 }

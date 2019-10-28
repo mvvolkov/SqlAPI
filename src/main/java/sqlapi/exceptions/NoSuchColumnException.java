@@ -1,8 +1,6 @@
 package sqlapi.exceptions;
 
-import java.sql.SQLException;
-
-public class NoSuchColumnException extends SQLException {
+public class NoSuchColumnException extends SqlException {
 
     private final String columnName;
 

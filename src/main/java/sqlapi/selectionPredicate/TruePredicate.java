@@ -3,14 +3,14 @@ package sqlapi.selectionPredicate;
 /**
  * This class should be used in case when selection criteria is not specified.
  */
-public class EmptyPredicate extends SelectionPredicate {
+public class TruePredicate extends SelectionPredicate {
 
-    public EmptyPredicate() {
-        super(Type.EMPTY);
+    public TruePredicate() {
+        super(Type.TRUE);
     }
 
     @Override
     public String toString() {
-        return "";
+        return "TRUE";
     }
 }

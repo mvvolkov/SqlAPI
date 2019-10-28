@@ -4,17 +4,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.ColumnReference;
 
-public final class ColumnComparisonPredicate extends SelectionPredicate {
+public final class OneColumnPredicate extends SelectionPredicate {
 
     @NotNull
     private final ColumnReference columnReference;
 
     @Nullable
-    private final Object value;
+    private final Comparable value;
 
 
-    public ColumnComparisonPredicate(@NotNull Type type, @NotNull ColumnReference columnReference,
-                                     @Nullable Object value) {
+    public OneColumnPredicate(@NotNull Type type, @NotNull ColumnReference columnReference,
+                              @Nullable Comparable value) {
         super(type);
         this.columnReference = columnReference;
         this.value = value;
@@ -27,7 +27,7 @@ public final class ColumnComparisonPredicate extends SelectionPredicate {
 
 
     @Nullable
-    public Object getValue() {
+    public Comparable getValue() {
         return value;
     }
 

@@ -29,6 +29,21 @@ public class ResultValueImpl implements ResultValue {
     }
 
     @Override
+    public <T> Comparable<T> getValue() {
+        return value.getValue();
+    }
+
+    @Override
+    public boolean isNull() {
+        return value.isNull();
+    }
+
+    @Override
+    public boolean isNotNull() {
+        return value.isNotNull();
+    }
+
+    @Override
     public String toString() {
         return value.toString();
     }

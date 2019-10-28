@@ -2,7 +2,11 @@ package sqlapi.selectionResult;
 
 import sqlapi.exceptions.NoSuchColumnException;
 
+import java.util.List;
+
 public interface ResultRow {
+
+    List<ResultValue> getValues();
 
     ResultValue getValue(String columnName) throws NoSuchColumnException;
 

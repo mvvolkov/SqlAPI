@@ -23,12 +23,21 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public List<ColumnMetadata> getColumns() {
-        return null;
+        return columns;
     }
 
     @Override
     public List<ResultRow> getAllRows() {
         return rows;
+    }
+
+    public ResultRow getRow(int i) {
+        return rows.get(i);
+    }
+
+    @Override
+    public int getSize() {
+        return rows.size();
     }
 
     @Override

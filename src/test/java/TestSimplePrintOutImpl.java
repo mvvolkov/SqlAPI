@@ -101,7 +101,7 @@ public class TestSimplePrintOutImpl {
 
         try {
             ResultSet resultSet = sqlManager.getDatabase("DB1").getTable("table1").
-                    select(Arrays.asList(SelectionUnit.all()), SelectionPredicate.empty());
+                    select(Arrays.asList(SelectedColumn.all()), SelectionPredicate.empty());
             System.out.println(resultSet);
         } catch (NoSuchTableException e) {
             e.printStackTrace();

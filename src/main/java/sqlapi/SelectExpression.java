@@ -1,7 +1,7 @@
 package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.selectionPredicate.EmptyPredicate;
+import sqlapi.selectionPredicate.TruePredicate;
 import sqlapi.selectionPredicate.SelectionPredicate;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public final class SelectExpression extends TableReference {
     @NotNull
     private final List<TableReference> tableReferences;
     @NotNull
-    private final List<SelectionUnit> selectionUnits;
+    private final List<SelectedColumn> selectedColumns;
     @NotNull
     private final SelectionPredicate selectionPredicate;
 
@@ -25,7 +25,7 @@ public final class SelectExpression extends TableReference {
     private SelectExpression(Builder builder) {
         super(builder.alias);
         tableReferences = builder.tableReferences;
-        selectionUnits = builder.selectionUnits;
+        selectedColumns = builder.selectedColumns;
         selectionPredicate = builder.selectionPredicate;
     }
 
@@ -35,8 +35,8 @@ public final class SelectExpression extends TableReference {
     }
 
     @NotNull
-    public List<SelectionUnit> getSelectionUnits() {
-        return selectionUnits;
+    public List<SelectedColumn> getSelectedColumns() {
+        return selectedColumns;
     }
 
     @NotNull
@@ -48,8 +48,8 @@ public final class SelectExpression extends TableReference {
 
 
         private List<TableReference> tableReferences = new ArrayList<>();
-        private List<SelectionUnit> selectionUnits = new ArrayList<>();
-        private SelectionPredicate selectionPredicate = new EmptyPredicate();
+        private List<SelectedColumn> selectedColumns = new ArrayList<>();
+        private SelectionPredicate selectionPredicate = new TruePredicate();
         private String alias = null;
 
 
@@ -62,8 +62,8 @@ public final class SelectExpression extends TableReference {
             return this;
         }
 
-        public Builder addColumn(@NotNull SelectionUnit selectionUnit) {
-            selectionUnits.add(selectionUnit);
+        public Builder addColumn(@NotNull SelectedColumn selectedColumn) {
+            selectedColumns.add(selectedColumn);
             return this;
         }
 

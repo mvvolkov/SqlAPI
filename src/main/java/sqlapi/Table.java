@@ -23,5 +23,5 @@ public interface Table {
 
     void update(List<AssignmentOperation> assignmentOperations, SelectionPredicate selectionPredicate);
 
-    ResultSet select(List<SelectionUnit> selectionUnits, SelectionPredicate selectionPredicate) throws WrongValueTypeException;
+    ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicate selectionPredicate) throws WrongValueTypeException;
 }
