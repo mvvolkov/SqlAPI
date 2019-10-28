@@ -87,6 +87,17 @@ public class SqlManagerImpl implements SqlManager {
             columns.addAll(resultSet.getColumns());
         }
 
+        if (resultSets.size() == 1) {
+            ResultSet resultSet = resultSets.get(0);
+            List<ResultRow> rows = new ArrayList<>();
+            for (ResultRow row : resultSet.getAllRows()) {
+                if (evaluate(row, selectionPredicate)) {
+                    rows.add(row);
+                }
+            }
+            return new ResultSetImpl(rows, columns);
+        }
+
         // Create all possible combinations of rows from different result sets.
         List<ResultRow> rows = new ArrayList<>();
         // Use stack here to get all combinations.
@@ -108,6 +119,84 @@ public class SqlManagerImpl implements SqlManager {
             ResultRow row = new ResultRowImpl(getValuesFromResultSets(resultSets, rowNumbers));
             if (evaluate(row, selectionPredicate)) {
                 rows.add(row);
+            }
+        }
+        return new ResultSetImpl(rows, columns);
+    }
+
+    private static ResultSet innerJoin(ResultSet left, ResultSet right, SelectionPredicate sc) throws NoSuchColumnException, WrongValueTypeException {
+
+        List<ColumnMetadata> columns = new ArrayList<>();
+        columns.addAll(left.getColumns());
+        columns.addAll(right.getColumns());
+        List<ResultRow> rows = new ArrayList<>();
+        for (ResultRow leftRow : left.getAllRows()) {
+            for (ResultRow rightRow : right.getAllRows()) {
+                List<ResultValue> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                values.addAll(rightRow.getValues());
+                ResultRow row = new ResultRowImpl(values);
+                if (evaluate(row, sc)) {
+                    rows.add(row);
+                }
+            }
+        }
+        return new ResultSetImpl(rows, columns);
+    }
+
+    private static ResultSet leftOutJoin(ResultSet left, ResultSet right, SelectionPredicate sc) throws NoSuchColumnException, WrongValueTypeException {
+
+        List<ColumnMetadata> columns = new ArrayList<>();
+        columns.addAll(left.getColumns());
+        columns.addAll(right.getColumns());
+        List<ResultRow> rows = new ArrayList<>();
+        for (ResultRow leftRow : left.getAllRows()) {
+            boolean matchFound = false;
+            for (ResultRow rightRow : right.getAllRows()) {
+                List<ResultValue> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                values.addAll(rightRow.getValues());
+                ResultRow row = new ResultRowImpl(values);
+                if (evaluate(row, sc)) {
+                    rows.add(row);
+                    matchFound = true;
+                }
+            }
+            if (!matchFound) {
+                List<ResultValue> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                for (ColumnMetadata columnMetadata : right.getColumns()) {
+                    values.add(new ResultValueImpl(null, columnMetadata.getColumnName()));
+                }
+            }
+        }
+        return new ResultSetImpl(rows, columns);
+    }
+
+    private static ResultSet rightOutJoin(ResultSet left, ResultSet right, SelectionPredicate sc) throws NoSuchColumnException, WrongValueTypeException {
+
+        List<ColumnMetadata> columns = new ArrayList<>();
+        columns.addAll(left.getColumns());
+        columns.addAll(right.getColumns());
+        List<ResultRow> rows = new ArrayList<>();
+        for (ResultRow rightRow : right.getAllRows()) {
+            boolean matchFound = false;
+            for (ResultRow leftRow : left.getAllRows()) {
+                List<ResultValue> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                values.addAll(rightRow.getValues());
+                ResultRow row = new ResultRowImpl(values);
+                if (evaluate(row, sc)) {
+                    rows.add(row);
+                    matchFound = true;
+                }
+            }
+            if (!matchFound) {
+                List<ResultValue> values = new ArrayList<>();
+                for (ColumnMetadata columnMetadata : left.getColumns()) {
+                    values.add(new ResultValueImpl(null, columnMetadata.getColumnName()));
+                }
+                values.addAll(rightRow.getValues());
             }
         }
         return new ResultSetImpl(rows, columns);
@@ -182,7 +271,7 @@ public class SqlManagerImpl implements SqlManager {
             case GREATER_THAN:
                 return compResult > 0;
             case GREATER_THAN_OR_EQUALS:
-                return compResult > -0;
+                return compResult >= 0;
             case LESS_THAN:
                 return compResult < 0;
             case LESS_THAN_OR_EQUALS:
@@ -202,6 +291,23 @@ public class SqlManagerImpl implements SqlManager {
                 TableImpl table = (TableImpl) this.getTable((BaseTableReference) tableReference);
                 resultSets.add(table.select(Arrays.asList(SelectedColumn.all()), SelectionPredicate.empty()));
                 continue;
+            } else if (tableReference instanceof JoinTableOperation) {
+                JoinTableOperation jto = (JoinTableOperation) tableReference;
+                ResultSet left = this.select(SelectExpression.builder(jto.getLeft()).build());
+                ResultSet right = this.select(SelectExpression.builder(jto.getRight()).build());
+                switch (jto.getType()) {
+                    case INNER_JOIN:
+                        resultSets.add(innerJoin(left, right, jto.getSelectionPredicate()));
+                        break;
+                    case LEFT_OUTER_JOIN:
+                        resultSets.add(leftOutJoin(left, right, jto.getSelectionPredicate()));
+                        break;
+                    case RIGHT_OUTER_JOIN:
+                        resultSets.add(rightOutJoin(left, right, jto.getSelectionPredicate()));
+                        break;
+                }
+            } else if (tableReference instanceof SelectExpression) {
+                resultSets.add(this.select((SelectExpression) tableReference));
             }
         }
         ResultSet resultSet = this.joinResultSets(resultSets, selectExpression.getSelectionPredicate());

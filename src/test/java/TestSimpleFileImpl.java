@@ -130,6 +130,17 @@ public class TestSimpleFileImpl {
 //                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
                     .build());
             System.out.println(resultSet);
+
+            ResultSet resultSet2 = sqlManager.select(SelectExpression.builder(
+                    JoinTableOperation.newInnerJoin(BaseTableReference.newTableReference("table2", "DB1"),
+                            BaseTableReference.newTableReference("table1", "DB1"),
+                            SelectionPredicate.equals(new ColumnReference("column5", "table2"),
+                                    new ColumnReference("column3", "table1"))))
+                    .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
+                    .build());
+            System.out.println(resultSet2);
+
+
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
