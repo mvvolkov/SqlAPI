@@ -1,8 +1,7 @@
+package testSimpleFileImpl;
+
 import SqlManagerFactory.SqlManagerFactory;
 import sqlapi.*;
-import sqlapi.dbMetadata.IntegerColumnMetadata;
-import sqlapi.dbMetadata.TableMetadata;
-import sqlapi.dbMetadata.VarcharColumnMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;
 import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.NoSuchTableException;
@@ -32,10 +31,10 @@ public class TestSimplePrintOutImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadata("table1",
-                    Arrays.asList(new IntegerColumnMetadata.Builder("column1").notNull().primaryKey().build(),
-                            new IntegerColumnMetadata.Builder("column2").build(),
-                            new VarcharColumnMetadata.Builder("column3", 20).notNull().build())));
+            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table1",
+                    Arrays.asList(new IntegerColumnMetadataImpl.Builder("column1").notNull().primaryKey().build(),
+                            new IntegerColumnMetadataImpl.Builder("column2").build(),
+                            new VarcharColumnMetadataImpl.Builder("column3", 20).notNull().build())));
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
         } catch (TableAlreadyExistsException e) {

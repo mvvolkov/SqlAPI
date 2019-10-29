@@ -2,7 +2,6 @@ package sqlapi;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.*;
 import sqlapi.selectionResult.ResultSet;
 import sqlapi.tableReference.SelectExpression;

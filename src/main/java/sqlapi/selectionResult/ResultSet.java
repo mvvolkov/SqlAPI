@@ -1,6 +1,6 @@
 package sqlapi.selectionResult;
 
-import sqlapi.dbMetadata.ColumnMetadata;
+import sqlapi.ColumnMetadata;
 
 import java.util.List;
 

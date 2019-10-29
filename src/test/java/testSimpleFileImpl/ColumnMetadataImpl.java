@@ -1,11 +1,11 @@
-package sqlapi.dbMetadata;
+package testSimpleFileImpl;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.*;
+import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.WrongValueTypeException;
 
-import java.io.Serializable;
-
-
-public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> implements Serializable {
+public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements ColumnMetadata {
 
     @NotNull
     private final String columnName;
@@ -18,7 +18,7 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     private final boolean isPrimaryKey;
 
 
-    protected ColumnMetadata(@NotNull Builder<?, V> builder) {
+    protected ColumnMetadataImpl(@NotNull Builder<?, V> builder) {
         this.columnName = builder.columnName;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
@@ -26,23 +26,25 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     }
 
     @NotNull
-    public String getColumnName() {
+    @Override
+    public String getName() {
         return columnName;
     }
 
-    @NotNull
-    public abstract String getTypeName();
 
+    @Override
     public boolean isNotNull() {
         return isNotNull;
     }
 
+    @Override
     public boolean isPrimaryKey() {
         return isPrimaryKey;
     }
 
+    @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(this.getColumnName());
+        StringBuilder sb = new StringBuilder(columnName);
         sb.append(" ");
         sb.append(this.getTypeName());
         sb.append(this.getTypeSpecificDescription());
@@ -61,11 +63,12 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
     }
 
     @NotNull
+    @Override
     public Class<V> getType() {
         return type;
     }
 
-    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V> & Serializable> {
+    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V>> {
 
         @NotNull
         private final String columnName;
@@ -96,6 +99,33 @@ public abstract class ColumnMetadata<V extends Comparable<V> & Serializable> imp
         // Subclasses must override this method to return "this"
         protected abstract T self();
 
-        abstract ColumnMetadata build();
+        abstract ColumnMetadataImpl build();
+    }
+
+    private ColumnReference createColumnReference(ColumnMetadata columnMetadata, String tableName, String dbName) {
+        return new ColumnReference(columnMetadata.getName(), tableName, dbName);
+    }
+
+    public void checkConstraints(Table table, Object value)
+            throws WrongValueTypeException, ConstraintException {
+
+        TableMetadata tableMetadata = table.getMetadata();
+        Database database = table.getDatabase();
+        String tableName = tableMetadata.getName();
+        String dbName = database.getName();
+
+        ColumnReference columnReference = new ColumnReference(this.getName(), tableName, dbName);
+
+        if (value != null && !this.getType().isInstance(value)) {
+            throw new WrongValueTypeException(this.createColumnReference(this,
+                    tableMetadata.getName(), database.getName()),
+                    this.getType(), value.getClass());
+        }
+        if (value == null && this.isNotNull()) {
+            throw new ConstraintException(columnReference, "NOT NULL");
+        }
+        if (this.isPrimaryKey()) {
+            table.checkPrimaryKey(columnReference, value);
+        }
     }
 }

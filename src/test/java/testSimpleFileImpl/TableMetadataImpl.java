@@ -1,12 +1,13 @@
-package sqlapi.dbMetadata;
+package testSimpleFileImpl;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.ColumnMetadata;
+import sqlapi.TableMetadata;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class TableMetadata implements Serializable {
+public final class TableMetadataImpl implements TableMetadata {
 
     @NotNull
     private final String name;
@@ -15,7 +16,7 @@ public final class TableMetadata implements Serializable {
     private final List<ColumnMetadata> columnMetadata;
 
 
-    public TableMetadata(@NotNull String name, @NotNull List<ColumnMetadata> columnMetadata) {
+    public TableMetadataImpl(@NotNull String name, @NotNull List<ColumnMetadata> columnMetadata) {
         this.name = name;
         this.columnMetadata = columnMetadata;
     }
@@ -25,6 +26,7 @@ public final class TableMetadata implements Serializable {
         return columnMetadata;
     }
 
+    @Override
     public String getName() {
         return name;
     }

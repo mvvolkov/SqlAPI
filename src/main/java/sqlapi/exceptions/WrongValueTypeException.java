@@ -1,13 +1,18 @@
 package sqlapi.exceptions;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.ColumnReference;
 
-public class WrongValueTypeException extends SqlException {
+public final class WrongValueTypeException extends SqlException {
 
+
+    @NotNull
     private final ColumnReference columnReference;
 
+    @NotNull
     private final Class expectedClass;
 
+    @NotNull
     private final Class actualClass;
 
     public WrongValueTypeException(ColumnReference columnReference, Class expectedClass, Class actualClass) {
@@ -26,5 +31,17 @@ public class WrongValueTypeException extends SqlException {
         sb.append("; Actual: ");
         sb.append(actualClass.getSimpleName());
         return sb.toString();
+    }
+
+    public ColumnReference getColumnReference() {
+        return columnReference;
+    }
+
+    public Class getExpectedClass() {
+        return expectedClass;
+    }
+
+    public Class getActualClass() {
+        return actualClass;
     }
 }

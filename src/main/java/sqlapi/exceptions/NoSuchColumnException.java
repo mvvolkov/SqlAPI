@@ -1,10 +1,13 @@
 package sqlapi.exceptions;
 
-public class NoSuchColumnException extends SqlException {
+import org.jetbrains.annotations.NotNull;
 
+public final class NoSuchColumnException extends SqlException {
+
+    @NotNull
     private final String columnName;
 
-    public NoSuchColumnException(String databaseName) {
+    public NoSuchColumnException(@NotNull String databaseName) {
         this.columnName = databaseName;
     }
 
@@ -13,6 +16,7 @@ public class NoSuchColumnException extends SqlException {
         return "The column with the name " + columnName + " not found.";
     }
 
+    @NotNull
     public String getColumnName() {
         return columnName;
     }

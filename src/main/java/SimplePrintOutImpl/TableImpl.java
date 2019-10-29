@@ -1,8 +1,14 @@
 package SimplePrintOutImpl;
 
+import SimpleFileImpl.Row;
+import SimpleFileImpl.Value;
 import sqlapi.*;
+import sqlapi.ColumnMetadata;
+import sqlapi.TableMetadata;
+import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectionPredicate.OneColumnPredicate;
 import sqlapi.selectionPredicate.SelectionPredicate;
-import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.selectionResult.ResultSet;
 
 import java.util.List;
@@ -25,6 +31,16 @@ public class TableImpl implements Table {
     @Override
     public TableMetadata getMetadata() {
         return metadata;
+    }
+
+    @Override
+    public Database getDatabase() {
+        return null;
+    }
+
+    @Override
+    public void checkPrimaryKey(ColumnReference columnReference, Object value)
+            throws ConstraintException, WrongValueTypeException {
     }
 
     private String getStringFromNewValue(Object value) {

@@ -1,12 +1,12 @@
-package sqlapi.dbMetadata;
+package testSimpleFileImpl;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class IntegerColumnMetadata extends ColumnMetadata<Integer> {
+public final class IntegerColumnMetadataImpl extends ColumnMetadataImpl<Integer> {
 
     public static final String TYPE_NAME = "INTEGER";
 
-    private IntegerColumnMetadata(@NotNull Builder builder) {
+    private IntegerColumnMetadataImpl(@NotNull Builder builder) {
         super(builder);
     }
 
@@ -20,7 +20,7 @@ public final class IntegerColumnMetadata extends ColumnMetadata<Integer> {
     }
 
 
-    public static class Builder extends ColumnMetadata.Builder<Builder, Integer> {
+    public static class Builder extends ColumnMetadataImpl.Builder<Builder, Integer> {
 
         public Builder(@NotNull String name) {
             super(name, Integer.class);
@@ -32,8 +32,8 @@ public final class IntegerColumnMetadata extends ColumnMetadata<Integer> {
         }
 
         @Override
-        public ColumnMetadata build() {
-            return new IntegerColumnMetadata(this);
+        public ColumnMetadataImpl build() {
+            return new IntegerColumnMetadataImpl(this);
         }
     }
 }

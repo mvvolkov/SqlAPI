@@ -1,4 +1,4 @@
 package sqlapi.exceptions;
 
-public class SqlException extends Exception {
+public abstract class SqlException extends Exception {
 }

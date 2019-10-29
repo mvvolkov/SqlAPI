@@ -2,7 +2,7 @@ package SimplePrintOutImpl;
 
 import sqlapi.Database;
 import sqlapi.Table;
-import sqlapi.dbMetadata.TableMetadata;
+import sqlapi.TableMetadata;
 import sqlapi.exceptions.NoSuchTableException;
 import sqlapi.exceptions.TableAlreadyExistsException;
 
@@ -43,12 +43,11 @@ public class DatabaseImpl implements Database {
         return table;
     }
 
-
     @Override
     public void createTable(TableMetadata tableMetadata) throws TableAlreadyExistsException {
         for (Table table : tables) {
             if (table.getMetadata().getName().equals(tableMetadata.getName())) {
-                throw new TableAlreadyExistsException(tableMetadata, table.getMetadata());
+                throw new TableAlreadyExistsException(tableMetadata.getName());
             }
         }
         tables.add(new TableImpl(this, tableMetadata));

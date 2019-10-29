@@ -1,6 +1,6 @@
 package SimpleFileImpl;
 
-import sqlapi.dbMetadata.ColumnMetadata;
+import sqlapi.ColumnMetadata;
 import sqlapi.exceptions.NoSuchColumnException;
 import sqlapi.selectionResult.ResultRow;
 import sqlapi.selectionResult.ResultSet;
@@ -49,7 +49,7 @@ public class ResultSetImpl implements ResultSet {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        String tableString = columns.stream().map(ColumnMetadata::getColumnName)
+        String tableString = columns.stream().map(ColumnMetadata::getName)
                 .collect(Collectors.joining(", "));
 
         sb.append("\nSelect result : ");
@@ -59,7 +59,7 @@ public class ResultSetImpl implements ResultSet {
             for (ColumnMetadata column : columns) {
                 String value;
                 try {
-                    value = row.getValue(column.getColumnName()).toString();
+                    value = row.getValue(column.getName()).toString();
                 } catch (NoSuchColumnException e) {
                     value = e.getMessage();
                 }

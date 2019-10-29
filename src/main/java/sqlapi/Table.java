@@ -1,6 +1,5 @@
 package sqlapi;
 
-import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.ConstraintException;
 import sqlapi.exceptions.WrongValueTypeException;
 import sqlapi.selectionPredicate.SelectionPredicate;
@@ -11,6 +10,11 @@ import java.util.List;
 public interface Table {
 
     TableMetadata getMetadata();
+
+    Database getDatabase();
+
+    void checkPrimaryKey(ColumnReference columnReference, Object value)
+            throws ConstraintException, WrongValueTypeException;
 
     void insert(List<Object> values) throws WrongValueTypeException, ConstraintException;
 

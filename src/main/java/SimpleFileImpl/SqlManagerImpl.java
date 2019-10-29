@@ -3,8 +3,7 @@ package SimpleFileImpl;
 import SimplePrintOutImpl.SqlManagerPrintOutImpl;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.*;
-import sqlapi.dbMetadata.ColumnMetadata;
-import sqlapi.dbMetadata.TableMetadata;
+import sqlapi.ColumnMetadata;
 import sqlapi.exceptions.*;
 import sqlapi.selectionPredicate.*;
 import sqlapi.selectionResult.ResultRow;
@@ -170,7 +169,7 @@ public class SqlManagerImpl implements SqlManager {
                 List<ResultValue> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 for (ColumnMetadata columnMetadata : right.getColumns()) {
-                    values.add(new ResultValueImpl(null, columnMetadata.getColumnName()));
+                    values.add(new ResultValueImpl(null, columnMetadata.getName()));
                 }
             }
         }
@@ -198,7 +197,7 @@ public class SqlManagerImpl implements SqlManager {
             if (!matchFound) {
                 List<ResultValue> values = new ArrayList<>();
                 for (ColumnMetadata columnMetadata : left.getColumns()) {
-                    values.add(new ResultValueImpl(null, columnMetadata.getColumnName()));
+                    values.add(new ResultValueImpl(null, columnMetadata.getName()));
                 }
                 values.addAll(rightRow.getValues());
             }

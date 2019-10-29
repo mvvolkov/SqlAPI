@@ -1,10 +1,13 @@
 package sqlapi.exceptions;
 
-public class NoSuchTableException extends SqlException {
+import org.jetbrains.annotations.NotNull;
 
+public final class NoSuchTableException extends SqlException {
+
+    @NotNull
     private final String tableName;
 
-    public NoSuchTableException(String tableName) {
+    public NoSuchTableException(@NotNull String tableName) {
         this.tableName = tableName;
     }
 
@@ -13,6 +16,7 @@ public class NoSuchTableException extends SqlException {
         return "The table with the name " + tableName + " not found.";
     }
 
+    @NotNull
     public String getTableName() {
         return tableName;
     }

@@ -4,9 +4,6 @@ import SqlManagerFactory.SqlManagerFactory;
 import sqlapi.ColumnReference;
 import sqlapi.SqlManager;
 import sqlapi.Table;
-import sqlapi.dbMetadata.IntegerColumnMetadata;
-import sqlapi.dbMetadata.TableMetadata;
-import sqlapi.dbMetadata.VarcharColumnMetadata;
 import sqlapi.exceptions.SqlException;
 import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionResult.ResultSet;
@@ -34,28 +31,30 @@ public class TestSimpleFileImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadata("table1",
-                    Arrays.asList(IntegerColumnMetadata.builder("column1").notNull().primaryKey().build(),
-                            IntegerColumnMetadata.builder("column2").build(),
-                            VarcharColumnMetadata.builder("column3", 20).notNull().build())));
+            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table1",
+                    Arrays.asList(IntegerColumnMetadataImpl.builder("column1").notNull().primaryKey().build(),
+                            IntegerColumnMetadataImpl.builder("column2").build(),
+                            VarcharColumnMetadataImpl.builder("column3", 20).notNull().build())));
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+
+        try {
+            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table1",
+                    Arrays.asList(IntegerColumnMetadataImpl.builder("column11").notNull().primaryKey().build(),
+                            IntegerColumnMetadataImpl.builder("column12").build(),
+                            VarcharColumnMetadataImpl.builder("column13", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadata("table1",
-                    Arrays.asList(IntegerColumnMetadata.builder("column11").notNull().primaryKey().build(),
-                            IntegerColumnMetadata.builder("column12").build(),
-                            VarcharColumnMetadata.builder("column13", 20).notNull().build())));
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
-
-        try {
-            sqlManager.getDatabase("DB2").createTable(new TableMetadata("table2",
-                    Arrays.asList(IntegerColumnMetadata.builder("column11").notNull().primaryKey().build(),
-                            IntegerColumnMetadata.builder("column12").build(),
-                            VarcharColumnMetadata.builder("column13", 20).notNull().build())));
+            sqlManager.getDatabase("DB2").createTable(new TableMetadataImpl("table2",
+                    Arrays.asList(IntegerColumnMetadataImpl.builder("column11").notNull().primaryKey().build(),
+                            IntegerColumnMetadataImpl.builder("column12").build(),
+                            VarcharColumnMetadataImpl.builder("column13", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -63,6 +62,13 @@ public class TestSimpleFileImpl {
         try {
             Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
             table1.insert(Arrays.asList(10, 20, null));
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            Table table1 = sqlManager.getDatabase("DB1").getTable("table1");
+            table1.insert(Arrays.asList(10, 20, "123456789012345678901234567890"));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -115,9 +121,9 @@ public class TestSimpleFileImpl {
 //        }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadata("table2",
-                    Arrays.asList(IntegerColumnMetadata.builder("column4").notNull().primaryKey().build(),
-                            VarcharColumnMetadata.builder("column5", 15).build())));
+            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table2",
+                    Arrays.asList(IntegerColumnMetadataImpl.builder("column4").notNull().primaryKey().build(),
+                            VarcharColumnMetadataImpl.builder("column5", 15).build())));
             Table table2 = sqlManager.getDatabase("DB1").getTable("table2");
             table2.insert(Arrays.asList(22, "test2"));
             table2.insert(Arrays.asList(23, "test2"));

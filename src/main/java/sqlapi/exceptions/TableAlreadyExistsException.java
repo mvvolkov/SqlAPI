@@ -1,31 +1,22 @@
 package sqlapi.exceptions;
 
-import sqlapi.dbMetadata.TableMetadata;
+import org.jetbrains.annotations.NotNull;
 
-public class TableAlreadyExistsException extends SqlException {
+public final class TableAlreadyExistsException extends SqlException {
 
-    private final TableMetadata newTableMetadata;
+    @NotNull
+    private final String tableName;
 
-    private TableMetadata existingTableMetadata;
-
-    public TableAlreadyExistsException(TableMetadata newTableMetadata, TableMetadata existingTableMetadata) {
-        this.newTableMetadata = newTableMetadata;
-        this.existingTableMetadata = existingTableMetadata;
-        assert (newTableMetadata.getName().equals(existingTableMetadata.getName()));
-    }
-
-    public TableMetadata getNewTableMetadata() {
-        return newTableMetadata;
-    }
-
-    public TableMetadata getExistingTableMetadata() {
-        return existingTableMetadata;
+    public TableAlreadyExistsException(@NotNull String tableName) {
+        this.tableName = tableName;
     }
 
     @Override
     public String getMessage() {
-        return "Can not create a new table. The table with the name " + existingTableMetadata.getName() + " already exists.";
+        return "Can not create a new table. The table with the name " + tableName + " already exists.";
     }
 
-
+    public String getTableName() {
+        return tableName;
+    }
 }
