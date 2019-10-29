@@ -1,6 +1,7 @@
-package sqlapi;
+package sqlapi.tableReference;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.SelectedColumn;
 import sqlapi.selectionPredicate.TruePredicate;
 import sqlapi.selectionPredicate.SelectionPredicate;
 

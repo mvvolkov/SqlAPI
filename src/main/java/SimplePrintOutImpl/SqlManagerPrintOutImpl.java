@@ -2,7 +2,7 @@ package SimplePrintOutImpl;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.Database;
-import sqlapi.SelectExpression;
+import sqlapi.tableReference.SelectExpression;
 import sqlapi.SqlManager;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.DatabaseAlreadyExistsException;

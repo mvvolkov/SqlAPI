@@ -1,11 +1,18 @@
+package testSimpleFileImpl;
+
 import SqlManagerFactory.SqlManagerFactory;
-import sqlapi.*;
+import sqlapi.ColumnReference;
+import sqlapi.SqlManager;
+import sqlapi.Table;
 import sqlapi.dbMetadata.IntegerColumnMetadata;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.dbMetadata.VarcharColumnMetadata;
 import sqlapi.exceptions.SqlException;
 import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionResult.ResultSet;
+import sqlapi.tableReference.BaseTableReference;
+import sqlapi.tableReference.SelectExpression;
+import sqlapi.tableReference.TableReference;
 
 import java.util.Arrays;
 
@@ -122,8 +129,8 @@ public class TestSimpleFileImpl {
 //            System.out.println(resultSet);
 
             ResultSet resultSet = sqlManager.select(SelectExpression.builder(
-                    BaseTableReference.newTableReference("table2", "DB1"))
-                    .addTableReference(BaseTableReference.newTableReference("table1", "DB1"))
+                    TableReference.baseTable("table2", "DB1"))
+                    .addTableReference(TableReference.baseTable("table1", "DB1"))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column5", "table2"),
                             new ColumnReference("column3", "table1")))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
@@ -132,8 +139,8 @@ public class TestSimpleFileImpl {
             System.out.println(resultSet);
 
             ResultSet resultSet2 = sqlManager.select(SelectExpression.builder(
-                    JoinTableOperation.newInnerJoin(BaseTableReference.newTableReference("table2", "DB1"),
-                            BaseTableReference.newTableReference("table1", "DB1"),
+                    TableReference.innerJoin(BaseTableReference.baseTable("table2", "DB1"),
+                            TableReference.baseTable("table1", "DB1"),
                             SelectionPredicate.equals(new ColumnReference("column5", "table2"),
                                     new ColumnReference("column3", "table1"))))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))

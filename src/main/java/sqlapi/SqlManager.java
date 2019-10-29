@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import sqlapi.dbMetadata.TableMetadata;
 import sqlapi.exceptions.*;
 import sqlapi.selectionResult.ResultSet;
+import sqlapi.tableReference.SelectExpression;
 
 import java.util.List;
 
