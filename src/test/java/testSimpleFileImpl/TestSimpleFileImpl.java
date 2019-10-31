@@ -137,19 +137,19 @@ public class TestSimpleFileImpl {
 //                    .build());
 //            System.out.println(resultSet);
 
-            ResultSet resultSet = sqlManager.select(SelectExpressionImpl.builder(
-                    TableReference1.baseTable("table2", "DB1"))
-                    .addTableReference(TableReference1.baseTable("table1", "DB1"))
-                    .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column5", "table2"),
-                            new ColumnReference("column3", "table1")))
-                    .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
+            ResultSet resultSet = sqlManager.select(
+                    qm.getSelectionExpressionBuilder(qm.baseTableRef("table2", "DB1"))
+                            .addTableReference(qm.baseTableRef("table1", "DB1"))
+                            .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column5", "table2"),
+                                    new ColumnReference("column3", "table1")))
+                            .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
 //                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
-                    .build());
+                            .build());
             System.out.println(resultSet);
 
             ResultSet resultSet2 = sqlManager.select(SelectExpressionImpl.builder(
-                    TableReference1.innerJoin(BaseTableReferenceImpl.baseTable("table2", "DB1"),
-                            TableReference1.baseTable("table1", "DB1"),
+                    qm.innerJoin(qm.baseTableRef("table2", "DB1"),
+                            qm.baseTableRef("table1", "DB1"),
                             SelectionPredicate.equals(new ColumnReference("column5", "table2"),
                                     new ColumnReference("column3", "table1"))))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))

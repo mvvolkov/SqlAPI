@@ -9,10 +9,7 @@ import sqlapi.selectionPredicate.*;
 import sqlapi.selectionResult.ResultRow;
 import sqlapi.selectionResult.ResultSet;
 import sqlapi.selectionResult.ResultValue;
-import sqlapi.tableReference.BaseTableReference;
-import sqlapi.tableReference.JoinTableReference;
-import sqlapi.tableReference.SelectExpression;
-import sqlapi.tableReference.TableReference;
+
 
 import java.util.*;
 
@@ -293,21 +290,19 @@ public class SqlManagerImpl implements SqlManager {
         return table.select(Arrays.asList(SelectedColumn.all()), SelectionPredicate.empty());
     }
 
-    protected ResultSet selectFromJoinedTable(TableReference tableReference)
+    protected ResultSet selectFromJoinedTable(JoinTableReference tableReference)
             throws NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException, WrongValueTypeException {
-        if (!(tableReference instanceof JoinTableReference)) {
-            throw new IllegalArgumentException();
-        }
-        JoinTableReference jto = (JoinTableReference) tableReference;
-        ResultSet left = this.select(SelectExpression.builder(jto.getLeft()).build());
-        ResultSet right = this.select(SelectExpression.builder(jto.getRight()).build());
+
+
+        ResultSet left = this.select(SelectExpression.builder(tableReference.getLeftTableReference()).build());
+        ResultSet right = this.select(SelectExpression.builder(tableReference.getRightTableReference()).build());
         switch (jto.getType()) {
             case INNER_JOIN:
-                return innerJoin(left, right, jto.getSelectionPredicate());
+                return innerJoin(left, right, tableReference.getSelectionPredicate());
             case LEFT_OUTER_JOIN:
-                return leftOutJoin(left, right, jto.getSelectionPredicate());
+                return leftOutJoin(left, right, tableReference.getSelectionPredicate());
             case RIGHT_OUTER_JOIN:
-                return rightOutJoin(left, right, jto.getSelectionPredicate());
+                return rightOutJoin(left, right, tableReference.getSelectionPredicate());
         }
         return new ResultSetImpl(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
@@ -322,7 +317,7 @@ public class SqlManagerImpl implements SqlManager {
                 resultSets.add(this.selectFromBaseTable(tableReference));
                 continue;
             } else if (tableReference instanceof JoinTableReference) {
-                resultSets.add(this.selectFromJoinedTable(tableReference));
+                resultSets.add(this.selectFromJoinedTable((JoinTableReference) tableReference));
                 continue;
             } else if (tableReference instanceof SelectExpression) {
                 resultSets.add(this.select((SelectExpression) tableReference));
@@ -335,11 +330,11 @@ public class SqlManagerImpl implements SqlManager {
     protected Table getTable(BaseTableReference tableReference) throws
             NoSuchTableException, NoSuchDatabaseException {
         for (Database database : databases) {
-            if (database.getName().equals(tableReference.getDbName())) {
+            if (database.getName().equals(tableReference.getDatabaseName())) {
                 return (TableImpl) database.getTable(tableReference.getTableName());
             }
         }
-        throw new NoSuchDatabaseException(tableReference.getDbName());
+        throw new NoSuchDatabaseException(tableReference.getDatabaseName());
     }
 
 }

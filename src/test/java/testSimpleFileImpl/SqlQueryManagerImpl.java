@@ -33,17 +33,17 @@ public class SqlQueryManagerImpl implements SqlQueryManager {
 
     @Override
     public TableReference innerJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
-        return new JoinTableReference(JoinTableReference.Type.INNER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.INNER_JOIN, left, right, selectionPredicate);
     }
 
 
     @Override
     public TableReference leftOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
-        return new JoinTableReference(JoinTableReference.Type.LEFT_OUTER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.LEFT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
     @Override
     public TableReference rightOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
-        return new JoinTableReference(JoinTableReference.Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
     }
 }

@@ -19,4 +19,6 @@ public interface SqlQueryManager {
     TableReference leftOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate);
 
     TableReference rightOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate);
+
+    SelectionExpressionBuilder getSelectionExpressionBuilder(TableReference tableReference);
 }

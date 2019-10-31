@@ -1,7 +1,10 @@
 package testSimpleFileImpl;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.SelectExpression;
 import sqlapi.SelectedColumn;
+import sqlapi.SelectionExpressionBuilder;
+import sqlapi.TableReference;
 import sqlapi.selectionPredicate.TruePredicate;
 import sqlapi.selectionPredicate.SelectionPredicate;
 
@@ -13,10 +16,10 @@ import java.util.List;
  * builder.addTableReference(tableReference1).add(tableReference2)
  * .addUnit(selectionUnit1).addUnit(selectionUnit2).addPredicate(SelectionPredicate)
  */
-public final class SelectExpressionImpl extends TableReference1 {
+public final class SelectExpressionImpl implements SelectExpression {
 
     @NotNull
-    private final List<TableReference1> tableReferences;
+    private final List<TableReference> tableReferences;
     @NotNull
     private final List<SelectedColumn> selectedColumns;
     @NotNull
@@ -24,14 +27,14 @@ public final class SelectExpressionImpl extends TableReference1 {
 
 
     private SelectExpressionImpl(Builder builder) {
-        super(builder.alias);
         tableReferences = builder.tableReferences;
         selectedColumns = builder.selectedColumns;
         selectionPredicate = builder.selectionPredicate;
     }
 
     @NotNull
-    public List<TableReference1> getTableReferences() {
+    @Override
+    public List<TableReference> getTableReferences() {
         return tableReferences;
     }
 
@@ -45,20 +48,20 @@ public final class SelectExpressionImpl extends TableReference1 {
         return selectionPredicate;
     }
 
-    public final static class Builder {
+    public final static class Builder implements SelectionExpressionBuilder {
 
 
-        private List<TableReference1> tableReferences = new ArrayList<>();
+        private List<TableReference> tableReferences = new ArrayList<>();
         private List<SelectedColumn> selectedColumns = new ArrayList<>();
         private SelectionPredicate selectionPredicate = new TruePredicate();
         private String alias = null;
 
 
-        public Builder(@NotNull TableReference1 tableReference) {
+        public Builder(@NotNull TableReference tableReference) {
             tableReferences.add(tableReference);
         }
 
-        public Builder addTableReference(@NotNull TableReference1 tableReference) {
+        public Builder addTableReference(@NotNull TableReference tableReference) {
             tableReferences.add(tableReference);
             return this;
         }
@@ -83,7 +86,7 @@ public final class SelectExpressionImpl extends TableReference1 {
         }
     }
 
-    public static Builder builder(TableReference1 tableReference) {
+    public static Builder builder(TableReference tableReference) {
         return new Builder(tableReference);
     }
 }
