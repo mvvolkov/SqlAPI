@@ -25,7 +25,7 @@ public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> 
 
     @NotNull
     @Override
-    public String getTypeName() {
+    public String getSqlTypeName() {
         return TYPE_NAME;
     }
 

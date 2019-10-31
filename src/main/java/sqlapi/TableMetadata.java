@@ -6,5 +6,5 @@ public interface TableMetadata {
 
     String getName();
 
-    List<ColumnMetadata> getColumnMetadata();
+    List<ColumnMetadata> getColumnsMetadata();
 }

@@ -11,7 +11,7 @@ public final class IntegerColumnMetadataImpl extends ColumnMetadataImpl<Integer>
     }
 
     @Override
-    public @NotNull String getTypeName() {
+    public @NotNull String getSqlTypeName() {
         return TYPE_NAME;
     }
 

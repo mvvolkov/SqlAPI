@@ -22,7 +22,7 @@ public final class TableMetadataImpl implements TableMetadata {
     }
 
     @NotNull
-    public List<ColumnMetadata> getColumnMetadata() {
+    public List<ColumnMetadata> getColumnsMetadata() {
         return columnMetadata;
     }
 

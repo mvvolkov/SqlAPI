@@ -11,9 +11,9 @@ public interface ColumnMetadata<V extends Comparable<V>> {
 
     public boolean isPrimaryKey();
 
-    String getTypeName();
+    String getSqlTypeName();
 
-    Class<V> getType();
+    Class<V> getJavaClass();
 
     void checkConstraints(Table table, Object value)
             throws WrongValueTypeException, ConstraintException;

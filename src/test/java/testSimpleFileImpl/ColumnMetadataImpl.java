@@ -46,7 +46,7 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
     public String toString() {
         StringBuilder sb = new StringBuilder(columnName);
         sb.append(" ");
-        sb.append(this.getTypeName());
+        sb.append(this.getSqlTypeName());
         sb.append(this.getTypeSpecificDescription());
         if (this.isNotNull()) {
             sb.append(" NOT NULL");
@@ -64,11 +64,12 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
 
     @NotNull
     @Override
-    public Class<V> getType() {
+    public Class<V> getJavaClass() {
         return type;
     }
 
-    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V>> {
+    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V>>
+    implements ColumnMetadataBuilder{
 
         @NotNull
         private final String columnName;
@@ -99,7 +100,7 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
         // Subclasses must override this method to return "this"
         protected abstract T self();
 
-        abstract ColumnMetadataImpl build();
+        public abstract ColumnMetadataImpl build();
     }
 
     private ColumnReference createColumnReference(ColumnMetadata columnMetadata, String tableName, String dbName) {
@@ -116,10 +117,10 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
 
         ColumnReference columnReference = new ColumnReference(this.getName(), tableName, dbName);
 
-        if (value != null && !this.getType().isInstance(value)) {
+        if (value != null && !this.getJavaClass().isInstance(value)) {
             throw new WrongValueTypeException(this.createColumnReference(this,
                     tableMetadata.getName(), database.getName()),
-                    this.getType(), value.getClass());
+                    this.getJavaClass(), value.getClass());
         }
         if (value == null && this.isNotNull()) {
             throw new ConstraintException(columnReference, "NOT NULL");

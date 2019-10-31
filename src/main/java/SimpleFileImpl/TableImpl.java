@@ -63,9 +63,9 @@ public class TableImpl implements Table, Serializable {
 
     protected void checkConstraints(ColumnMetadata columnMetadata, Object value)
             throws WrongValueTypeException, ConstraintException {
-        if (value != null && !columnMetadata.getType().isInstance(value)) {
+        if (value != null && !columnMetadata.getJavaClass().isInstance(value)) {
             throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
-                    columnMetadata.getType(), value.getClass());
+                    columnMetadata.getJavaClass(), value.getClass());
         }
         if (value == null && columnMetadata.isNotNull()) {
             throw new ConstraintException(this.createColumnReference(columnMetadata), "NOT NULL");
@@ -87,14 +87,14 @@ public class TableImpl implements Table, Serializable {
     @Override
     public void insert(List<Object> values) throws WrongValueTypeException, ConstraintException {
 
-        List<ColumnMetadata> columnsMetadata = metadata.getColumnMetadata();
+        List<ColumnMetadata> columnsMetadata = metadata.getColumnsMetadata();
         Map<String, Value> map = new HashMap<>();
         for (int i = 0; i < columnsMetadata.size(); i++) {
             ColumnMetadata columnMetadata = columnsMetadata.get(i);
             Object value = values.size() > i ? values.get(i) : null;
             columnMetadata.checkConstraints(this, value);
             this.checkConstraints(columnMetadata, value);
-            map.put(columnMetadata.getName(), new Value(columnMetadata.getType(), value));
+            map.put(columnMetadata.getName(), new Value(columnMetadata.getJavaClass(), value));
         }
         rows.add(new Row(map));
 
@@ -135,7 +135,7 @@ public class TableImpl implements Table, Serializable {
     private ResultRow getSelectionResultRow(Row row, List<SelectedColumn> selectedColumns) {
         List<ResultValue> values = new ArrayList<>();
         if (selectedColumns.isEmpty()) {
-            for (ColumnMetadata columnMetadata : metadata.getColumnMetadata()) {
+            for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
                 Value tableValue = row.getValue(columnMetadata.getName());
                 ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getName());
                 values.add(value);
@@ -144,7 +144,7 @@ public class TableImpl implements Table, Serializable {
         for (SelectedColumn selectedColumn : selectedColumns) {
             switch (selectedColumn.getType()) {
                 case SELECT_ALL:
-                    for (ColumnMetadata columnMetadata : metadata.getColumnMetadata()) {
+                    for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
                         Value tableValue = row.getValue(columnMetadata.getName());
                         ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getName());
                         values.add(value);
@@ -172,6 +172,6 @@ public class TableImpl implements Table, Serializable {
             resultRows.add(this.getSelectionResultRow(row, selectedColumns));
 
         }
-        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnMetadata()));
+        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnsMetadata()));
     }
 }

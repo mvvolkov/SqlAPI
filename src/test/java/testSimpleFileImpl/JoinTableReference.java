@@ -1,8 +1,9 @@
-package sqlapi.tableReference;
+package testSimpleFileImpl;
 
+import sqlapi.TableReference;
 import sqlapi.selectionPredicate.SelectionPredicate;
 
-public class JoinTableReference extends TableReference {
+public class JoinTableReference implements TableReference {
 
     private final Type type;
     private final TableReference left;
@@ -16,7 +17,6 @@ public class JoinTableReference extends TableReference {
     }
 
     JoinTableReference(Type type, TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
-        super(null);
         this.type = type;
         this.left = left;
         this.right = right;

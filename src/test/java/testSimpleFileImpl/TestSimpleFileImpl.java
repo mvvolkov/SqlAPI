@@ -3,13 +3,11 @@ package testSimpleFileImpl;
 import SqlManagerFactory.SqlManagerFactory;
 import sqlapi.ColumnReference;
 import sqlapi.SqlManager;
+import sqlapi.SqlQueryManager;
 import sqlapi.Table;
 import sqlapi.exceptions.SqlException;
 import sqlapi.selectionPredicate.SelectionPredicate;
 import sqlapi.selectionResult.ResultSet;
-import sqlapi.tableReference.BaseTableReference;
-import sqlapi.tableReference.SelectExpression;
-import sqlapi.tableReference.TableReference;
 
 import java.util.Arrays;
 
@@ -17,6 +15,7 @@ public class TestSimpleFileImpl {
     public static void main(String[] args) {
 
         SqlManager sqlManager = SqlManagerFactory.getSimpleFileSqlManager();
+        SqlQueryManager qm = new SqlQueryManagerImpl();
 
         try {
             sqlManager.createDatabase("DB1");
@@ -31,30 +30,32 @@ public class TestSimpleFileImpl {
         }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table1",
-                    Arrays.asList(IntegerColumnMetadataImpl.builder("column1").notNull().primaryKey().build(),
-                            IntegerColumnMetadataImpl.builder("column2").build(),
-                            VarcharColumnMetadataImpl.builder("column3", 20).notNull().build())));
+            sqlManager.getDatabase("DB1").createTable(
+                    qm.tableMetadata("table1", Arrays.asList(
+                            qm.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
+                            qm.getIntegerColumnMetadataBuilder("column2").build(),
+                            qm.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
 
-
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table1",
-                    Arrays.asList(IntegerColumnMetadataImpl.builder("column11").notNull().primaryKey().build(),
-                            IntegerColumnMetadataImpl.builder("column12").build(),
-                            VarcharColumnMetadataImpl.builder("column13", 20).notNull().build())));
+            sqlManager.getDatabase("DB1").createTable(
+                    qm.tableMetadata("table1", Arrays.asList(
+                            qm.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+                            qm.getIntegerColumnMetadataBuilder("column12").build(),
+                            qm.getVarcharColumnMetadataBuilder("column13", 20).notNull().build()
+                    )));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
         try {
-            sqlManager.getDatabase("DB2").createTable(new TableMetadataImpl("table2",
-                    Arrays.asList(IntegerColumnMetadataImpl.builder("column11").notNull().primaryKey().build(),
-                            IntegerColumnMetadataImpl.builder("column12").build(),
-                            VarcharColumnMetadataImpl.builder("column13", 20).notNull().build())));
+            sqlManager.getDatabase("DB2").createTable(qm.tableMetadata("table2", Arrays.asList(
+                    qm.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+                    qm.getIntegerColumnMetadataBuilder("column12").build(),
+                    qm.getVarcharColumnMetadataBuilder("column13", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -121,9 +122,11 @@ public class TestSimpleFileImpl {
 //        }
 
         try {
-            sqlManager.getDatabase("DB1").createTable(new TableMetadataImpl("table2",
-                    Arrays.asList(IntegerColumnMetadataImpl.builder("column4").notNull().primaryKey().build(),
-                            VarcharColumnMetadataImpl.builder("column5", 15).build())));
+            sqlManager.getDatabase("DB1").createTable(
+                    qm.tableMetadata("table2", Arrays.asList(
+                            qm.getIntegerColumnMetadataBuilder("column4").notNull().primaryKey().build(),
+                            qm.getVarcharColumnMetadataBuilder("column5", 15).build()
+                    )));
             Table table2 = sqlManager.getDatabase("DB1").getTable("table2");
             table2.insert(Arrays.asList(22, "test2"));
             table2.insert(Arrays.asList(23, "test2"));
@@ -134,9 +137,9 @@ public class TestSimpleFileImpl {
 //                    .build());
 //            System.out.println(resultSet);
 
-            ResultSet resultSet = sqlManager.select(SelectExpression.builder(
-                    TableReference.baseTable("table2", "DB1"))
-                    .addTableReference(TableReference.baseTable("table1", "DB1"))
+            ResultSet resultSet = sqlManager.select(SelectExpressionImpl.builder(
+                    TableReference1.baseTable("table2", "DB1"))
+                    .addTableReference(TableReference1.baseTable("table1", "DB1"))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column5", "table2"),
                             new ColumnReference("column3", "table1")))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
@@ -144,9 +147,9 @@ public class TestSimpleFileImpl {
                     .build());
             System.out.println(resultSet);
 
-            ResultSet resultSet2 = sqlManager.select(SelectExpression.builder(
-                    TableReference.innerJoin(BaseTableReference.baseTable("table2", "DB1"),
-                            TableReference.baseTable("table1", "DB1"),
+            ResultSet resultSet2 = sqlManager.select(SelectExpressionImpl.builder(
+                    TableReference1.innerJoin(BaseTableReferenceImpl.baseTable("table2", "DB1"),
+                            TableReference1.baseTable("table1", "DB1"),
                             SelectionPredicate.equals(new ColumnReference("column5", "table2"),
                                     new ColumnReference("column3", "table1"))))
                     .addPredicateWithAnd(SelectionPredicate.equals(new ColumnReference("column4", "table2"), 23))
