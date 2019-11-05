@@ -1,20 +1,16 @@
 package testSimpleFileImpl;
 
+import sqlapi.JoinTableReference;
 import sqlapi.TableReference;
 import sqlapi.selectionPredicate.SelectionPredicate;
 
-public class JoinTableReferenceImpl implements TableReference {
+public class JoinTableReferenceImpl implements JoinTableReference {
 
     private final Type type;
     private final TableReference left;
     private final TableReference right;
     private final SelectionPredicate selectionPredicate;
 
-    public enum Type {
-        INNER_JOIN,
-        LEFT_OUTER_JOIN,
-        RIGHT_OUTER_JOIN
-    }
 
     JoinTableReferenceImpl(Type type, TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
         this.type = type;
@@ -27,11 +23,14 @@ public class JoinTableReferenceImpl implements TableReference {
         return type;
     }
 
-    public final TableReference getLeft() {
+
+    @Override
+    public TableReference getLeftTableReference() {
         return left;
     }
 
-    public final TableReference getRight() {
+    @Override
+    public TableReference getRightTableReference() {
         return right;
     }
 

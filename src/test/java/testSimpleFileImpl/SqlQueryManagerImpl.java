@@ -1,10 +1,6 @@
 package testSimpleFileImpl;
 
-import sqlapi.ColumnMetadata;
-import sqlapi.ColumnMetadataBuilder;
-import sqlapi.SqlQueryManager;
-import sqlapi.TableMetadata;
-import sqlapi.TableReference;
+import sqlapi.*;
 import sqlapi.selectionPredicate.SelectionPredicate;
 
 import java.util.List;
@@ -45,5 +41,10 @@ public class SqlQueryManagerImpl implements SqlQueryManager {
     @Override
     public TableReference rightOuterJoin(TableReference left, TableReference right, SelectionPredicate selectionPredicate) {
         return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
+    }
+
+    @Override
+    public SelectionExpressionBuilder getSelectionExpressionBuilder(TableReference tableReference) {
+        return SelectExpressionImpl.builder(tableReference);
     }
 }

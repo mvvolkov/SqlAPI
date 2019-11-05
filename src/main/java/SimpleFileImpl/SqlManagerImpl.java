@@ -294,9 +294,9 @@ public class SqlManagerImpl implements SqlManager {
             throws NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException, WrongValueTypeException {
 
 
-        ResultSet left = this.select(SelectExpression.builder(tableReference.getLeftTableReference()).build());
-        ResultSet right = this.select(SelectExpression.builder(tableReference.getRightTableReference()).build());
-        switch (jto.getType()) {
+        ResultSet left = this.selectAll(tableReference.getLeftTableReference());
+        ResultSet right = this.selectAll(tableReference.getRightTableReference());
+        switch (tableReference.getType()) {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getSelectionPredicate());
             case LEFT_OUTER_JOIN:
@@ -325,6 +325,19 @@ public class SqlManagerImpl implements SqlManager {
         }
         ResultSet resultSet = this.joinResultSets(resultSets, selectExpression.getSelectionPredicate());
         return resultSet;
+    }
+
+    protected @NotNull ResultSet selectAll(TableReference tableReference) throws
+            WrongValueTypeException, NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException {
+
+        if (tableReference instanceof BaseTableReference) {
+            return this.selectFromBaseTable(tableReference);
+        } else if (tableReference instanceof JoinTableReference) {
+            return this.selectFromJoinedTable((JoinTableReference) tableReference);
+        } else if (tableReference instanceof SelectExpression) {
+            return this.select((SelectExpression) tableReference);
+        }
+        throw new IllegalArgumentException("");
     }
 
     protected Table getTable(BaseTableReference tableReference) throws
