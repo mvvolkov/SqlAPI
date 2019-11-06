@@ -1,6 +1,6 @@
 package testSimpleFileImpl;
 
-import api.ColumnReference;
+import clientDefaultImpl.ColumnReferenceImpl;
 import api.SqlClient;
 import api.SqlServer;
 import api.Table;
@@ -141,9 +141,9 @@ public class TestSimpleFileImpl {
             ResultSet resultSet = sqlServer.select(
                     sqlClient.getSelectionExpressionBuilder(sqlClient.baseTableRef("table2", "DB1"))
                             .addTableReference(sqlClient.baseTableRef("table1", "DB1"))
-                            .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column5", "table2"),
-                                    new ColumnReference("column3", "table1")))
-                            .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column4", "table2"), 23))
+                            .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
+                                    sqlClient.createColumnReference("column3", "table1")))
+                            .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
 //                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
                             .build());
             System.out.println(resultSet);
@@ -151,9 +151,9 @@ public class TestSimpleFileImpl {
             ResultSet resultSet2 = sqlServer.select(SelectExpressionImpl.builder(
                     sqlClient.innerJoin(sqlClient.baseTableRef("table2", "DB1"),
                             sqlClient.baseTableRef("table1", "DB1"),
-                            sqlClient.getPredicateEquals(new ColumnReference("column5", "table2"),
-                                    new ColumnReference("column3", "table1"))))
-                    .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column4", "table2"), 23))
+                            sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
+                                    sqlClient.createColumnReference("column3", "table1"))))
+                    .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
                     .build());
             System.out.println(resultSet2);
 

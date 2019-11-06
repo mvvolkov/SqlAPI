@@ -103,8 +103,8 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
         public abstract ColumnMetadataImpl build();
     }
 
-    private ColumnReference createColumnReference(ColumnMetadata columnMetadata, String tableName, String dbName) {
-        return new ColumnReference(columnMetadata.getName(), tableName, dbName);
+    private ColumnReferenceImpl createColumnReference(ColumnMetadata columnMetadata, String tableName, String dbName) {
+        return new ColumnReferenceImpl(columnMetadata.getName(), tableName, dbName);
     }
 
     public void checkConstraints(Table table, Object value)
@@ -115,7 +115,7 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
         String tableName = tableMetadata.getName();
         String dbName = database.getName();
 
-        ColumnReference columnReference = new ColumnReference(this.getName(), tableName, dbName);
+        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
 
         if (value != null && !this.getJavaClass().isInstance(value)) {
             throw new WrongValueTypeException(this.createColumnReference(this,

@@ -1,6 +1,7 @@
 package api.selectionResult;
 
 public interface ResultValue {
+
     String getColumnName();
 
     Integer getInteger();

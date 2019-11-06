@@ -1,6 +1,6 @@
 package serverFileImpl;
 
-import api.selectionPredicate.Predicate;
+import api.selectionPredicate.*;
 import clientDefaultImpl.*;
 import serverPrintOutImpl.SqlServerPrintOutImpl;
 import org.jetbrains.annotations.NotNull;
@@ -212,11 +212,11 @@ public class SqlServerImpl implements SqlServer {
         }
         switch (predicate.getType()) {
             case AND:
-                CombinedPredicateImpl cp1 = (CombinedPredicateImpl) predicate;
+                CombinedPredicate cp1 = (CombinedPredicate) predicate;
                 return evaluate(resultRow, cp1.getLeftPredicate()) &&
                         evaluate(resultRow, cp1.getRightPredicate());
             case OR:
-                CombinedPredicateImpl cp2 = (CombinedPredicateImpl) predicate;
+                CombinedPredicate cp2 = (CombinedPredicate) predicate;
                 return evaluate(resultRow, cp2.getLeftPredicate()) ||
                         evaluate(resultRow, cp2.getRightPredicate());
             case EQUALS:
@@ -227,10 +227,10 @@ public class SqlServerImpl implements SqlServer {
             case LESS_THAN_OR_EQUALS:
                 return compareValues(resultRow, predicate);
             case IS_NULL:
-                ColumnNullPredicateImpl cn1 = (ColumnNullPredicateImpl) predicate;
+                ColumnNullPredicate cn1 = (ColumnNullPredicate) predicate;
                 return resultRow.getValue(cn1.getColumnReference().getColumnName()).isNull();
             case IS_NOT_NULL:
-                ColumnNullPredicateImpl cn2 = (ColumnNullPredicateImpl) predicate;
+                ColumnNullPredicate cn2 = (ColumnNullPredicate) predicate;
                 return resultRow.getValue(cn2.getColumnReference().getColumnName()).isNotNull();
             default:
                 return false;
@@ -243,16 +243,16 @@ public class SqlServerImpl implements SqlServer {
         Comparable rightValue = null;
         ColumnReference cr = null;
 
-        if (sc instanceof ColumnValuePredicateImpl) {
-            cr = ((ColumnValuePredicateImpl) sc).getColumnReference();
+        if (sc instanceof ColumnValuePredicate) {
+            cr = ((ColumnValuePredicate) sc).getColumnReference();
             leftValue = resultRow.getValue(cr.getColumnName()).getValue();
-            rightValue = ((ColumnValuePredicateImpl) sc).getValue();
+            rightValue = ((ColumnValuePredicate) sc).getValue();
         }
 
-        if (sc instanceof ColumnColumnsPredicateImpl) {
-            cr = ((ColumnColumnsPredicateImpl) sc).getLeftColumn();
+        if (sc instanceof ColumnColumnPredicate) {
+            cr = ((ColumnColumnPredicate) sc).getLeftColumn();
             leftValue = resultRow.getValue(cr.getColumnName()).getValue();
-            ColumnReference cr2 = ((ColumnColumnsPredicateImpl) sc).getRightColumn();
+            ColumnReference cr2 = ((ColumnColumnPredicate) sc).getRightColumn();
             rightValue = resultRow.getValue(cr2.getColumnName()).getValue();
         }
 

@@ -3,20 +3,19 @@ package clientDefaultImpl;
 import api.selectionPredicate.ColumnColumnPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import api.ColumnReference;
 
 public class ColumnColumnsPredicateImpl extends SelectionPredicateImpl implements ColumnColumnPredicate {
 
 
     @NotNull
-    private final ColumnReference leftColumn;
+    private final ColumnReferenceImpl leftColumn;
 
     @NotNull
-    private final ColumnReference rightColumn;
+    private final ColumnReferenceImpl rightColumn;
 
 
-    public ColumnColumnsPredicateImpl(@NotNull Type type, @NotNull ColumnReference leftColumn,
-                                      @Nullable ColumnReference rightColumn) {
+    public ColumnColumnsPredicateImpl(@NotNull Type type, @NotNull ColumnReferenceImpl leftColumn,
+                                      @Nullable ColumnReferenceImpl rightColumn) {
         super(type);
         this.leftColumn = leftColumn;
         this.rightColumn = rightColumn;
@@ -24,13 +23,13 @@ public class ColumnColumnsPredicateImpl extends SelectionPredicateImpl implement
 
     @NotNull
     @Override
-    public ColumnReference getLeftColumn() {
+    public ColumnReferenceImpl getLeftColumn() {
         return leftColumn;
     }
 
     @NotNull
     @Override
-    public ColumnReference getRightColumn() {
+    public ColumnReferenceImpl getRightColumn() {
         return rightColumn;
     }
 

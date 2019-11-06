@@ -1,7 +1,6 @@
 package clientDefaultImpl;
 
 import org.jetbrains.annotations.NotNull;
-import api.ColumnReference;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,12 +8,12 @@ import java.util.stream.Collectors;
 public class ColumnInPredicate extends SelectionPredicateImpl {
 
     @NotNull
-    private final ColumnReference columnReference;
+    private final ColumnReferenceImpl columnReference;
 
     @NotNull
     private final List<?> values;
 
-    public ColumnInPredicate(ColumnReference columnReference, List<?> values) {
+    public ColumnInPredicate(ColumnReferenceImpl columnReference, List<?> values) {
         super(Type.IN);
         this.columnReference = columnReference;
         this.values = values;

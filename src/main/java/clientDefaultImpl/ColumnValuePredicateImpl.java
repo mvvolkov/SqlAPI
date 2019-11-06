@@ -3,18 +3,17 @@ package clientDefaultImpl;
 import api.selectionPredicate.ColumnValuePredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import api.ColumnReference;
 
 public final class ColumnValuePredicateImpl extends SelectionPredicateImpl implements ColumnValuePredicate {
 
     @NotNull
-    private final ColumnReference columnReference;
+    private final ColumnReferenceImpl columnReference;
 
     @Nullable
     private final Comparable value;
 
 
-    public ColumnValuePredicateImpl(@NotNull Type type, @NotNull ColumnReference columnReference,
+    public ColumnValuePredicateImpl(@NotNull Type type, @NotNull ColumnReferenceImpl columnReference,
                                     @Nullable Comparable value) {
         super(type);
         this.columnReference = columnReference;
@@ -23,7 +22,7 @@ public final class ColumnValuePredicateImpl extends SelectionPredicateImpl imple
 
     @NotNull
     @Override
-    public ColumnReference getColumnReference() {
+    public ColumnReferenceImpl getColumnReference() {
         return columnReference;
     }
 

@@ -1,7 +1,7 @@
 package api.exceptions;
 
-import org.jetbrains.annotations.NotNull;
 import api.ColumnReference;
+import org.jetbrains.annotations.NotNull;
 
 public final class WrongValueTypeException extends SqlException {
 

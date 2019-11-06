@@ -61,9 +61,9 @@ public class TestSimplePrintOutImpl {
         try {
             sqlServer.getDatabase("DB1").getTable("table1").
                     delete(
-                            sqlClient.getPredicateEquals(new ColumnReference("column1"), 3).or(
-                                    sqlClient.getPredicateGreaterThan(new ColumnReference("column2"), "12")).and(
-                                    sqlClient.getPredicateIsNull(new ColumnReference("column3")))
+                            sqlClient.getPredicateEquals(new ColumnReferenceImpl("column1"), 3).or(
+                                    sqlClient.getPredicateGreaterThan(new ColumnReferenceImpl("column2"), "12")).and(
+                                    sqlClient.getPredicateIsNull(new ColumnReferenceImpl("column3")))
                     );
         } catch (SqlException e) {
             System.out.println(e.getMessage());
@@ -73,12 +73,12 @@ public class TestSimplePrintOutImpl {
             sqlServer.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            sqlClient.getPredicateLessThan(new ColumnReference("column3"), "abs"));
+                            sqlClient.getPredicateLessThan(new ColumnReferenceImpl("column3"), "abs"));
 
             sqlServer.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            sqlClient.getPredicateIn(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
+                            sqlClient.getPredicateIn(new ColumnReferenceImpl("column3"), Arrays.asList("12", "13", "14")));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }

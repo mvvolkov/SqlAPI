@@ -10,6 +10,7 @@ import api.selectionPredicate.Predicate;
 import api.selectionResult.ResultRow;
 import api.selectionResult.ResultSet;
 import api.selectionResult.ResultValue;
+import clientDefaultImpl.ColumnReferenceImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -82,8 +83,8 @@ public class TableImpl implements Table, Serializable {
         };
     }
 
-    private ColumnReference createColumnReference(ColumnMetadata columnMetadata) {
-        return new ColumnReference(columnMetadata.getName(), metadata.getName(), database.getName());
+    private ColumnReferenceImpl createColumnReference(ColumnMetadata columnMetadata) {
+        return new ColumnReferenceImpl(columnMetadata.getName(), metadata.getName(), database.getName());
     }
 
     protected void checkConstraints(ColumnMetadata columnMetadata, Object value)

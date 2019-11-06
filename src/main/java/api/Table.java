@@ -4,6 +4,7 @@ import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.selectionPredicate.Predicate;
 import api.selectionResult.ResultSet;
+import clientDefaultImpl.ColumnReferenceImpl;
 
 import java.util.List;
 

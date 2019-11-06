@@ -49,17 +49,32 @@ public class SqlClientImpl implements SqlClient {
     }
 
     @Override
+    public ColumnReference createColumnReference(String columnName) {
+        return new ColumnReferenceImpl(columnName);
+    }
+
+    @Override
+    public ColumnReference createColumnReference(String columnName, String tableName) {
+        return new ColumnReferenceImpl(columnName, tableName);
+    }
+
+    @Override
+    public ColumnReference createColumnReference(String columnName, String tableName, String databaseName) {
+        return new ColumnReferenceImpl(columnName, tableName, databaseName);
+    }
+
+    @Override
     public Predicate getPredicateEmpty() {
         return new SelectionPredicateImpl(Predicate.Type.TRUE);
     }
 
     @Override
-    public Predicate getPredicateIsNull(ColumnReference columnReference) {
+    public Predicate getPredicateIsNull(ColumnReferenceImpl columnReference) {
         return new ColumnNullPredicateImpl(Predicate.Type.IS_NULL, columnReference);
     }
 
     @Override
-    public Predicate getPredicateIsNotNull(ColumnReference columnReference) {
+    public Predicate getPredicateIsNotNull(ColumnReferenceImpl columnReference) {
         return new ColumnNullPredicateImpl(Predicate.Type.IS_NOT_NULL, columnReference);
     }
 
@@ -74,14 +89,14 @@ public class SqlClientImpl implements SqlClient {
     }
 
     private Predicate getBinaryPredicate(Predicate.Type type, Object leftValue, Object rightValue) {
-        if (leftValue instanceof ColumnReference) {
-            if (rightValue instanceof ColumnReference) {
-                return new ColumnColumnsPredicateImpl(type, (ColumnReference) leftValue, (ColumnReference) rightValue);
+        if (leftValue instanceof ColumnReferenceImpl) {
+            if (rightValue instanceof ColumnReferenceImpl) {
+                return new ColumnColumnsPredicateImpl(type, (ColumnReferenceImpl) leftValue, (ColumnReferenceImpl) rightValue);
             }
-            return new ColumnValuePredicateImpl(type, (ColumnReference) leftValue, (Comparable) rightValue);
+            return new ColumnValuePredicateImpl(type, (ColumnReferenceImpl) leftValue, (Comparable) rightValue);
         }
-        if (rightValue instanceof ColumnReference) {
-            return new ColumnValuePredicateImpl(type, (ColumnReference) rightValue, (Comparable) leftValue);
+        if (rightValue instanceof ColumnReferenceImpl) {
+            return new ColumnValuePredicateImpl(type, (ColumnReferenceImpl) rightValue, (Comparable) leftValue);
         }
         Predicate.Type newType = leftValue.equals(rightValue) ? Predicate.Type.TRUE : Predicate.Type.FALSE;
         return new SelectionPredicateImpl(newType);
@@ -118,7 +133,7 @@ public class SqlClientImpl implements SqlClient {
     }
 
     @Override
-    public Predicate getPredicateIn(ColumnReference columnReference, List<?> values) {
+    public Predicate getPredicateIn(ColumnReferenceImpl columnReference, List<?> values) {
         return new ColumnInPredicate(columnReference, values);
     }
 }

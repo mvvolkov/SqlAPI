@@ -1,6 +1,7 @@
 package api;
 
 import api.selectionPredicate.Predicate;
+import clientDefaultImpl.ColumnReferenceImpl;
 
 import java.util.List;
 
@@ -22,12 +23,18 @@ public interface SqlClient {
 
     SelectionExpressionBuilder getSelectionExpressionBuilder(TableReference tableReference);
 
+    ColumnReference createColumnReference(String columnName);
+
+    ColumnReference createColumnReference(String columnName, String tableName);
+
+    ColumnReference createColumnReference(String columnName, String tableName, String databaseName);
+
 
     Predicate getPredicateEmpty();
 
-    Predicate getPredicateIsNull(ColumnReference columnReference);
+    Predicate getPredicateIsNull(ColumnReferenceImpl columnReference);
 
-    Predicate getPredicateIsNotNull(ColumnReference columnReference);
+    Predicate getPredicateIsNotNull(ColumnReferenceImpl columnReference);
 
     Predicate getPredicateAnd(Predicate left, Predicate right);
 
@@ -45,5 +52,5 @@ public interface SqlClient {
 
     Predicate getPredicateLessThanOrEquals(Object leftValue, Object rightValue);
 
-    Predicate getPredicateIn(ColumnReference columnReference, List<?> values);
+    Predicate getPredicateIn(ColumnReferenceImpl columnReference, List<?> values);
 }

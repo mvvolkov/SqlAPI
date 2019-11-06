@@ -67,7 +67,7 @@ public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> 
         Database database = table.getDatabase();
         String tableName = tableMetadata.getName();
         String dbName = database.getName();
-        ColumnReference columnReference = new ColumnReference(this.getName(), tableName, dbName);
+        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
         String stringValue = (String) value;
         if (stringValue.length() > maxLength) {
             throw new ConstraintException(columnReference, "Maximal length exceeded");

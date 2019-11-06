@@ -1,7 +1,8 @@
 package api.exceptions;
 
-import org.jetbrains.annotations.NotNull;
 import api.ColumnReference;
+import org.jetbrains.annotations.NotNull;
+import clientDefaultImpl.ColumnReferenceImpl;
 
 public final class ConstraintException extends SqlException {
 
