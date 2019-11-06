@@ -1,15 +1,12 @@
 package testSimpleFileImpl;
 
+import clientDefaultImpl.*;
 import sqlFactory.SqlManagerFactory;
-import clientDefaultImpl.IntegerColumnMetadataImpl;
-import clientDefaultImpl.TableMetadataImpl;
-import clientDefaultImpl.VarcharColumnMetadataImpl;
 import api.*;
 import api.exceptions.DatabaseAlreadyExistsException;
 import api.exceptions.NoSuchDatabaseException;
 import api.exceptions.NoSuchTableException;
 import api.exceptions.TableAlreadyExistsException;
-import clientDefaultImpl.SelectionPredicateImpl;
 import api.selectionResult.ResultSet;
 
 
@@ -20,6 +17,7 @@ public class TestSimplePrintOutImpl {
     public static void main(String[] args) {
 
         SqlServer sqlServer = SqlManagerFactory.getPrintOutSqlManager();
+        SqlClient sqlClient = new SqlClientImpl();
 
         try {
             sqlServer.createDatabase("DB1");
@@ -67,7 +65,7 @@ public class TestSimplePrintOutImpl {
         }
 
         try {
-            sqlServer.getDatabase("DB1").getTable("table1").delete(SelectionPredicateImpl.empty());
+            sqlServer.getDatabase("DB1").getTable("table1").delete(sqlClient.getPredicateEmpty());
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
         } catch (NoSuchTableException e) {
@@ -75,9 +73,10 @@ public class TestSimplePrintOutImpl {
         }
         try {
             sqlServer.getDatabase("DB1").getTable("table1").
-                    delete(SelectionPredicateImpl.and(SelectionPredicateImpl.or(SelectionPredicateImpl.equals(new ColumnReference("column1"), 3),
-                            SelectionPredicateImpl.greaterThan(new ColumnReference("column2"), "12")),
-                            SelectionPredicateImpl.isNull(new ColumnReference("column3")))
+                    delete(sqlClient.getPredicateAnd(sqlClient.getPredicateOr(
+                            sqlClient.getPredicateEquals(new ColumnReference("column1"), 3),
+                            sqlClient.getPredicateGreaterThan(new ColumnReference("column2"), "12")),
+                            sqlClient.getPredicateIsNull(new ColumnReference("column3")))
                     );
         } catch (NoSuchDatabaseException e) {
             System.out.println(e.getMessage());
@@ -89,12 +88,12 @@ public class TestSimplePrintOutImpl {
             sqlServer.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            SelectionPredicateImpl.lessThan(new ColumnReference("column3"), "abs"));
+                            sqlClient.getPredicateLessThan(new ColumnReference("column3"), "abs"));
 
             sqlServer.getDatabase("DB1").getTable("table1").
                     update(Arrays.asList(new AssignmentOperation("column1", 10),
                             new AssignmentOperation("column2", "test3")),
-                            SelectionPredicateImpl.in(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
+                            sqlClient.getPredicateIn(new ColumnReference("column3"), Arrays.asList("12", "13", "14")));
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         } catch (NoSuchDatabaseException e) {
@@ -103,7 +102,7 @@ public class TestSimplePrintOutImpl {
 
         try {
             ResultSet resultSet = sqlServer.getDatabase("DB1").getTable("table1").
-                    select(Arrays.asList(SelectedColumn.all()), SelectionPredicateImpl.empty());
+                    select(Arrays.asList(SelectedColumn.all()), sqlClient.getPredicateEmpty());
             System.out.println(resultSet);
         } catch (NoSuchTableException e) {
             e.printStackTrace();

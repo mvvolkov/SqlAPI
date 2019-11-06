@@ -1,10 +1,10 @@
 package api;
 
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.Predicate;
 
 public interface JoinTableReference extends TableReference {
 
-    enum Type {
+    enum JoinType {
         INNER_JOIN,
         LEFT_OUTER_JOIN,
         RIGHT_OUTER_JOIN
@@ -14,7 +14,7 @@ public interface JoinTableReference extends TableReference {
 
     TableReference getRightTableReference();
 
-    SelectionPredicateImpl getSelectionPredicate();
+    Predicate getSelectionPredicate();
 
-    Type getType();
+    JoinType getJoinType();
 }

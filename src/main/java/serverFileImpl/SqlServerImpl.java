@@ -125,7 +125,7 @@ public class SqlServerImpl implements SqlServer {
         return new ResultSetImpl(rows, columns);
     }
 
-    private static ResultSet innerJoin(ResultSet left, ResultSet right, SelectionPredicateImpl sc) throws NoSuchColumnException, WrongValueTypeException {
+    private static ResultSet innerJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -145,7 +145,7 @@ public class SqlServerImpl implements SqlServer {
         return new ResultSetImpl(rows, columns);
     }
 
-    private static ResultSet leftOutJoin(ResultSet left, ResultSet right, SelectionPredicateImpl sc) throws NoSuchColumnException, WrongValueTypeException {
+    private static ResultSet leftOutJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -174,7 +174,7 @@ public class SqlServerImpl implements SqlServer {
         return new ResultSetImpl(rows, columns);
     }
 
-    private static ResultSet rightOutJoin(ResultSet left, ResultSet right, SelectionPredicateImpl sc) throws NoSuchColumnException, WrongValueTypeException {
+    private static ResultSet rightOutJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnMetadata> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -227,10 +227,10 @@ public class SqlServerImpl implements SqlServer {
             case LESS_THAN_OR_EQUALS:
                 return compareValues(resultRow, predicate);
             case IS_NULL:
-                ColumnIsNullPredicate cn1 = (ColumnIsNullPredicate) predicate;
+                ColumnNullPredicateImpl cn1 = (ColumnNullPredicateImpl) predicate;
                 return resultRow.getValue(cn1.getColumnReference().getColumnName()).isNull();
             case IS_NOT_NULL:
-                ColumnIsNullPredicate cn2 = (ColumnIsNullPredicate) predicate;
+                ColumnNullPredicateImpl cn2 = (ColumnNullPredicateImpl) predicate;
                 return resultRow.getValue(cn2.getColumnReference().getColumnName()).isNotNull();
             default:
                 return false;
@@ -243,16 +243,16 @@ public class SqlServerImpl implements SqlServer {
         Comparable rightValue = null;
         ColumnReference cr = null;
 
-        if (sc instanceof OneColumnPredicateImpl) {
-            cr = ((OneColumnPredicateImpl) sc).getColumnReference();
+        if (sc instanceof ColumnValuePredicateImpl) {
+            cr = ((ColumnValuePredicateImpl) sc).getColumnReference();
             leftValue = resultRow.getValue(cr.getColumnName()).getValue();
-            rightValue = ((OneColumnPredicateImpl) sc).getValue();
+            rightValue = ((ColumnValuePredicateImpl) sc).getValue();
         }
 
-        if (sc instanceof TwoColumnsPredicate) {
-            cr = ((TwoColumnsPredicate) sc).getLeftColumn();
+        if (sc instanceof ColumnColumnsPredicateImpl) {
+            cr = ((ColumnColumnsPredicateImpl) sc).getLeftColumn();
             leftValue = resultRow.getValue(cr.getColumnName()).getValue();
-            ColumnReference cr2 = ((TwoColumnsPredicate) sc).getRightColumn();
+            ColumnReference cr2 = ((ColumnColumnsPredicateImpl) sc).getRightColumn();
             rightValue = resultRow.getValue(cr2.getColumnName()).getValue();
         }
 
@@ -299,7 +299,7 @@ public class SqlServerImpl implements SqlServer {
 
         ResultSet left = this.selectAll(tableReference.getLeftTableReference());
         ResultSet right = this.selectAll(tableReference.getRightTableReference());
-        switch (tableReference.getType()) {
+        switch (tableReference.getJoinType()) {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getSelectionPredicate());
             case LEFT_OUTER_JOIN:

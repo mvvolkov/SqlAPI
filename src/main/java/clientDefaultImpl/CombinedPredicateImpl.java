@@ -1,9 +1,10 @@
 package clientDefaultImpl;
 
+import api.selectionPredicate.CombinedPredicate;
 import api.selectionPredicate.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public final class CombinedPredicateImpl extends SelectionPredicateImpl {
+public final class CombinedPredicateImpl extends SelectionPredicateImpl implements CombinedPredicate {
 
 
     @NotNull
@@ -21,11 +22,13 @@ public final class CombinedPredicateImpl extends SelectionPredicateImpl {
     }
 
     @NotNull
+    @Override
     public Predicate getLeftPredicate() {
         return leftPredicate;
     }
 
     @NotNull
+    @Override
     public Predicate getRightPredicate() {
         return rightPredicate;
     }

@@ -1,7 +1,6 @@
 package api;
 
-import api.selectionPredicate.*;
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.Predicate;
 
 import java.util.List;
 
@@ -15,11 +14,11 @@ public interface SqlClient {
 
     TableReference baseTableRef(String tableName, String databaseName);
 
-    TableReference innerJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate);
+    TableReference innerJoin(TableReference left, TableReference right, Predicate selectionPredicate);
 
-    TableReference leftOuterJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate);
+    TableReference leftOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate);
 
-    TableReference rightOuterJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate);
+    TableReference rightOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate);
 
     SelectionExpressionBuilder getSelectionExpressionBuilder(TableReference tableReference);
 

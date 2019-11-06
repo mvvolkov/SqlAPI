@@ -2,7 +2,7 @@ package api;
 
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.Predicate;
 import api.selectionResult.ResultSet;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public interface Table {
 
     void insert(ResultSet rows);
 
-    void delete(SelectionPredicateImpl selectionPredicate);
+    void delete(Predicate selectionPredicate);
 
-    void update(List<AssignmentOperation> assignmentOperations, SelectionPredicateImpl selectionPredicate);
+    void update(List<AssignmentOperation> assignmentOperations, Predicate selectionPredicate);
 
-    ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicateImpl selectionPredicate) throws WrongValueTypeException;
+    ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate) throws WrongValueTypeException;
 }

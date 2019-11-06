@@ -28,19 +28,19 @@ public class SqlClientImpl implements SqlClient {
     }
 
     @Override
-    public TableReference innerJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.INNER_JOIN, left, right, selectionPredicate);
+    public TableReference innerJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
+        return new JoinTableReferenceImpl(JoinTableReference.JoinType.INNER_JOIN, left, right, selectionPredicate);
     }
 
 
     @Override
-    public TableReference leftOuterJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.LEFT_OUTER_JOIN, left, right, selectionPredicate);
+    public TableReference leftOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
+        return new JoinTableReferenceImpl(JoinTableReference.JoinType.LEFT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
     @Override
-    public TableReference rightOuterJoin(TableReference left, TableReference right, SelectionPredicateImpl selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReferenceImpl.Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
+    public TableReference rightOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
+        return new JoinTableReferenceImpl(JoinTableReference.JoinType.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
     @Override
@@ -55,12 +55,12 @@ public class SqlClientImpl implements SqlClient {
 
     @Override
     public Predicate getPredicateIsNull(ColumnReference columnReference) {
-        return new ColumnIsNullPredicate(Predicate.Type.IS_NULL, columnReference);
+        return new ColumnNullPredicateImpl(Predicate.Type.IS_NULL, columnReference);
     }
 
     @Override
     public Predicate getPredicateIsNotNull(ColumnReference columnReference) {
-        return new ColumnIsNullPredicate(Predicate.Type.IS_NOT_NULL, columnReference);
+        return new ColumnNullPredicateImpl(Predicate.Type.IS_NOT_NULL, columnReference);
     }
 
     @Override
@@ -76,12 +76,12 @@ public class SqlClientImpl implements SqlClient {
     private Predicate getBinaryPredicate(Predicate.Type type, Object leftValue, Object rightValue) {
         if (leftValue instanceof ColumnReference) {
             if (rightValue instanceof ColumnReference) {
-                return new TwoColumnsPredicate(type, (ColumnReference) leftValue, (ColumnReference) rightValue);
+                return new ColumnColumnsPredicateImpl(type, (ColumnReference) leftValue, (ColumnReference) rightValue);
             }
-            return new OneColumnPredicateImpl(type, (ColumnReference) leftValue, (Comparable) rightValue);
+            return new ColumnValuePredicateImpl(type, (ColumnReference) leftValue, (Comparable) rightValue);
         }
         if (rightValue instanceof ColumnReference) {
-            return new OneColumnPredicateImpl(type, (ColumnReference) rightValue, (Comparable) leftValue);
+            return new ColumnValuePredicateImpl(type, (ColumnReference) rightValue, (Comparable) leftValue);
         }
         Predicate.Type newType = leftValue.equals(rightValue) ? Predicate.Type.TRUE : Predicate.Type.FALSE;
         return new SelectionPredicateImpl(newType);

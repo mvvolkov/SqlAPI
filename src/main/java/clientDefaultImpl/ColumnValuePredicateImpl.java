@@ -1,11 +1,11 @@
 package clientDefaultImpl;
 
-import api.selectionPredicate.OneColumnPredicate;
+import api.selectionPredicate.ColumnValuePredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import api.ColumnReference;
 
-public final class OneColumnPredicateImpl extends SelectionPredicateImpl implements OneColumnPredicate {
+public final class ColumnValuePredicateImpl extends SelectionPredicateImpl implements ColumnValuePredicate {
 
     @NotNull
     private final ColumnReference columnReference;
@@ -14,8 +14,8 @@ public final class OneColumnPredicateImpl extends SelectionPredicateImpl impleme
     private final Comparable value;
 
 
-    public OneColumnPredicateImpl(@NotNull Type type, @NotNull ColumnReference columnReference,
-                                  @Nullable Comparable value) {
+    public ColumnValuePredicateImpl(@NotNull Type type, @NotNull ColumnReference columnReference,
+                                    @Nullable Comparable value) {
         super(type);
         this.columnReference = columnReference;
         this.value = value;

@@ -2,7 +2,7 @@ package api.selectionPredicate;
 
 public interface Predicate {
 
-    public enum Type {
+    enum Type {
         TRUE,
         FALSE,
         IS_NULL,
@@ -19,4 +19,8 @@ public interface Predicate {
     }
 
     Type getType();
+
+    default boolean isTrue() {
+        return this.getType() == Type.TRUE;
+    }
 }

@@ -1,6 +1,6 @@
 package api;
 
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.Predicate;
 
 public interface SelectionExpressionBuilder {
 
@@ -8,9 +8,9 @@ public interface SelectionExpressionBuilder {
 
     SelectionExpressionBuilder addColumn(SelectedColumn selectedColumn);
 
-    SelectionExpressionBuilder addPredicateWithAnd(SelectionPredicateImpl selectionPredicate);
+    SelectionExpressionBuilder addPredicateWithAnd(Predicate selectionPredicate);
 
-    SelectionExpressionBuilder addPredicateWithOr(SelectionPredicateImpl selectionPredicate);
+    SelectionExpressionBuilder addPredicateWithOr(Predicate selectionPredicate);
 
     SelectExpression build();
 }

@@ -1,14 +1,12 @@
 package serverFileImpl;
 
 import api.*;
-import api.ColumnMetadata;
-import api.TableMetadata;
 import api.exceptions.ConstraintException;
 import api.exceptions.NoSuchDatabaseException;
 import api.exceptions.NoSuchTableException;
 import api.exceptions.WrongValueTypeException;
-import clientDefaultImpl.OneColumnPredicateImpl;
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.ColumnValuePredicate;
+import api.selectionPredicate.Predicate;
 import api.selectionResult.ResultRow;
 import api.selectionResult.ResultSet;
 import api.selectionResult.ResultValue;
@@ -49,12 +47,29 @@ public class TableImpl implements Table, Serializable {
 
         for (Row row : rows) {
             Value v2 = row.getValue(columnReference.getColumnName());
-            boolean b = v2.evaluate((OneColumnPredicateImpl) SelectionPredicateImpl.equals(
-                    columnReference, value));
-            if (b) {
+            if (v2.evaluate(this.getColumnValuePredicate(columnReference, value))) {
                 throw new ConstraintException(columnReference, "PRIMARY KEY");
             }
         }
+    }
+
+    private ColumnValuePredicate getColumnValuePredicate(ColumnReference columnReference, Object value) {
+        return new ColumnValuePredicate() {
+            @Override
+            public ColumnReference getColumnReference() {
+                return columnReference;
+            }
+
+            @Override
+            public Comparable getValue() {
+                return (Comparable) value;
+            }
+
+            @Override
+            public Type getType() {
+                return Type.EQUALS;
+            }
+        };
     }
 
     private ColumnReference createColumnReference(ColumnMetadata columnMetadata) {
@@ -74,9 +89,7 @@ public class TableImpl implements Table, Serializable {
 
             for (Row row : rows) {
                 Value v2 = row.getValue(columnMetadata.getName());
-                boolean b = v2.evaluate((OneColumnPredicateImpl) SelectionPredicateImpl.equals(
-                        this.createColumnReference(columnMetadata), value));
-                if (b) {
+                if (v2.evaluate(this.getColumnValuePredicate(this.createColumnReference(columnMetadata), value))) {
                     throw new ConstraintException(this.createColumnReference(columnMetadata), "PRIMARY KEY");
                 }
             }
@@ -123,12 +136,12 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public void delete(SelectionPredicateImpl selectionPredicate) {
+    public void delete(Predicate selectionPredicate) {
 
     }
 
     @Override
-    public void update(List<AssignmentOperation> newValues, SelectionPredicateImpl selectionPredicate) {
+    public void update(List<AssignmentOperation> newValues, Predicate selectionPredicate) {
 
     }
 
@@ -172,7 +185,7 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicateImpl selectionPredicate)
+    public ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate)
             throws WrongValueTypeException {
 
 

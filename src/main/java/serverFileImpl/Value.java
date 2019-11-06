@@ -1,7 +1,7 @@
 package serverFileImpl;
 
 import api.exceptions.WrongValueTypeException;
-import clientDefaultImpl.OneColumnPredicateImpl;
+import api.selectionPredicate.ColumnValuePredicate;
 
 import java.io.Serializable;
 
@@ -28,7 +28,7 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
         return value != null;
     }
 
-    public boolean evaluate(OneColumnPredicateImpl bp) throws WrongValueTypeException {
+    public boolean evaluate(ColumnValuePredicate bp) throws WrongValueTypeException {
 
         Object obj = bp.getValue();
         if (obj == null) {

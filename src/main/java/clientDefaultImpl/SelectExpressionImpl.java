@@ -1,5 +1,6 @@
 package clientDefaultImpl;
 
+import api.selectionPredicate.Predicate;
 import org.jetbrains.annotations.NotNull;
 import api.SelectExpression;
 import api.SelectedColumn;
@@ -51,7 +52,7 @@ public final class SelectExpressionImpl implements SelectExpression {
 
         private List<TableReference> tableReferences = new ArrayList<>();
         private List<SelectedColumn> selectedColumns = new ArrayList<>();
-        private SelectionPredicateImpl selectionPredicate = new TruePredicate();
+        private SelectionPredicateImpl selectionPredicate = new SelectionPredicateImpl(Predicate.Type.TRUE);
         private String alias = null;
 
 
@@ -59,23 +60,28 @@ public final class SelectExpressionImpl implements SelectExpression {
             tableReferences.add(tableReference);
         }
 
+        @Override
         public Builder addTableReference(@NotNull TableReference tableReference) {
             tableReferences.add(tableReference);
             return this;
         }
 
+        @Override
         public Builder addColumn(@NotNull SelectedColumn selectedColumn) {
             selectedColumns.add(selectedColumn);
             return this;
         }
 
-        public Builder addPredicateWithAnd(@NotNull SelectionPredicateImpl selectionPredicate) {
-            this.selectionPredicate = SelectionPredicateImpl.and(this.selectionPredicate, selectionPredicate);
+        @Override
+        public Builder addPredicateWithAnd(@NotNull Predicate selectionPredicate) {
+            this.selectionPredicate = new CombinedPredicateImpl(Predicate.Type.AND,
+                    this.selectionPredicate, selectionPredicate);
             return this;
         }
 
-        public Builder addPredicateWithOr(@NotNull SelectionPredicateImpl selectionPredicate) {
-            this.selectionPredicate = SelectionPredicateImpl.or(this.selectionPredicate, selectionPredicate);
+        public Builder addPredicateWithOr(@NotNull Predicate selectionPredicate) {
+            this.selectionPredicate = new CombinedPredicateImpl(Predicate.Type.OR,
+                    this.selectionPredicate, selectionPredicate);
             return this;
         }
 

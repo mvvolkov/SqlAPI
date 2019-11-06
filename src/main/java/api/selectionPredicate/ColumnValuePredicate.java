@@ -2,7 +2,7 @@ package api.selectionPredicate;
 
 import api.ColumnReference;
 
-public interface OneColumnPredicate extends Predicate {
+public interface ColumnValuePredicate extends Predicate {
 
     ColumnReference getColumnReference();
 

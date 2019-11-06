@@ -1,10 +1,9 @@
 package serverPrintOutImpl;
 
 import api.*;
-import api.TableMetadata;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
-import clientDefaultImpl.SelectionPredicateImpl;
+import api.selectionPredicate.Predicate;
 import api.selectionResult.ResultSet;
 
 import java.util.List;
@@ -81,10 +80,10 @@ public class TableImpl implements Table {
 
 
     @Override
-    public void delete(SelectionPredicateImpl selectionPredicate) {
+    public void delete(Predicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(metadata.getName());
-        if (selectionPredicate.isNotEmpty()) {
+        if (!selectionPredicate.isTrue()) {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }
@@ -92,14 +91,14 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void update(List<AssignmentOperation> assignmentOperations, SelectionPredicateImpl selectionPredicate) {
+    public void update(List<AssignmentOperation> assignmentOperations, Predicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(metadata.getName());
         sb.append(" SET ");
         String assignmetns = assignmentOperations.stream().map(AssignmentOperation::toString)
                 .collect(Collectors.joining(", "));
         sb.append(assignmetns);
-        if (selectionPredicate.isNotEmpty()) {
+        if (!selectionPredicate.isTrue()) {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }
@@ -107,14 +106,14 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public ResultSet select(List<SelectedColumn> selectedColumns, SelectionPredicateImpl selectionPredicate) {
+    public ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
         String from = selectedColumns.stream().map(SelectedColumn::toString).collect(Collectors.joining(", "));
         sb.append(from);
         sb.append(" FROM ");
         sb.append(metadata.getName());
         System.out.println(sb);
-        if (selectionPredicate.isNotEmpty()) {
+        if (!selectionPredicate.isTrue()) {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }

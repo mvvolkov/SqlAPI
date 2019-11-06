@@ -1,15 +1,14 @@
 package testSimpleFileImpl;
 
-import sqlFactory.SqlManagerFactory;
-import clientDefaultImpl.SelectExpressionImpl;
-import clientDefaultImpl.SqlClientImpl;
 import api.ColumnReference;
-import api.SqlServer;
 import api.SqlClient;
+import api.SqlServer;
 import api.Table;
 import api.exceptions.SqlException;
-import clientDefaultImpl.SelectionPredicateImpl;
 import api.selectionResult.ResultSet;
+import clientDefaultImpl.SelectExpressionImpl;
+import clientDefaultImpl.SqlClientImpl;
+import sqlFactory.SqlManagerFactory;
 
 import java.util.Arrays;
 
@@ -17,7 +16,7 @@ public class TestSimpleFileImpl {
     public static void main(String[] args) {
 
         SqlServer sqlServer = SqlManagerFactory.getSimpleFileSqlManager();
-        SqlClient qm = new SqlClientImpl();
+        SqlClient sqlClient = new SqlClientImpl();
 
         try {
             sqlServer.createDatabase("DB1");
@@ -33,10 +32,10 @@ public class TestSimpleFileImpl {
 
         try {
             sqlServer.getDatabase("DB1").createTable(
-                    qm.tableMetadata("table1", Arrays.asList(
-                            qm.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
-                            qm.getIntegerColumnMetadataBuilder("column2").build(),
-                            qm.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
+                    sqlClient.tableMetadata("table1", Arrays.asList(
+                            sqlClient.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
+                            sqlClient.getIntegerColumnMetadataBuilder("column2").build(),
+                            sqlClient.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -44,20 +43,20 @@ public class TestSimpleFileImpl {
 
         try {
             sqlServer.getDatabase("DB1").createTable(
-                    qm.tableMetadata("table1", Arrays.asList(
-                            qm.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
-                            qm.getIntegerColumnMetadataBuilder("column12").build(),
-                            qm.getVarcharColumnMetadataBuilder("column13", 20).notNull().build()
+                    sqlClient.tableMetadata("table1", Arrays.asList(
+                            sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+                            sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
+                            sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build()
                     )));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
 
         try {
-            sqlServer.getDatabase("DB2").createTable(qm.tableMetadata("table2", Arrays.asList(
-                    qm.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
-                    qm.getIntegerColumnMetadataBuilder("column12").build(),
-                    qm.getVarcharColumnMetadataBuilder("column13", 20).notNull().build())));
+            sqlServer.getDatabase("DB2").createTable(sqlClient.tableMetadata("table2", Arrays.asList(
+                    sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+                    sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
+                    sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -125,9 +124,9 @@ public class TestSimpleFileImpl {
 
         try {
             sqlServer.getDatabase("DB1").createTable(
-                    qm.tableMetadata("table2", Arrays.asList(
-                            qm.getIntegerColumnMetadataBuilder("column4").notNull().primaryKey().build(),
-                            qm.getVarcharColumnMetadataBuilder("column5", 15).build()
+                    sqlClient.tableMetadata("table2", Arrays.asList(
+                            sqlClient.getIntegerColumnMetadataBuilder("column4").notNull().primaryKey().build(),
+                            sqlClient.getVarcharColumnMetadataBuilder("column5", 15).build()
                     )));
             Table table2 = sqlServer.getDatabase("DB1").getTable("table2");
             table2.insert(Arrays.asList(22, "test2"));
@@ -140,21 +139,21 @@ public class TestSimpleFileImpl {
 //            System.out.println(resultSet);
 
             ResultSet resultSet = sqlServer.select(
-                    qm.getSelectionExpressionBuilder(qm.baseTableRef("table2", "DB1"))
-                            .addTableReference(qm.baseTableRef("table1", "DB1"))
-                            .addPredicateWithAnd(SelectionPredicateImpl.equals(new ColumnReference("column5", "table2"),
+                    sqlClient.getSelectionExpressionBuilder(sqlClient.baseTableRef("table2", "DB1"))
+                            .addTableReference(sqlClient.baseTableRef("table1", "DB1"))
+                            .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column5", "table2"),
                                     new ColumnReference("column3", "table1")))
-                            .addPredicateWithAnd(SelectionPredicateImpl.equals(new ColumnReference("column4", "table2"), 23))
+                            .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column4", "table2"), 23))
 //                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
                             .build());
             System.out.println(resultSet);
 
             ResultSet resultSet2 = sqlServer.select(SelectExpressionImpl.builder(
-                    qm.innerJoin(qm.baseTableRef("table2", "DB1"),
-                            qm.baseTableRef("table1", "DB1"),
-                            SelectionPredicateImpl.equals(new ColumnReference("column5", "table2"),
+                    sqlClient.innerJoin(sqlClient.baseTableRef("table2", "DB1"),
+                            sqlClient.baseTableRef("table1", "DB1"),
+                            sqlClient.getPredicateEquals(new ColumnReference("column5", "table2"),
                                     new ColumnReference("column3", "table1"))))
-                    .addPredicateWithAnd(SelectionPredicateImpl.equals(new ColumnReference("column4", "table2"), 23))
+                    .addPredicateWithAnd(sqlClient.getPredicateEquals(new ColumnReference("column4", "table2"), 23))
                     .build());
             System.out.println(resultSet2);
 
