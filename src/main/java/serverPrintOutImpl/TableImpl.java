@@ -87,6 +87,7 @@ public class TableImpl implements Table {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }
+        sb.append(";");
         System.out.println(sb);
     }
 
@@ -102,6 +103,7 @@ public class TableImpl implements Table {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }
+        sb.append(";");
         System.out.println(sb);
     }
 

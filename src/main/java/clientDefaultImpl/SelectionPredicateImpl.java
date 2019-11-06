@@ -2,9 +2,6 @@ package clientDefaultImpl;
 
 import api.selectionPredicate.Predicate;
 import org.jetbrains.annotations.NotNull;
-import api.ColumnReference;
-
-import java.util.List;
 
 public class SelectionPredicateImpl implements Predicate {
 
@@ -18,6 +15,16 @@ public class SelectionPredicateImpl implements Predicate {
     @Override
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public Predicate and(Predicate predicate) {
+        return new CombinedPredicateImpl(Type.AND, this, predicate);
+    }
+
+    @Override
+    public Predicate or(Predicate predicate) {
+        return new CombinedPredicateImpl(Type.OR, this, predicate);
     }
 
 

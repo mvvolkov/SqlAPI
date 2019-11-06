@@ -23,4 +23,8 @@ public interface Predicate {
     default boolean isTrue() {
         return this.getType() == Type.TRUE;
     }
+
+    Predicate and(Predicate predicate);
+
+    Predicate or(Predicate predicate);
 }

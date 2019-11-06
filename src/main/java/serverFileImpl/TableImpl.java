@@ -69,6 +69,16 @@ public class TableImpl implements Table, Serializable {
             public Type getType() {
                 return Type.EQUALS;
             }
+
+            @Override
+            public Predicate and(Predicate predicate) {
+                return null;
+            }
+
+            @Override
+            public Predicate or(Predicate predicate) {
+                return null;
+            }
         };
     }
 
