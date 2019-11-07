@@ -1,13 +1,14 @@
 package clientDefaultImpl;
 
-import api.selectionPredicate.Predicate;
-import org.jetbrains.annotations.NotNull;
 import api.SelectExpression;
-import api.SelectedColumn;
+import api.SelectedItem;
 import api.SelectionExpressionBuilder;
 import api.TableReference;
+import api.selectionPredicate.Predicate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,15 +21,19 @@ public final class SelectExpressionImpl implements SelectExpression {
     @NotNull
     private final List<TableReference> tableReferences;
     @NotNull
-    private final List<SelectedColumn> selectedColumns;
+    private final List<SelectedItem> selectedItems;
     @NotNull
-    private final SelectionPredicateImpl selectionPredicate;
+    private final Predicate predicate;
 
 
     private SelectExpressionImpl(Builder builder) {
         tableReferences = builder.tableReferences;
-        selectedColumns = builder.selectedColumns;
-        selectionPredicate = builder.selectionPredicate;
+        if (builder.selectedItems.isEmpty()) {
+            selectedItems = Arrays.asList(new SelectedAllImpl());
+        } else {
+            selectedItems = builder.selectedItems;
+        }
+        predicate = builder.predicate;
     }
 
     @NotNull
@@ -38,21 +43,22 @@ public final class SelectExpressionImpl implements SelectExpression {
     }
 
     @NotNull
-    public List<SelectedColumn> getSelectedColumns() {
-        return selectedColumns;
+    @Override
+    public List<SelectedItem> getSelectedItems() {
+        return selectedItems;
     }
 
     @NotNull
-    public SelectionPredicateImpl getSelectionPredicate() {
-        return selectionPredicate;
+    @Override
+    public Predicate getPredicate() {
+        return predicate;
     }
 
     public final static class Builder implements SelectionExpressionBuilder {
 
-
         private List<TableReference> tableReferences = new ArrayList<>();
-        private List<SelectedColumn> selectedColumns = new ArrayList<>();
-        private SelectionPredicateImpl selectionPredicate = new SelectionPredicateImpl(Predicate.Type.TRUE);
+        private List<SelectedItem> selectedItems = new ArrayList<>();
+        private Predicate predicate = new SelectionPredicateImpl(Predicate.Type.TRUE);
         private String alias = null;
 
 
@@ -67,23 +73,22 @@ public final class SelectExpressionImpl implements SelectExpression {
         }
 
         @Override
-        public Builder addColumn(@NotNull SelectedColumn selectedColumn) {
-            selectedColumns.add(selectedColumn);
+        public Builder addSelectedItem(@NotNull SelectedItem selectedItem) {
+            selectedItems.add(selectedItem);
             return this;
         }
 
         @Override
-        public Builder addPredicateWithAnd(@NotNull Predicate selectionPredicate) {
-            this.selectionPredicate = new CombinedPredicateImpl(Predicate.Type.AND,
-                    this.selectionPredicate, selectionPredicate);
+        public Builder addPredicate(@NotNull Predicate selectionPredicate) {
+            if (this.predicate.isTrue()) {
+                this.predicate = selectionPredicate;
+            } else {
+                this.predicate = new CombinedPredicateImpl(Predicate.Type.AND,
+                        this.predicate, selectionPredicate);
+            }
             return this;
         }
 
-        public Builder addPredicateWithOr(@NotNull Predicate selectionPredicate) {
-            this.selectionPredicate = new CombinedPredicateImpl(Predicate.Type.OR,
-                    this.selectionPredicate, selectionPredicate);
-            return this;
-        }
 
         public SelectExpressionImpl build() {
             return new SelectExpressionImpl(this);

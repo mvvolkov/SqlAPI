@@ -1,16 +1,20 @@
 package testSimpleFileImpl;
 
-import clientDefaultImpl.ColumnReferenceImpl;
 import api.SqlClient;
 import api.SqlServer;
 import api.Table;
+import api.exceptions.NoSuchColumnException;
 import api.exceptions.SqlException;
-import api.selectionResult.ResultSet;
+import api.ResultRow;
+import api.ResultSet;
 import clientDefaultImpl.SelectExpressionImpl;
 import clientDefaultImpl.SqlClientImpl;
 import sqlFactory.SqlManagerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestSimpleFileImpl {
     public static void main(String[] args) {
@@ -24,11 +28,11 @@ public class TestSimpleFileImpl {
             System.out.println(e.getMessage());
         }
 
-        try {
-            sqlServer.createDatabase("DB1");
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            sqlServer.createDatabase("DB1");
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
 
         try {
             sqlServer.getDatabase("DB1").createTable(
@@ -41,45 +45,45 @@ public class TestSimpleFileImpl {
         }
 
 
-        try {
-            sqlServer.getDatabase("DB1").createTable(
-                    sqlClient.tableMetadata("table1", Arrays.asList(
-                            sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
-                            sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
-                            sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build()
-                    )));
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            sqlServer.getDatabase("DB1").createTable(
+//                    sqlClient.tableMetadata("table1", Arrays.asList(
+//                            sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+//                            sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
+//                            sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build()
+//                    )));
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
 
-        try {
-            sqlServer.getDatabase("DB2").createTable(sqlClient.tableMetadata("table2", Arrays.asList(
-                    sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
-                    sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
-                    sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build())));
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            sqlServer.getDatabase("DB2").createTable(sqlClient.tableMetadata("table2", Arrays.asList(
+//                    sqlClient.getIntegerColumnMetadataBuilder("column11").notNull().primaryKey().build(),
+//                    sqlClient.getIntegerColumnMetadataBuilder("column12").build(),
+//                    sqlClient.getVarcharColumnMetadataBuilder("column13", 20).notNull().build())));
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
 
-        try {
-            Table table1 = sqlServer.getDatabase("DB1").getTable("table1");
-            table1.insert(Arrays.asList(10, 20, null));
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            Table table1 = sqlServer.getDatabase("DB1").getTable("table1");
+//            table1.insert(Arrays.asList(10, 20, null));
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
 
-        try {
-            Table table1 = sqlServer.getDatabase("DB1").getTable("table1");
-            table1.insert(Arrays.asList(10, 20, "123456789012345678901234567890"));
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            Table table1 = sqlServer.getDatabase("DB1").getTable("table1");
+//            table1.insert(Arrays.asList(10, 20, "123456789012345678901234567890"));
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
 
         try {
             Table table1 = sqlServer.getDatabase("DB1").getTable("table1");
             table1.insert(Arrays.asList(10, 20, "test1"));
             table1.insert(Arrays.asList(11, 20, "test1"));
-            table1.insert(Arrays.asList(10, 20, "test1"));
+//            table1.insert(Arrays.asList(10, 20, "test1"));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
@@ -141,27 +145,51 @@ public class TestSimpleFileImpl {
             ResultSet resultSet = sqlServer.select(
                     sqlClient.getSelectionExpressionBuilder(sqlClient.baseTableRef("table2", "DB1"))
                             .addTableReference(sqlClient.baseTableRef("table1", "DB1"))
-                            .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
+                            .addPredicate(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
                                     sqlClient.createColumnReference("column3", "table1")))
-                            .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
+                            .addPredicate(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
 //                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
                             .build());
-            System.out.println(resultSet);
+            printResultSet(resultSet);
 
             ResultSet resultSet2 = sqlServer.select(SelectExpressionImpl.builder(
                     sqlClient.innerJoin(sqlClient.baseTableRef("table2", "DB1"),
                             sqlClient.baseTableRef("table1", "DB1"),
                             sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
-                                    sqlClient.createColumnReference("column3", "table1"))))
-                    .addPredicateWithAnd(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
+                                    sqlClient.createColumnReference("column3", "table1"))
+                                    .and(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))))
                     .build());
-            System.out.println(resultSet2);
+            printResultSet(resultSet2);
 
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static void printResultSet(ResultSet resultSet) {
+        StringBuilder sb = new StringBuilder();
 
 
+        String tableString = resultSet.getColumns().stream()
+                .collect(Collectors.joining(", "));
+
+        sb.append("Select result :\n");
+        sb.append(tableString);
+        for (ResultRow row : resultSet.getRows()) {
+            List<String> values = new ArrayList<>();
+            for (String columnName : resultSet.getColumns()) {
+                String value = null;
+                try {
+                    value = row.getObject(columnName).toString();
+                } catch (NoSuchColumnException e) {
+                    e.printStackTrace();
+                }
+                values.add(value);
+            }
+            String rowString = values.stream().collect(Collectors.joining(", "));
+            sb.append("\n" + rowString);
+        }
+        System.out.println(sb);
     }
 }

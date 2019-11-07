@@ -29,18 +29,18 @@ public class SqlClientImpl implements SqlClient {
 
     @Override
     public TableReference innerJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReference.JoinType.INNER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(TableReference.Type.INNER_JOIN, left, right, selectionPredicate);
     }
 
 
     @Override
     public TableReference leftOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReference.JoinType.LEFT_OUTER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(TableReference.Type.LEFT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
     @Override
     public TableReference rightOuterJoin(TableReference left, TableReference right, Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(JoinTableReference.JoinType.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
+        return new JoinTableReferenceImpl(TableReference.Type.RIGHT_OUTER_JOIN, left, right, selectionPredicate);
     }
 
     @Override
@@ -61,6 +61,21 @@ public class SqlClientImpl implements SqlClient {
     @Override
     public ColumnReference createColumnReference(String columnName, String tableName, String databaseName) {
         return new ColumnReferenceImpl(columnName, tableName, databaseName);
+    }
+
+    @Override
+    public SelectedItem getAllColumns() {
+        return new SelectedAllImpl();
+    }
+
+    @Override
+    public SelectedItem getAllColumnsFromTable(String tableName) {
+        return new SelectedTableImpl(tableName);
+    }
+
+    @Override
+    public SelectedItem getColumnExpression(ColumnExpression columnExpression) {
+        return new SelectedColumnExpressionImpl(columnExpression, null);
     }
 
     @Override

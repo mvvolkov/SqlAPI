@@ -63,7 +63,7 @@ public final class Value<T extends Comparable<T> & Serializable> implements Seri
 
     @Override
     public String toString() {
-        return type.getSimpleName() + ": " + value;
+        return " " + value;
     }
 
 

@@ -3,8 +3,7 @@ package api;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.selectionPredicate.Predicate;
-import api.selectionResult.ResultSet;
-import clientDefaultImpl.ColumnReferenceImpl;
+import clientDefaultImpl.SelectedItemImpl;
 
 import java.util.List;
 
@@ -28,5 +27,5 @@ public interface Table {
 
     void update(List<AssignmentOperation> assignmentOperations, Predicate selectionPredicate);
 
-    ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate) throws WrongValueTypeException;
+    ResultSet select(List<SelectedItemImpl> selectedItems, Predicate selectionPredicate) throws WrongValueTypeException;
 }

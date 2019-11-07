@@ -7,16 +7,14 @@ import api.exceptions.NoSuchTableException;
 import api.exceptions.WrongValueTypeException;
 import api.selectionPredicate.ColumnValuePredicate;
 import api.selectionPredicate.Predicate;
-import api.selectionResult.ResultRow;
-import api.selectionResult.ResultSet;
-import api.selectionResult.ResultValue;
+import api.ResultRow;
+import api.ResultSet;
 import clientDefaultImpl.ColumnReferenceImpl;
+import clientDefaultImpl.SelectedItemImpl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TableImpl implements Table, Serializable {
 
@@ -156,22 +154,24 @@ public class TableImpl implements Table, Serializable {
 
     }
 
-    private ResultRow getSelectionResultRow(Row row, List<SelectedColumn> selectedColumns) {
-        List<ResultValue> values = new ArrayList<>();
-        if (selectedColumns.isEmpty()) {
+    private ResultRow getSelectionResultRow(Row row, List<SelectedItemImpl> selectedItems) {
+        List<Object> values = new ArrayList<>();
+        List<String> columnNames = new ArrayList<>();
+        if (selectedItems.isEmpty()) {
             for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
                 Value tableValue = row.getValue(columnMetadata.getName());
-                ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getName());
-                values.add(value);
+                values.add(tableValue.getValue());
+                columnNames.add(columnMetadata.getName());
             }
+            return new ResultRowImpl(columnNames, values);
         }
-        for (SelectedColumn selectedColumn : selectedColumns) {
-            switch (selectedColumn.getType()) {
+        for (SelectedItemImpl selectedItem : selectedItems) {
+            switch (selectedItem.getType()) {
                 case SELECT_ALL:
                     for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
                         Value tableValue = row.getValue(columnMetadata.getName());
-                        ResultValueImpl value = new ResultValueImpl(tableValue, columnMetadata.getName());
-                        values.add(value);
+                        values.add(tableValue.getValue());
+                        columnNames.add(columnMetadata.getName());
                     }
                     break;
                 case SELECT_ALL_FROM_TABLE:
@@ -179,33 +179,34 @@ public class TableImpl implements Table, Serializable {
                 case SELECT_COLUMN_EXPRESSION:
                     break;
             }
-
-
         }
-        return new ResultRowImpl(values);
+        return new ResultRowImpl(columnNames, values);
     }
 
-    protected ResultSet select(List<SelectedColumn> selectedColumns) {
+    protected ResultSet selectAll() {
         List<ResultRow> resultRows = new ArrayList<>();
         for (Row row : rows) {
 
-            resultRows.add(this.getSelectionResultRow(row, selectedColumns));
+            resultRows.add(this.getSelectionResultRow(row, Collections.EMPTY_LIST));
 
         }
-        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnsMetadata()));
+        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnsMetadata().stream()
+                .map(ColumnMetadata::getName).collect(Collectors.toList())));
     }
 
     @Override
-    public ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate)
+    public ResultSet select(List<SelectedItemImpl> selectedItems, Predicate selectionPredicate)
             throws WrongValueTypeException {
 
 
         List<ResultRow> resultRows = new ArrayList<>();
         for (Row row : rows) {
 
-            resultRows.add(this.getSelectionResultRow(row, selectedColumns));
+            resultRows.add(this.getSelectionResultRow(row, selectedItems));
 
         }
-        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnsMetadata()));
+        return new ResultSetImpl(resultRows,
+                new ArrayList<>(metadata.getColumnsMetadata().stream()
+                        .map(ColumnMetadata::getName).collect(Collectors.toList())));
     }
 }

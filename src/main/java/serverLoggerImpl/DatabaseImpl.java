@@ -1,4 +1,4 @@
-package serverPrintOutImpl;
+package serverLoggerImpl;
 
 import api.Database;
 import api.Table;

@@ -6,11 +6,9 @@ public interface SelectionExpressionBuilder {
 
     SelectionExpressionBuilder addTableReference(TableReference tableReference);
 
-    SelectionExpressionBuilder addColumn(SelectedColumn selectedColumn);
+    SelectionExpressionBuilder addSelectedItem(SelectedItem selectedItem);
 
-    SelectionExpressionBuilder addPredicateWithAnd(Predicate selectionPredicate);
-
-    SelectionExpressionBuilder addPredicateWithOr(Predicate selectionPredicate);
+    SelectionExpressionBuilder addPredicate(Predicate predicate);
 
     SelectExpression build();
 }

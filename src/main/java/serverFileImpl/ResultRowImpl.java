@@ -1,62 +1,76 @@
 package serverFileImpl;
 
 import api.exceptions.NoSuchColumnException;
-import api.selectionResult.ResultRow;
-import api.selectionResult.ResultValue;
+import api.ResultRow;
 
 import java.util.List;
 
 public class ResultRowImpl implements ResultRow {
 
 
-    private final List<ResultValue> values;
+    private final List<String> columns;
+    private final List<Object> values;
 
-    public ResultRowImpl(List<ResultValue> values) {
+    public ResultRowImpl(List<String> columns, List<Object> values) {
+        this.columns = columns;
         this.values = values;
     }
 
-
-    @Override
-    public ResultValue getValue(String columnName) throws NoSuchColumnException {
-        ResultValue value = this.getValueOrNull(columnName);
-        if (value == null) {
+    private int getColumnIndex(String columnName) throws NoSuchColumnException {
+        int index = columns.indexOf(columnName);
+        if (index == -1) {
             throw new NoSuchColumnException(columnName);
         }
-        return value;
+        return index;
     }
+
 
     @Override
-    public ResultValue getValueOrNull(String columnName) {
-        for (ResultValue value : values) {
-            if (value.getColumnName().equals(columnName)) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    public List<ResultValue> getValues() {
+    public List<Object> getValues() {
         return values;
     }
 
-
     @Override
-    public ResultValue getValue(int index) {
-        return null;
+    public Integer getInteger(String columnName) throws NoSuchColumnException {
+        Object value = this.getObject(columnName);
+        return (Integer) value;
     }
 
     @Override
-    public ResultValue getValueOrNull(int index) {
-        return null;
+    public Integer getInteger(int index) {
+        Object value = this.getObject(index);
+        return (Integer) value;
     }
 
     @Override
-    public int getLength() {
-        return values.size();
+    public String getString(String columnName) throws NoSuchColumnException {
+        Object value = this.getObject(columnName);
+        return (String) value;
     }
 
     @Override
-    public int findColumn(String columnName) {
-        return 0;
+    public String getString(int index) {
+        Object value = this.getObject(index);
+        return (String) value;
+    }
+
+    @Override
+    public Object getObject(String columnName) throws NoSuchColumnException {
+        return values.get(this.getColumnIndex(columnName));
+    }
+
+    @Override
+    public Object getObject(int index) {
+        return values.get(index);
+    }
+
+    @Override
+    public boolean isNull(String columnName) throws NoSuchColumnException {
+        return this.getObject(columnName) == null;
+    }
+
+    @Override
+    public boolean isNull(int index) {
+        return this.getObject(index) == null;
     }
 }

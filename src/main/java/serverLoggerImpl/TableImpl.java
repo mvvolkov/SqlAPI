@@ -1,10 +1,11 @@
-package serverPrintOutImpl;
+package serverLoggerImpl;
 
 import api.*;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.selectionPredicate.Predicate;
-import api.selectionResult.ResultSet;
+import api.ResultSet;
+import clientDefaultImpl.SelectedItemImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,6 +52,8 @@ public class TableImpl implements Table {
     @Override
     public void insert(List<Object> values) {
         StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(database.getName());
+        sb.append(".");
         sb.append(metadata.getName());
         sb.append(" VALUES (");
         String valuesString = values.stream().map(this::getStringFromNewValue).collect(Collectors.joining(", "));
@@ -108,17 +111,18 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public ResultSet select(List<SelectedColumn> selectedColumns, Predicate selectionPredicate) {
+    public ResultSet select(List<SelectedItemImpl> selectedItems, Predicate selectionPredicate) {
         StringBuilder sb = new StringBuilder("SELECT ");
-        String from = selectedColumns.stream().map(SelectedColumn::toString).collect(Collectors.joining(", "));
+        String from = selectedItems.stream().map(SelectedItemImpl::toString).collect(Collectors.joining(", "));
         sb.append(from);
         sb.append(" FROM ");
         sb.append(metadata.getName());
-        System.out.println(sb);
         if (!selectionPredicate.isTrue()) {
             sb.append(" WHERE ");
             sb.append(selectionPredicate.toString());
         }
+        sb.append(";");
+        System.out.println(sb);
         return null;
     }
 }

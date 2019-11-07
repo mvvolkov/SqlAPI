@@ -1,7 +1,7 @@
 package sqlFactory;
 
 import serverFileImpl.SqlServerImpl;
-import serverPrintOutImpl.SqlServerPrintOutImpl;
+import serverLoggerImpl.SqlServerPrintOutImpl;
 import api.SqlServer;
 
 public class SqlManagerFactory {

@@ -6,23 +6,18 @@ import api.selectionPredicate.Predicate;
 
 public class JoinTableReferenceImpl implements JoinTableReference {
 
-    private final JoinType joinType;
+    private final Type joinType;
     private final TableReference left;
     private final TableReference right;
     private final Predicate selectionPredicate;
 
 
-    JoinTableReferenceImpl(JoinType joinType, TableReference left, TableReference right, Predicate selectionPredicate) {
+    JoinTableReferenceImpl(Type joinType, TableReference left, TableReference right, Predicate selectionPredicate) {
         this.joinType = joinType;
         this.left = left;
         this.right = right;
         this.selectionPredicate = selectionPredicate;
     }
-
-    public JoinType getJoinType() {
-        return joinType;
-    }
-
 
     @Override
     public TableReference getLeftTableReference() {
@@ -40,4 +35,8 @@ public class JoinTableReferenceImpl implements JoinTableReference {
     }
 
 
+    @Override
+    public Type getType() {
+        return joinType;
+    }
 }

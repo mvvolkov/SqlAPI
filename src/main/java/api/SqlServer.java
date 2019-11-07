@@ -3,7 +3,6 @@ package api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import api.exceptions.*;
-import api.selectionResult.ResultSet;
 
 
 import java.util.List;

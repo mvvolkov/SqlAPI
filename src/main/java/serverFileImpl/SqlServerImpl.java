@@ -1,16 +1,10 @@
 package serverFileImpl;
 
-import api.selectionPredicate.*;
-import clientDefaultImpl.*;
-import serverPrintOutImpl.SqlServerPrintOutImpl;
-import org.jetbrains.annotations.NotNull;
 import api.*;
-import api.ColumnMetadata;
 import api.exceptions.*;
-import api.selectionResult.ResultRow;
-import api.selectionResult.ResultSet;
-import api.selectionResult.ResultValue;
-
+import api.selectionPredicate.*;
+import org.jetbrains.annotations.NotNull;
+import serverLoggerImpl.SqlServerPrintOutImpl;
 
 import java.util.*;
 
@@ -68,14 +62,14 @@ public class SqlServerImpl implements SqlServer {
         return database;
     }
 
-    private static List<ResultValue> getValuesFromResultSets(List<ResultSet> resultSets, Deque<Integer> stack) {
+    private static List<Object> getValuesFromResultSets(List<ResultSet> resultSets, Deque<Integer> stack) {
         Deque<Integer> rowNumbers = new ArrayDeque<>(stack);
-        List<ResultValue> values = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
         while (!rowNumbers.isEmpty()) {
             int rowNumber = rowNumbers.pop();
             ResultSet resultSet = resultSets.get(rowNumbers.size());
-            ResultRow row = resultSet.getRow(rowNumber);
-            values.addAll(row.getValues());
+            ResultRow row = resultSet.getRows().get(rowNumber);
+            values.addAll(0, row.getValues());
         }
         return values;
     }
@@ -83,7 +77,7 @@ public class SqlServerImpl implements SqlServer {
     private static ResultSet joinResultSets(List<ResultSet> resultSets, Predicate selectionPredicate) throws NoSuchColumnException, WrongValueTypeException {
 
         // Create full list of columns.
-        List<ColumnMetadata> columns = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         for (ResultSet resultSet : resultSets) {
             columns.addAll(resultSet.getColumns());
         }
@@ -91,7 +85,7 @@ public class SqlServerImpl implements SqlServer {
         if (resultSets.size() == 1) {
             ResultSet resultSet = resultSets.get(0);
             List<ResultRow> rows = new ArrayList<>();
-            for (ResultRow row : resultSet.getAllRows()) {
+            for (ResultRow row : resultSet.getRows()) {
                 if (evaluate(row, selectionPredicate)) {
                     rows.add(row);
                 }
@@ -108,7 +102,7 @@ public class SqlServerImpl implements SqlServer {
         while (!rowNumbers.isEmpty()) {
             if (rowNumbers.size() == resultSets.size() || nextResultSetHasNoRows) {
                 int rowNumber = rowNumbers.pop();
-                nextResultSetHasNoRows = (rowNumber == resultSets.get(rowNumbers.size()).getSize() - 1);
+                nextResultSetHasNoRows = (rowNumber == resultSets.get(rowNumbers.size()).getRows().size() - 1);
                 if (nextResultSetHasNoRows) {
                     continue;
                 }
@@ -117,7 +111,7 @@ public class SqlServerImpl implements SqlServer {
             while (rowNumbers.size() < resultSets.size()) {
                 rowNumbers.push(0);
             }
-            ResultRow row = new ResultRowImpl(getValuesFromResultSets(resultSets, rowNumbers));
+            ResultRow row = new ResultRowImpl(columns, getValuesFromResultSets(resultSets, rowNumbers));
             if (evaluate(row, selectionPredicate)) {
                 rows.add(row);
             }
@@ -127,16 +121,16 @@ public class SqlServerImpl implements SqlServer {
 
     private static ResultSet innerJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnMetadata> columns = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow leftRow : left.getAllRows()) {
-            for (ResultRow rightRow : right.getAllRows()) {
-                List<ResultValue> values = new ArrayList<>();
+        for (ResultRow leftRow : left.getRows()) {
+            for (ResultRow rightRow : right.getRows()) {
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(values);
+                ResultRow row = new ResultRowImpl(columns, values);
                 if (evaluate(row, sc)) {
                     rows.add(row);
                 }
@@ -147,27 +141,27 @@ public class SqlServerImpl implements SqlServer {
 
     private static ResultSet leftOutJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnMetadata> columns = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow leftRow : left.getAllRows()) {
+        for (ResultRow leftRow : left.getRows()) {
             boolean matchFound = false;
-            for (ResultRow rightRow : right.getAllRows()) {
-                List<ResultValue> values = new ArrayList<>();
+            for (ResultRow rightRow : right.getRows()) {
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(values);
+                ResultRow row = new ResultRowImpl(columns, values);
                 if (evaluate(row, sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
             }
             if (!matchFound) {
-                List<ResultValue> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
-                for (ColumnMetadata columnMetadata : right.getColumns()) {
-                    values.add(new ResultValueImpl(null, columnMetadata.getName()));
+                for (String columnName : right.getColumns()) {
+                    values.add(null);
                 }
             }
         }
@@ -176,26 +170,26 @@ public class SqlServerImpl implements SqlServer {
 
     private static ResultSet rightOutJoin(ResultSet left, ResultSet right, Predicate sc) throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnMetadata> columns = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow rightRow : right.getAllRows()) {
+        for (ResultRow rightRow : right.getRows()) {
             boolean matchFound = false;
-            for (ResultRow leftRow : left.getAllRows()) {
-                List<ResultValue> values = new ArrayList<>();
+            for (ResultRow leftRow : left.getRows()) {
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(values);
+                ResultRow row = new ResultRowImpl(columns, values);
                 if (evaluate(row, sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
             }
             if (!matchFound) {
-                List<ResultValue> values = new ArrayList<>();
-                for (ColumnMetadata columnMetadata : left.getColumns()) {
-                    values.add(new ResultValueImpl(null, columnMetadata.getName()));
+                List<Object> values = new ArrayList<>();
+                for (String columnName : left.getColumns()) {
+                    values.add(null);
                 }
                 values.addAll(rightRow.getValues());
             }
@@ -228,10 +222,10 @@ public class SqlServerImpl implements SqlServer {
                 return compareValues(resultRow, predicate);
             case IS_NULL:
                 ColumnNullPredicate cn1 = (ColumnNullPredicate) predicate;
-                return resultRow.getValue(cn1.getColumnReference().getColumnName()).isNull();
+                return resultRow.isNull(cn1.getColumnReference().getColumnName());
             case IS_NOT_NULL:
                 ColumnNullPredicate cn2 = (ColumnNullPredicate) predicate;
-                return resultRow.getValue(cn2.getColumnReference().getColumnName()).isNotNull();
+                return !resultRow.isNull(cn2.getColumnReference().getColumnName());
             default:
                 return false;
         }
@@ -245,15 +239,15 @@ public class SqlServerImpl implements SqlServer {
 
         if (sc instanceof ColumnValuePredicate) {
             cr = ((ColumnValuePredicate) sc).getColumnReference();
-            leftValue = resultRow.getValue(cr.getColumnName()).getValue();
+            leftValue = (Comparable) resultRow.getObject(cr.getColumnName());
             rightValue = ((ColumnValuePredicate) sc).getValue();
         }
 
         if (sc instanceof ColumnColumnPredicate) {
             cr = ((ColumnColumnPredicate) sc).getLeftColumn();
-            leftValue = resultRow.getValue(cr.getColumnName()).getValue();
+            leftValue = (Comparable) resultRow.getObject(cr.getColumnName());
             ColumnReference cr2 = ((ColumnColumnPredicate) sc).getRightColumn();
-            rightValue = resultRow.getValue(cr2.getColumnName()).getValue();
+            rightValue = (Comparable) resultRow.getObject(cr2.getColumnName());
         }
 
         if (leftValue == null || rightValue == null) {
@@ -290,7 +284,7 @@ public class SqlServerImpl implements SqlServer {
             throw new IllegalArgumentException();
         }
         TableImpl table = (TableImpl) this.getTable((BaseTableReference) tableReference);
-        return table.select(Arrays.asList(SelectedColumn.all()));
+        return table.selectAll();
     }
 
     protected ResultSet selectFromJoinedTable(JoinTableReference tableReference)
@@ -299,7 +293,7 @@ public class SqlServerImpl implements SqlServer {
 
         ResultSet left = this.selectAll(tableReference.getLeftTableReference());
         ResultSet right = this.selectAll(tableReference.getRightTableReference());
-        switch (tableReference.getJoinType()) {
+        switch (tableReference.getType()) {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getSelectionPredicate());
             case LEFT_OUTER_JOIN:
@@ -314,6 +308,12 @@ public class SqlServerImpl implements SqlServer {
     public @NotNull ResultSet select(SelectExpression selectExpression) throws
             WrongValueTypeException, NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException {
 
+        try {
+            this.getLogger().select(selectExpression);
+        } catch (SqlException ex) {
+            System.out.println(ex.getMessage());
+        }
+
         List<ResultSet> resultSets = new ArrayList<>();
         for (TableReference tableReference : selectExpression.getTableReferences()) {
             if (tableReference instanceof BaseTableReference) {
@@ -326,7 +326,7 @@ public class SqlServerImpl implements SqlServer {
                 resultSets.add(this.select((SelectExpression) tableReference));
             }
         }
-        ResultSet resultSet = this.joinResultSets(resultSets, selectExpression.getSelectionPredicate());
+        ResultSet resultSet = this.joinResultSets(resultSets, selectExpression.getPredicate());
         return resultSet;
     }
 

@@ -1,11 +1,12 @@
 package testSimpleFileImpl;
 
-import api.exceptions.*;
-import clientDefaultImpl.*;
+import api.AssignmentOperation;
+import api.SqlClient;
+import api.SqlServer;
+import api.exceptions.SqlException;
+import clientDefaultImpl.ColumnReferenceImpl;
+import clientDefaultImpl.SqlClientImpl;
 import sqlFactory.SqlManagerFactory;
-import api.*;
-import api.selectionResult.ResultSet;
-
 
 import java.util.Arrays;
 
@@ -83,11 +84,11 @@ public class TestSimplePrintOutImpl {
             System.out.println(e.getMessage());
         }
 
-        try {
-            ResultSet resultSet = sqlServer.getDatabase("DB1").getTable("table1").
-                    select(Arrays.asList(SelectedColumn.all()), sqlClient.getPredicateEmpty());
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            ResultSet resultSet = sqlServer.getDatabase("DB1").getTable("table1").
+//                    select(Arrays.asList(SelectedItemImpl.all()), sqlClient.getPredicateEmpty());
+//        } catch (SqlException e) {
+//            System.out.println(e.getMessage());
+//        }
     }
 }

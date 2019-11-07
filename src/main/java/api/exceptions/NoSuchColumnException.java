@@ -7,8 +7,8 @@ public final class NoSuchColumnException extends SqlException {
     @NotNull
     private final String columnName;
 
-    public NoSuchColumnException(@NotNull String databaseName) {
-        this.columnName = databaseName;
+    public NoSuchColumnException(@NotNull String columnName) {
+        this.columnName = columnName;
     }
 
     @Override

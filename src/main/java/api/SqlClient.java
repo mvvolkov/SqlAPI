@@ -29,6 +29,12 @@ public interface SqlClient {
 
     ColumnReference createColumnReference(String columnName, String tableName, String databaseName);
 
+    SelectedItem getAllColumns();
+
+    SelectedItem getAllColumnsFromTable(String tableName);
+
+    SelectedItem getColumnExpression(ColumnExpression columnExpression);
+
 
     Predicate getPredicateEmpty();
 
