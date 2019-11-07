@@ -18,9 +18,20 @@ public class TableImpl implements Table {
 
     private final TableMetadata metadata;
 
+    private String tableName;
+
+    private List<ColumnMetadata> columns;
+
     public TableImpl(Database database, TableMetadata description) {
         this.database = database;
         this.metadata = description;
+    }
+
+    public TableImpl(Database database, String tableName, List<ColumnMetadata> columns) {
+        this.database = database;
+        this.tableName = tableName;
+        this.columns = columns;
+        metadata = null;
     }
 
 

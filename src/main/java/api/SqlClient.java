@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface SqlClient {
 
+    CreateTableStatement newCreateTableStatement(String databaseName,
+                                                 String tableName, List<ColumnMetadata> columns);
+
     TableMetadata tableMetadata(String tableName, List<ColumnMetadata> columnsMetadata);
 
     ColumnMetadataBuilder getIntegerColumnMetadataBuilder(String columnName);

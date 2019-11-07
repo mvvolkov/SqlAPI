@@ -1,14 +1,12 @@
 package serverLoggerImpl;
 
 import api.*;
-import api.exceptions.DatabaseAlreadyExistsException;
-import api.exceptions.NoSuchDatabaseException;
-import api.exceptions.NoSuchTableException;
-import api.exceptions.WrongValueTypeException;
+import api.exceptions.*;
 import api.selectionPredicate.ColumnColumnPredicate;
 import api.selectionPredicate.ColumnValuePredicate;
 import api.selectionPredicate.CombinedPredicate;
 import api.selectionPredicate.Predicate;
+import clientDefaultImpl.VarcharColumnMetadataImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,9 +15,70 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SqlServerPrintOutImpl implements SqlServer {
+public class SqlServerLoggerImpl implements SqlServer {
 
-    private final Collection<Database> databases = new ArrayList<>();
+    private final Collection<DatabaseImpl> databases = new ArrayList<>();
+
+    public static String getColumnMetadataString(ColumnMetadata columnMetadata) {
+        StringBuilder sb = new StringBuilder(columnMetadata.getName());
+        sb.append(" ");
+        sb.append(columnMetadata.getSqlTypeName());
+        if (columnMetadata instanceof VarcharColumnMetadata) {
+            sb.append("(");
+            sb.append(((VarcharColumnMetadata) columnMetadata).getMaxLength());
+            sb.append(")");
+        }
+        if (columnMetadata.isNotNull()) {
+            sb.append(" NOT NULL");
+        }
+        if (columnMetadata.isPrimaryKey()) {
+            sb.append(" PRIMARY KEY");
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public void executeStatement(SqlStatement stmt) throws SqlException {
+        switch (stmt.getType()) {
+            case CREATE_TABLE:
+                this.createTable((CreateTableStatement) stmt);
+                return;
+            case INSERT:
+                this.insert((InsertStatement) stmt);
+        }
+    }
+
+    private void createTable(CreateTableStatement stmt) {
+        StringBuilder sb = new StringBuilder("CREATE TABLE ");
+        sb.append(stmt.getTableName());
+        sb.append("(");
+        sb.append(stmt.getColumns().stream().map(c -> getColumnMetadataString(c)).collect(Collectors.joining(", ")));
+        sb.append(");");
+        System.out.println(sb);
+    }
+
+    private static String getStringFromInsertValue(Object value) {
+        if (value instanceof String) {
+            return '\'' + (String) value + '\'';
+        } else if (value == null) {
+            return "NULL";
+        }
+        return String.valueOf(value);
+    }
+
+    private void insert(InsertStatement stmt) {
+
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(stmt.getDatabaseName());
+        sb.append(".");
+        sb.append(stmt.getTableName());
+        sb.append(" VALUES (");
+        String valuesString = stmt.getValues().stream().map(o -> getStringFromInsertValue(o)).collect(Collectors.joining(", "));
+        sb.append(valuesString);
+        sb.append(");");
+        System.out.println(sb);
+
+    }
 
     @Override
     public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {

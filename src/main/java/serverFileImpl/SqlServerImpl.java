@@ -4,19 +4,25 @@ import api.*;
 import api.exceptions.*;
 import api.selectionPredicate.*;
 import org.jetbrains.annotations.NotNull;
-import serverLoggerImpl.SqlServerPrintOutImpl;
+import serverLoggerImpl.SqlServerLoggerImpl;
 
 import java.util.*;
 
 public class SqlServerImpl implements SqlServer {
 
 
-    SqlServerPrintOutImpl logger = new SqlServerPrintOutImpl();
+    SqlServerLoggerImpl logger = new SqlServerLoggerImpl();
 
     private final Collection<Database> databases = new ArrayList<>();
 
-    public SqlServerPrintOutImpl getLogger() {
+    public SqlServerLoggerImpl getLogger() {
         return logger;
+    }
+
+
+    @Override
+    public void executeStatement(SqlStatement statement) throws SqlException {
+
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface SqlServer {
 
+    void executeStatement(SqlStatement statement) throws SqlException;
+
     void createDatabase(String dbName) throws DatabaseAlreadyExistsException;
 
     void openDatabaseWithTables(String dbName, List<TableMetadata> tables);

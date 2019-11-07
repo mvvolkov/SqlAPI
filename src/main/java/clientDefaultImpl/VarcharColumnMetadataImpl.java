@@ -5,7 +5,7 @@ import api.*;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 
-public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> {
+public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> implements VarcharColumnMetadata {
 
     /**
      * Maximal number of characters.

@@ -52,7 +52,7 @@ public class DatabaseImpl implements Database {
     public void createTable(TableMetadata tableMetadata) throws TableAlreadyExistsException {
         for (Table table : tables) {
             if (table.getMetadata().getName().equals(tableMetadata.getName())) {
-                throw new TableAlreadyExistsException(tableMetadata.getName());
+                throw new TableAlreadyExistsException(name, tableMetadata.getName());
             }
         }
         tables.add(new TableImpl(this, tableMetadata));

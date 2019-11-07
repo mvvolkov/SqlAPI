@@ -13,10 +13,14 @@ public class DatabaseImpl implements Database {
 
     private final String name;
 
-    private final Collection<Table> tables = new ArrayList<>();
+    private final Collection<TableImpl> tables = new ArrayList<>();
 
     public DatabaseImpl(String name) {
         this.name = name;
+    }
+
+    public void addTable(TableImpl table) {
+        tables.add(table);
     }
 
     @Override
@@ -47,7 +51,7 @@ public class DatabaseImpl implements Database {
     public void createTable(TableMetadata tableMetadata) throws TableAlreadyExistsException {
         for (Table table : tables) {
             if (table.getMetadata().getName().equals(tableMetadata.getName())) {
-                throw new TableAlreadyExistsException(tableMetadata.getName());
+                throw new TableAlreadyExistsException(name, tableMetadata.getName());
             }
         }
         tables.add(new TableImpl(this, tableMetadata));

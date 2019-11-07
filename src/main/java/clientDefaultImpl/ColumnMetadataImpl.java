@@ -5,7 +5,7 @@ import api.*;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 
-public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements ColumnMetadata {
+public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements ColumnMetadata<V> {
 
     @NotNull
     private final String columnName;

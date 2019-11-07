@@ -10,7 +10,7 @@ import sqlFactory.SqlManagerFactory;
 
 import java.util.Arrays;
 
-public class TestSimplePrintOutImpl {
+public class TestSqlServerLoggerImpl {
 
     public static void main(String[] args) {
 
@@ -30,12 +30,17 @@ public class TestSimplePrintOutImpl {
         }
 
         try {
-            sqlServer.getDatabase("DB1").createTable(
-                    sqlClient.tableMetadata("table1",
-                            Arrays.asList(
-                                    sqlClient.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
-                                    sqlClient.getIntegerColumnMetadataBuilder("column2").build(),
-                                    sqlClient.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
+
+            sqlServer.executeStatement(sqlClient.newCreateTableStatement("DB1", "table1", Arrays.asList(
+                    sqlClient.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
+                    sqlClient.getIntegerColumnMetadataBuilder("column2").build(),
+                    sqlClient.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
+//            sqlServer.getDatabase("DB1").createTable(
+//                    sqlClient.tableMetadata("table1",
+//                            Arrays.asList(
+//                                    sqlClient.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
+//                                    sqlClient.getIntegerColumnMetadataBuilder("column2").build(),
+//                                    sqlClient.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }

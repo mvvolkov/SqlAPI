@@ -8,6 +8,11 @@ import java.util.List;
 public class SqlClientImpl implements SqlClient {
 
     @Override
+    public CreateTableStatement newCreateTableStatement(String databaseName, String tableName, List<ColumnMetadata> columns) {
+        return new CreateTableStatementImpl(databaseName, tableName, columns);
+    }
+
+    @Override
     public TableMetadata tableMetadata(String tableName, List<ColumnMetadata> columnsMetadata) {
         return new TableMetadataImpl(tableName, columnsMetadata);
     }
