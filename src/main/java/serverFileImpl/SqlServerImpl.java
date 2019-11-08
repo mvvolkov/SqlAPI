@@ -11,33 +11,59 @@ import java.util.*;
 public class SqlServerImpl implements SqlServer {
 
 
-    SqlServerLoggerImpl logger = new SqlServerLoggerImpl();
+    private final transient SqlServerLoggerImpl logger = new SqlServerLoggerImpl();
 
     private final Collection<Database> databases = new ArrayList<>();
 
-    public SqlServerLoggerImpl getLogger() {
-        return logger;
+
+    @Override
+    public void executeStatement(SqlStatement stmt) throws SqlException {
+        logger.executeStatement(stmt);
+        switch (stmt.getType()) {
+            case CREATE_TABLE:
+                this.createTable((CreateTableStatement) stmt);
+                return;
+            case INSERT:
+                this.insert((InsertStatement) stmt);
+                return;
+            case DELETE:
+//                delete((DeleteStatement) stmt);
+                return;
+            case UPDATE:
+//                update((UpdateStatement) stmt);
+                return;
+        }
     }
 
 
-    @Override
-    public void executeStatement(SqlStatement statement) throws SqlException {
+    private void createTable(CreateTableStatement stmt) throws TableAlreadyExistsException, NoSuchDatabaseException {
+        Database database = this.getDatabase(stmt.getDatabaseName());
+        Table table = database.getTableOrNull(stmt.getTableName());
+        if (table != null) {
+            throw new TableAlreadyExistsException(database.getName(), stmt.getTableName());
+        }
+        database.addTable(new Table(database, stmt.getTableName(), stmt.getColumns()));
+    }
 
+    private void insert(InsertStatement stmt) throws NoSuchDatabaseException, NoSuchTableException, ConstraintException, WrongValueTypeException {
+        Database database = this.getDatabase(stmt.getDatabaseName());
+        Table table = database.getTable(stmt.getTableName());
+        if (stmt.getColumns() == null) {
+            table.insert(stmt.getValues());
+        } else {
+            table.insert(stmt.getColumns(), stmt.getValues());
+        }
     }
 
     @Override
     public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
+        logger.createDatabase(dbName);
         for (Database database : databases) {
             if (database.getName().equals(dbName)) {
                 throw new DatabaseAlreadyExistsException(dbName);
             }
         }
-        databases.add(new DatabaseImpl(this, dbName));
-        try {
-            this.getLogger().createDatabase(dbName);
-        } catch (DatabaseAlreadyExistsException e) {
-            e.printStackTrace();
-        }
+        databases.add(new Database(dbName));
     }
 
     @Override
@@ -49,7 +75,7 @@ public class SqlServerImpl implements SqlServer {
     public void persistDatabase(String dbName) {
     }
 
-    @Override
+
     public Database getDatabaseOrNull(String dbName) {
         for (Database database : databases) {
             if (database.getName().equals(dbName)) {
@@ -59,7 +85,7 @@ public class SqlServerImpl implements SqlServer {
         return null;
     }
 
-    @Override
+
     public @NotNull Database getDatabase(String dbName) throws NoSuchDatabaseException {
         Database database = this.getDatabaseOrNull(dbName);
         if (database == null) {
@@ -84,8 +110,15 @@ public class SqlServerImpl implements SqlServer {
 
         // Create full list of columns.
         List<String> columns = new ArrayList<>();
+        boolean hasEmptyResultSet = false;
         for (ResultSet resultSet : resultSets) {
             columns.addAll(resultSet.getColumns());
+            if (resultSet.getRows().isEmpty()) {
+                hasEmptyResultSet = true;
+            }
+        }
+        if (hasEmptyResultSet) {
+            return new ResultSetImpl(Collections.EMPTY_LIST, columns);
         }
 
         if (resultSets.size() == 1) {
@@ -289,7 +322,7 @@ public class SqlServerImpl implements SqlServer {
         if (!(tableReference instanceof BaseTableReference)) {
             throw new IllegalArgumentException();
         }
-        TableImpl table = (TableImpl) this.getTable((BaseTableReference) tableReference);
+        Table table = (Table) this.getTable((BaseTableReference) tableReference);
         return table.selectAll();
     }
 
@@ -314,11 +347,8 @@ public class SqlServerImpl implements SqlServer {
     public @NotNull ResultSet select(SelectExpression selectExpression) throws
             WrongValueTypeException, NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException {
 
-        try {
-            this.getLogger().select(selectExpression);
-        } catch (SqlException ex) {
-            System.out.println(ex.getMessage());
-        }
+
+        logger.select(selectExpression);
 
         List<ResultSet> resultSets = new ArrayList<>();
         for (TableReference tableReference : selectExpression.getTableReferences()) {
@@ -353,10 +383,34 @@ public class SqlServerImpl implements SqlServer {
             NoSuchTableException, NoSuchDatabaseException {
         for (Database database : databases) {
             if (database.getName().equals(tableReference.getDatabaseName())) {
-                return (TableImpl) database.getTable(tableReference.getTableName());
+                return (Table) database.getTable(tableReference.getTableName());
             }
         }
         throw new NoSuchDatabaseException(tableReference.getDatabaseName());
     }
+
+
+//    public void checkConstraints(Table table, Object value)
+//            throws WrongValueTypeException, ConstraintException {
+//
+//        TableMetadata tableMetadata = table.getMetadata();
+//        Database database = table.getDatabase();
+//        String tableName = tableMetadata.getName();
+//        String dbName = database.getName();
+//
+//        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
+//
+//        if (value != null && !this.getJavaClass().isInstance(value)) {
+//            throw new WrongValueTypeException(this.createColumnReference(this,
+//                    tableMetadata.getName(), database.getName()),
+//                    this.getJavaClass(), value.getClass());
+//        }
+//        if (value == null && this.isNotNull()) {
+//            throw new ConstraintException(columnReference, "NOT NULL");
+//        }
+//        if (this.isPrimaryKey()) {
+//            table.checkPrimaryKey(columnReference, value);
+//        }
+//    }
 
 }

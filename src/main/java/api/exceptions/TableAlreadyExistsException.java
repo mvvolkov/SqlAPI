@@ -17,8 +17,8 @@ public final class TableAlreadyExistsException extends SqlException {
 
     @Override
     public String getMessage() {
-        return "Can not create a new table. The table with the name " + tableName
-                + "." + databaseName + " already exists.";
+        return "Can not create a new table. The table " + databaseName
+                + "." + tableName + " already exists.";
     }
 
     public String getTableName() {

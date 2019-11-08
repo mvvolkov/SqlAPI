@@ -1,15 +1,13 @@
 package serverFileImpl;
 
-import api.*;
+import api.ColumnMetadata;
+import api.ColumnReference;
+import api.ResultRow;
+import api.ResultSet;
 import api.exceptions.ConstraintException;
-import api.exceptions.NoSuchDatabaseException;
-import api.exceptions.NoSuchTableException;
 import api.exceptions.WrongValueTypeException;
 import api.selectionPredicate.ColumnValuePredicate;
 import api.selectionPredicate.Predicate;
-import api.ResultRow;
-import api.ResultSet;
-import clientDefaultImpl.AssignmentOperationImpl;
 import clientDefaultImpl.ColumnReferenceImpl;
 import clientDefaultImpl.SelectedItemImpl;
 
@@ -17,31 +15,32 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TableImpl implements Table, Serializable {
+public class Table implements Serializable {
 
-    private final DatabaseImpl database;
+    private final Database database;
 
-    private final TableMetadata metadata;
+
+    private final String tableName;
+
+    private final List<ColumnMetadata> columns;
 
     private final List<Row> rows = new ArrayList<>();
 
-    public TableImpl(DatabaseImpl database, TableMetadata metadata) {
+    public Table(Database database, String tableName, List<ColumnMetadata> columns) {
         this.database = database;
-        this.metadata = metadata;
+        this.tableName = tableName;
+        this.columns = columns;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public List<ColumnMetadata> getColumns() {
+        return columns;
     }
 
 
-    @Override
-    public TableMetadata getMetadata() {
-        return metadata;
-    }
-
-    @Override
-    public Database getDatabase() {
-        return database;
-    }
-
-    @Override
     public void checkPrimaryKey(ColumnReference columnReference, Object value)
             throws ConstraintException, WrongValueTypeException {
 
@@ -83,7 +82,7 @@ public class TableImpl implements Table, Serializable {
     }
 
     private ColumnReferenceImpl createColumnReference(ColumnMetadata columnMetadata) {
-        return new ColumnReferenceImpl(columnMetadata.getName(), metadata.getName(), database.getName());
+        return new ColumnReferenceImpl(columnMetadata.getName(), tableName, database.getName());
     }
 
     protected void checkConstraints(ColumnMetadata columnMetadata, Object value)
@@ -107,59 +106,38 @@ public class TableImpl implements Table, Serializable {
         }
     }
 
-    @Override
+
     public void insert(List<Object> values) throws WrongValueTypeException, ConstraintException {
 
-        List<ColumnMetadata> columnsMetadata = metadata.getColumnsMetadata();
+
         Map<String, Value> map = new HashMap<>();
-        for (int i = 0; i < columnsMetadata.size(); i++) {
-            ColumnMetadata columnMetadata = columnsMetadata.get(i);
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnMetadata columnMetadata = columns.get(i);
             Object value = values.size() > i ? values.get(i) : null;
-            columnMetadata.checkConstraints(this, value);
+//            columnMetadata.checkConstraints(this, value);
             this.checkConstraints(columnMetadata, value);
             map.put(columnMetadata.getName(), new Value(columnMetadata.getJavaClass(), value));
         }
         rows.add(new Row(map));
-
-        try {
-            this.getLoggerTable().insert(values);
-        } catch (NoSuchTableException e) {
-            e.printStackTrace();
-        } catch (NoSuchDatabaseException e) {
-            e.printStackTrace();
-        }
     }
 
-    private Table getLoggerTable() throws NoSuchDatabaseException, NoSuchTableException {
-        return database.getLoggerDatabase().getTable(metadata.getName());
-    }
 
-    @Override
     public void insert(List<String> columns, List<Object> values)
             throws WrongValueTypeException, ConstraintException {
 
     }
 
-    @Override
+
     public void insert(ResultSet rows) {
 
     }
 
-    @Override
-    public void delete(Predicate selectionPredicate) {
-
-    }
-
-    @Override
-    public void update(List<AssignmentOperationImpl> newValues, Predicate selectionPredicate) {
-
-    }
 
     private ResultRow getSelectionResultRow(Row row, List<SelectedItemImpl> selectedItems) {
         List<Object> values = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
         if (selectedItems.isEmpty()) {
-            for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
+            for (ColumnMetadata columnMetadata : columns) {
                 Value tableValue = row.getValue(columnMetadata.getName());
                 values.add(tableValue.getValue());
                 columnNames.add(columnMetadata.getName());
@@ -169,7 +147,7 @@ public class TableImpl implements Table, Serializable {
         for (SelectedItemImpl selectedItem : selectedItems) {
             switch (selectedItem.getType()) {
                 case SELECT_ALL:
-                    for (ColumnMetadata columnMetadata : metadata.getColumnsMetadata()) {
+                    for (ColumnMetadata columnMetadata : columns) {
                         Value tableValue = row.getValue(columnMetadata.getName());
                         values.add(tableValue.getValue());
                         columnNames.add(columnMetadata.getName());
@@ -191,11 +169,11 @@ public class TableImpl implements Table, Serializable {
             resultRows.add(this.getSelectionResultRow(row, Collections.EMPTY_LIST));
 
         }
-        return new ResultSetImpl(resultRows, new ArrayList<>(metadata.getColumnsMetadata().stream()
+        return new ResultSetImpl(resultRows, new ArrayList<>(columns.stream()
                 .map(ColumnMetadata::getName).collect(Collectors.toList())));
     }
 
-    @Override
+
     public ResultSet select(List<SelectedItemImpl> selectedItems, Predicate selectionPredicate)
             throws WrongValueTypeException {
 
@@ -207,7 +185,7 @@ public class TableImpl implements Table, Serializable {
 
         }
         return new ResultSetImpl(resultRows,
-                new ArrayList<>(metadata.getColumnsMetadata().stream()
+                new ArrayList<>(columns.stream()
                         .map(ColumnMetadata::getName).collect(Collectors.toList())));
     }
 }

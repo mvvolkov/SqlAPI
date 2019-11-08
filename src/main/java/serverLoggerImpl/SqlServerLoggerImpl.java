@@ -44,19 +44,6 @@ public class SqlServerLoggerImpl implements SqlServer {
     public void persistDatabase(String dbName) {
     }
 
-    @Override
-    public Database getDatabaseOrNull(String dbName) {
-        return null;
-    }
-
-    @Override
-    public Database getDatabase(String dbName) throws NoSuchDatabaseException {
-        Database database = this.getDatabaseOrNull(dbName);
-        if (database == null) {
-            throw new NoSuchDatabaseException(dbName);
-        }
-        return database;
-    }
 
     @Override
     public @NotNull ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException {
@@ -97,6 +84,8 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void createTable(CreateTableStatement stmt) {
         StringBuilder sb = new StringBuilder("CREATE TABLE ");
+        sb.append(stmt.getDatabaseName());
+        sb.append(".");
         sb.append(stmt.getTableName());
         sb.append("(");
         sb.append(stmt.getColumns().stream().map(c -> getColumnMetadataString(c)).collect(Collectors.joining(", ")));

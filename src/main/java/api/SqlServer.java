@@ -1,9 +1,7 @@
 package api;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import api.exceptions.*;
-
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -17,11 +15,6 @@ public interface SqlServer {
 
     void persistDatabase(String dbName);
 
-    @Nullable
-    Database getDatabaseOrNull(String dbName);
-
-    @NotNull
-    Database getDatabase(String dbName) throws NoSuchDatabaseException;
 
     @NotNull
     ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException, NoSuchDatabaseException, NoSuchColumnException;

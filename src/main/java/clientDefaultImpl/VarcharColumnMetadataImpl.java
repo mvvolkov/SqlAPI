@@ -1,9 +1,7 @@
 package clientDefaultImpl;
 
+import api.VarcharColumnMetadata;
 import org.jetbrains.annotations.NotNull;
-import api.*;
-import api.exceptions.ConstraintException;
-import api.exceptions.WrongValueTypeException;
 
 public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> implements VarcharColumnMetadata {
 
@@ -59,18 +57,18 @@ public final class VarcharColumnMetadataImpl extends ColumnMetadataImpl<String> 
         }
     }
 
-    @Override
-    public void checkConstraints(Table table, Object value) throws WrongValueTypeException, ConstraintException {
-        super.checkConstraints(table, value);
-
-        TableMetadata tableMetadata = table.getMetadata();
-        Database database = table.getDatabase();
-        String tableName = tableMetadata.getName();
-        String dbName = database.getName();
-        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
-        String stringValue = (String) value;
-        if (stringValue.length() > maxLength) {
-            throw new ConstraintException(columnReference, "Maximal length exceeded");
-        }
-    }
+//    @Override
+//    public void checkConstraints(Table table, Object value) throws WrongValueTypeException, ConstraintException {
+//        super.checkConstraints(table, value);
+//
+//        TableMetadata tableMetadata = table.getMetadata();
+//        Database database = table.getDatabase();
+//        String tableName = tableMetadata.getName();
+//        String dbName = database.getName();
+//        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
+//        String stringValue = (String) value;
+//        if (stringValue.length() > maxLength) {
+//            throw new ConstraintException(columnReference, "Maximal length exceeded");
+//        }
+//    }
 }

@@ -52,10 +52,7 @@ public class TestSqlServerLoggerImpl {
                     sqlClient.getPredicateIn(new ColumnReferenceImpl("column3"), Arrays.asList("12", "13", "14"))
             ));
 
-            sqlServer.getDatabase("DB1").getTable("table1").
-                    update(Arrays.asList(new AssignmentOperationImpl("column1", 10),
-                            new AssignmentOperationImpl("column2", "test3")),
-                            sqlClient.getPredicateIn(new ColumnReferenceImpl("column3"), Arrays.asList("12", "13", "14")));
+
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }

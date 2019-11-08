@@ -1,9 +1,8 @@
 package clientDefaultImpl;
 
+import api.ColumnMetadata;
+import api.ColumnMetadataBuilder;
 import org.jetbrains.annotations.NotNull;
-import api.*;
-import api.exceptions.ConstraintException;
-import api.exceptions.WrongValueTypeException;
 
 public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements ColumnMetadata<V> {
 
@@ -107,26 +106,26 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>> implements Col
         return new ColumnReferenceImpl(columnMetadata.getName(), tableName, dbName);
     }
 
-    public void checkConstraints(Table table, Object value)
-            throws WrongValueTypeException, ConstraintException {
-
-        TableMetadata tableMetadata = table.getMetadata();
-        Database database = table.getDatabase();
-        String tableName = tableMetadata.getName();
-        String dbName = database.getName();
-
-        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
-
-        if (value != null && !this.getJavaClass().isInstance(value)) {
-            throw new WrongValueTypeException(this.createColumnReference(this,
-                    tableMetadata.getName(), database.getName()),
-                    this.getJavaClass(), value.getClass());
-        }
-        if (value == null && this.isNotNull()) {
-            throw new ConstraintException(columnReference, "NOT NULL");
-        }
-        if (this.isPrimaryKey()) {
-            table.checkPrimaryKey(columnReference, value);
-        }
-    }
+//    public void checkConstraints(Table table, Object value)
+//            throws WrongValueTypeException, ConstraintException {
+//
+//        TableMetadata tableMetadata = table.getMetadata();
+//        Database database = table.getDatabase();
+//        String tableName = tableMetadata.getName();
+//        String dbName = database.getName();
+//
+//        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
+//
+//        if (value != null && !this.getJavaClass().isInstance(value)) {
+//            throw new WrongValueTypeException(this.createColumnReference(this,
+//                    tableMetadata.getName(), database.getName()),
+//                    this.getJavaClass(), value.getClass());
+//        }
+//        if (value == null && this.isNotNull()) {
+//            throw new ConstraintException(columnReference, "NOT NULL");
+//        }
+//        if (this.isPrimaryKey()) {
+//            table.checkPrimaryKey(columnReference, value);
+//        }
+//    }
 }
