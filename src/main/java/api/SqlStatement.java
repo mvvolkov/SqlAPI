@@ -11,4 +11,8 @@ public interface SqlStatement {
     }
 
     Type getType();
+
+    String getDatabaseName();
+
+    String getTableName();
 }

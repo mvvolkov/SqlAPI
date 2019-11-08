@@ -7,8 +7,22 @@ import java.util.List;
 
 public interface SqlClient {
 
-    CreateTableStatement newCreateTableStatement(String databaseName,
-                                                 String tableName, List<ColumnMetadata> columns);
+    SqlStatement newCreateTableStatement(String databaseName,
+                                         String tableName, List<ColumnMetadata> columns);
+
+    SqlStatement newInsertStatement(String databaseName, String tableName, List<Object> values);
+
+    SqlStatement newInsertStatement(String databaseName, String tableName, List<String> columns, List<Object> values);
+
+    SqlStatement newDeleteStatement(String databaseName, String tableName);
+
+    SqlStatement newDeleteStatement(String databaseName, String tableName, Predicate predicate);
+
+    SqlStatement newUpdateStatement(String databaseName, String tableName,
+                                    List<AssignmentOperation> assignmentOperations);
+
+    SqlStatement newUpdateStatement(String databaseName, String tableName,
+                                    List<AssignmentOperation> assignmentOperations, Predicate predicate);
 
     TableMetadata tableMetadata(String tableName, List<ColumnMetadata> columnsMetadata);
 

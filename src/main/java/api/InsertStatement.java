@@ -4,9 +4,6 @@ import java.util.List;
 
 public interface InsertStatement extends SqlStatement {
 
-    String getDatabaseName();
-
-    String getTableName();
 
     List<Object> getValues();
 

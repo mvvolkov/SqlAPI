@@ -8,8 +8,38 @@ import java.util.List;
 public class SqlClientImpl implements SqlClient {
 
     @Override
-    public CreateTableStatement newCreateTableStatement(String databaseName, String tableName, List<ColumnMetadata> columns) {
+    public SqlStatement newCreateTableStatement(String databaseName, String tableName, List<ColumnMetadata> columns) {
         return new CreateTableStatementImpl(databaseName, tableName, columns);
+    }
+
+    @Override
+    public SqlStatement newInsertStatement(String databaseName, String tableName, List<Object> values) {
+        return new InsertStatementImpl(databaseName, tableName, values);
+    }
+
+    @Override
+    public SqlStatement newInsertStatement(String databaseName, String tableName, List<String> columns, List<Object> values) {
+        return new InsertStatementImpl(databaseName, tableName, columns, values);
+    }
+
+    @Override
+    public SqlStatement newDeleteStatement(String databaseName, String tableName) {
+        return new DeleteStatementImpl(databaseName, tableName, new SelectionPredicateImpl(Predicate.Type.TRUE));
+    }
+
+    @Override
+    public SqlStatement newDeleteStatement(String databaseName, String tableName, Predicate predicate) {
+        return new DeleteStatementImpl(databaseName, tableName, predicate);
+    }
+
+    @Override
+    public SqlStatement newUpdateStatement(String databaseName, String tableName, List<AssignmentOperation> assignmentOperations) {
+        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations, new SelectionPredicateImpl(Predicate.Type.TRUE));
+    }
+
+    @Override
+    public SqlStatement newUpdateStatement(String databaseName, String tableName, List<AssignmentOperation> assignmentOperations, Predicate predicate) {
+        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations, predicate);
     }
 
     @Override
@@ -154,6 +184,6 @@ public class SqlClientImpl implements SqlClient {
 
     @Override
     public Predicate getPredicateIn(ColumnReferenceImpl columnReference, List<?> values) {
-        return new ColumnInPredicate(columnReference, values);
+        return new ColumnInPredicateImpl(columnReference, values);
     }
 }

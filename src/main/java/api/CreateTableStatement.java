@@ -4,9 +4,6 @@ import java.util.List;
 
 public interface CreateTableStatement extends SqlStatement {
 
-    String getDatabaseName();
-
-    String getTableName();
 
     List<ColumnMetadata> getColumns();
 

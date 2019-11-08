@@ -1,17 +1,8 @@
 package api;
 
-public final class AssignmentOperation {
+public interface AssignmentOperation {
 
-    private final String columnName;
-    private final Object value;
+    String getColumnName();
 
-    public AssignmentOperation(String columnName, Object value) {
-        this.columnName = columnName;
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return columnName + " = " + value.toString();
-    }
+    Object getValue();
 }

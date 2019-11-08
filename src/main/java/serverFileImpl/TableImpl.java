@@ -9,6 +9,7 @@ import api.selectionPredicate.ColumnValuePredicate;
 import api.selectionPredicate.Predicate;
 import api.ResultRow;
 import api.ResultSet;
+import clientDefaultImpl.AssignmentOperationImpl;
 import clientDefaultImpl.ColumnReferenceImpl;
 import clientDefaultImpl.SelectedItemImpl;
 
@@ -150,7 +151,7 @@ public class TableImpl implements Table, Serializable {
     }
 
     @Override
-    public void update(List<AssignmentOperation> newValues, Predicate selectionPredicate) {
+    public void update(List<AssignmentOperationImpl> newValues, Predicate selectionPredicate) {
 
     }
 
