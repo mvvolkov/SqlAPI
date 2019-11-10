@@ -1,9 +1,15 @@
 package serverLoggerImpl;
 
 import api.*;
+import api.columnExpr.ColumnExpression;
+import api.columnExpr.ColumnRef;
 import api.exceptions.*;
-import api.selectionPredicate.*;
-import clientDefaultImpl.ColumnInPredicateImpl;
+import api.metadata.ColumnMetadata;
+import api.metadata.TableMetadata;
+import api.metadata.VarcharColumnMetadata;
+import api.predicates.*;
+import api.queries.*;
+import clientImpl.predicates.ColumnInPredicateImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -46,14 +52,15 @@ public class SqlServerLoggerImpl implements SqlServer {
 
 
     @Override
-    public @NotNull ResultSet select(SelectExpression selectExpression) throws WrongValueTypeException, NoSuchTableException {
+    public @NotNull ResultSet select(SelectExpression selectExpression) {
         StringBuilder sb = new StringBuilder("SELECT ");
         String from = selectExpression.getSelectedItems()
                 .stream().map(SelectedItem::toString).collect(Collectors.joining(", "));
         sb.append(from);
         sb.append(" FROM ");
         String tables = selectExpression.getTableReferences().stream().
-                map(table -> getTableReferencesString(table)).collect(Collectors.joining(", "));
+                map(table -> getTableReferencesString(table))
+                .collect(Collectors.joining(", "));
         sb.append(tables);
         if (!selectExpression.getPredicate().isTrue()) {
             sb.append(" WHERE ");
@@ -88,7 +95,8 @@ public class SqlServerLoggerImpl implements SqlServer {
         sb.append(".");
         sb.append(stmt.getTableName());
         sb.append("(");
-        sb.append(stmt.getColumns().stream().map(c -> getColumnMetadataString(c)).collect(Collectors.joining(", ")));
+        sb.append(stmt.getColumns().stream().map(c -> getColumnMetadataString(c))
+                .collect(Collectors.joining(", ")));
         sb.append(");");
         System.out.println(sb);
     }
@@ -109,13 +117,14 @@ public class SqlServerLoggerImpl implements SqlServer {
         sb.append(".");
         sb.append(stmt.getTableName());
         if (stmt.getColumns() != null) {
-
             String columns = stmt.getColumns().stream()
                     .collect(Collectors.joining(", ", "(", ")"));
             sb.append(columns);
         }
         sb.append(" VALUES (");
-        String valuesString = stmt.getValues().stream().map(o -> getStringFromValue(o)).collect(Collectors.joining(", "));
+        String valuesString =
+                stmt.getValues().stream().map(o -> getStringFromValue(o.getValue()))
+                        .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
         System.out.println(sb);
@@ -134,8 +143,10 @@ public class SqlServerLoggerImpl implements SqlServer {
         System.out.println(sb);
     }
 
-    private static String getAssignmentOperationString(AssignmentOperation assignmentOperation) {
-        return assignmentOperation.getColumnName() + "=" + getStringFromValue(assignmentOperation.getValue());
+    private static String getAssignmentOperationString(
+            AssignmentOperation assignmentOperation) {
+        return assignmentOperation.getColumnName() + "=" +
+                getStringFromValue(assignmentOperation.getValue());
     }
 
     private static void update(UpdateStatement stmt) {
@@ -144,7 +155,8 @@ public class SqlServerLoggerImpl implements SqlServer {
         sb.append(".");
         sb.append(stmt.getTableName());
         sb.append(" SET ");
-        String assignmetns = stmt.getAssignmentOperations().stream().map(op -> getAssignmentOperationString(op))
+        String assignmetns = stmt.getAssignmentOperations().stream()
+                .map(op -> getAssignmentOperationString(op))
                 .collect(Collectors.joining(", "));
         sb.append(assignmetns);
         if (!stmt.getPredicate().isTrue()) {
@@ -172,8 +184,8 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static String getTableReferencesString(TableReference tableReference) {
 
-        if (tableReference instanceof BaseTableReference) {
-            return getBaseTableRefString((BaseTableReference) tableReference);
+        if (tableReference instanceof DatabaseTableReference) {
+            return getBaseTableRefString((DatabaseTableReference) tableReference);
         }
         if (tableReference instanceof JoinTableReference) {
             return getJoinTableRefString((JoinTableReference) tableReference);
@@ -181,7 +193,7 @@ public class SqlServerLoggerImpl implements SqlServer {
         return "";
     }
 
-    private static String getBaseTableRefString(BaseTableReference btr) {
+    private static String getBaseTableRefString(DatabaseTableReference btr) {
         return btr.getDatabaseName() + "." + btr.getTableName();
     }
 
@@ -224,9 +236,6 @@ public class SqlServerLoggerImpl implements SqlServer {
         if (predicate instanceof ColumnColumnPredicate) {
             return getColumnColumnPredicateString((ColumnColumnPredicate) predicate);
         }
-        if (predicate instanceof ColumnNullPredicate) {
-            return getColumnNullPredicateString((ColumnNullPredicate) predicate);
-        }
         if (predicate instanceof ColumnInPredicateImpl) {
             return getColumnInPredicateString((ColumnInPredicate) predicate);
         }
@@ -236,32 +245,24 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static String getColumnInPredicateString(ColumnInPredicate cip) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(cip.getColumnReference()));
+        sb.append(getColumnRefString(cip.getColumnRef()));
         sb.append(" IN ");
-        String values = cip.getValues().stream().map(obj -> getStringFromValue(obj))
-                .collect(Collectors.joining(",", "(", ")"));
+        String values =
+                cip.getColumnValues().stream()
+                        .map(obj -> getStringFromValue(obj.getValue()))
+                        .collect(Collectors.joining(",", "(", ")"));
         sb.append(values);
         return sb.toString();
     }
 
-    private static String getColumnNullPredicateString(ColumnNullPredicate cnp) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(cnp.getColumnReference()));
-        sb.append(" IS");
-        if (cnp.getType() == Predicate.Type.IS_NOT_NULL) {
-            sb.append(" NOT");
-        }
-        sb.append(" NULL");
-        return sb.toString();
-    }
 
     private static String getColumnColumnPredicateString(ColumnColumnPredicate ccp) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(ccp.getLeftColumn()));
+        sb.append(getColumnRefString(ccp.getLeftColumnRef()));
         sb.append(" ");
         sb.append(getOperatorString(ccp.getType()));
         sb.append(" ");
-        sb.append(ccp.getRightColumn());
+        sb.append(ccp.getRightColumnRef());
         return sb.toString();
     }
 
@@ -271,10 +272,6 @@ public class SqlServerLoggerImpl implements SqlServer {
                 return "AND";
             case OR:
                 return "OR";
-            case IS_NOT_NULL:
-                return "IS NOT NULL";
-            case IS_NULL:
-                return "IS NULL";
             case IN:
                 return "IN";
             case EQUALS:
@@ -296,16 +293,24 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static String getColumnValuePredicateString(ColumnValuePredicate cvp) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(cvp.getColumnReference()));
+        sb.append(getColumnRefString(cvp.getColumnRef()));
         sb.append(" ");
+        if (cvp.getColumnValue().getType() == ColumnExpression.Type.NULL_VALUE) {
+            if (cvp.getType() == Predicate.Type.EQUALS) {
+                sb.append("IS NULL");
+            } else if (cvp.getType() == Predicate.Type.NOT_EQUALS) {
+                sb.append("IS NOT NULL");
+            }
+            return sb.toString();
+        }
         sb.append(getOperatorString(cvp.getType()));
         sb.append(" ");
-        sb.append(getStringFromValue(cvp.getValue()));
+        sb.append(getStringFromValue(cvp.getColumnValue().getValue()));
         return sb.toString();
     }
 
 
-    private static String getColumnRefString(ColumnReference cr) {
+    private static String getColumnRefString(ColumnRef cr) {
         StringBuilder sb = new StringBuilder(cr.getColumnName());
         if (cr.getTableName() != null) {
             sb.insert(0, ".");

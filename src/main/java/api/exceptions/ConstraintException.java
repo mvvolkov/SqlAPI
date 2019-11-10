@@ -1,30 +1,29 @@
 package api.exceptions;
 
-import api.ColumnReference;
+import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
-import clientDefaultImpl.ColumnReferenceImpl;
 
 public final class ConstraintException extends SqlException {
 
     @NotNull
-    private final ColumnReference columnReference;
+    private final ColumnRef columnRef;
 
     @NotNull
     private final String errorMessage;
 
-    public ConstraintException(@NotNull ColumnReference columnReference, @NotNull String errorMessage) {
-        this.columnReference = columnReference;
+    public ConstraintException(@NotNull ColumnRef columnRef, @NotNull String errorMessage) {
+        this.columnRef = columnRef;
         this.errorMessage = errorMessage;
     }
 
     @Override
     public String getMessage() {
-        return "Constraint violation for the column " + columnReference + ": " + errorMessage;
+        return "Constraint violation for the column " + columnRef + ": " + errorMessage;
     }
 
     @NotNull
-    public ColumnReference getColumnReference() {
-        return columnReference;
+    public ColumnRef getColumnRef() {
+        return columnRef;
     }
 
     @NotNull

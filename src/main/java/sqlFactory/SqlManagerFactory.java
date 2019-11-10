@@ -1,6 +1,6 @@
 package sqlFactory;
 
-import serverFileImpl.SqlServerImpl;
+import serverLocalFileImpl.SqlServerImpl;
 import serverLoggerImpl.SqlServerLoggerImpl;
 import api.SqlServer;
 

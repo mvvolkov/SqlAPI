@@ -2,12 +2,15 @@ package testSimpleFileImpl;
 
 import api.ResultRow;
 import api.ResultSet;
-import api.SqlClient;
 import api.SqlServer;
 import api.exceptions.NoSuchColumnException;
 import api.exceptions.SqlException;
-import clientDefaultImpl.SelectExpressionImpl;
-import clientDefaultImpl.SqlClientImpl;
+import clientImpl.columnExpr.ColumnExprFactory;
+import clientImpl.metadata.ColumnMetadataFactory;
+import clientImpl.predicates.PredicateFactory;
+import clientImpl.queries.SqlQueryFactory;
+import clientImpl.selectedItems.SelectedItemFactory;
+import clientImpl.tableRef.TableRefFactory;
 import sqlFactory.SqlManagerFactory;
 
 import java.util.ArrayList;
@@ -19,61 +22,93 @@ public class TestSimpleFileImpl {
     public static void main(String[] args) {
 
         SqlServer sqlServer = SqlManagerFactory.getSimpleFileSqlManager();
-        SqlClient sqlClient = new SqlClientImpl();
+
 
         try {
             sqlServer.createDatabase("DB1");
 
-            sqlServer.executeStatement(sqlClient.newCreateTableStatement("DB1",
-                    "table1", Arrays.asList(
-                            sqlClient.getIntegerColumnMetadataBuilder("column1").notNull().primaryKey().build(),
-                            sqlClient.getIntegerColumnMetadataBuilder("column2").build(),
-                            sqlClient.getVarcharColumnMetadataBuilder("column3", 20).notNull().build())));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.createTable("DB1", "table1",
+                            Arrays.asList(
+                                    ColumnMetadataFactory.integerBuilder("column1")
+                                            .notNull().primaryKey().build(),
+                                    ColumnMetadataFactory.integerBuilder("column2")
+                                            .build(),
+                                    ColumnMetadataFactory.varcharBuilder("column3", 20)
+                                            .notNull()
+                                            .build()
+                            )));
 
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table1",
-                    Arrays.asList(10, 20, "test1")));
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table1",
-                    Arrays.asList(11, 20, "test1")));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table1",
+                            ColumnExprFactory.columnValues(Arrays.asList(10, 20, "test1"))
+                    ));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table1",
+                            ColumnExprFactory
+                                    .columnValues(Arrays.asList(11, 20, "test1"))));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table1",
+                            ColumnExprFactory
+                                    .columnValues(Arrays.asList(12, 20, "test1"))));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table1",
+                            ColumnExprFactory
+                                    .columnValues(Arrays.asList(13, 20, "test2"))));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table1",
+                            ColumnExprFactory
+                                    .columnValues(Arrays.asList(15, 21, "test1"))));
 
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table1",
-                    Arrays.asList(12, 20, "test1")));
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table1",
-                    Arrays.asList(13, 20, "test2")));
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table1",
-                    Arrays.asList(15, 21, "test1")));
 
-
-            sqlServer.executeStatement(sqlClient.newCreateTableStatement("DB1",
-                    "table2", Arrays.asList(
-                            sqlClient.getIntegerColumnMetadataBuilder("column4").notNull().primaryKey().build(),
-                            sqlClient.getVarcharColumnMetadataBuilder("column5", 15).build()
+            sqlServer.executeStatement(
+                    SqlQueryFactory.createTable("DB1", "table2", Arrays.asList(
+                            ColumnMetadataFactory.integerBuilder("column4")
+                                    .notNull().primaryKey().build(),
+                            ColumnMetadataFactory.varcharBuilder("column5", 15).build()
                     )));
 
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table2",
-                    Arrays.asList(22, "test2")));
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table2",
-                    Arrays.asList(23, "test2")));
-            sqlServer.executeStatement(sqlClient.newInsertStatement("DB1", "table2",
-                    Arrays.asList(25, "test22")));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.columnValues(Arrays.asList(22, "test2"))));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.columnValues(Arrays.asList(23, "test2"))));
+            sqlServer.executeStatement(
+                    SqlQueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.columnValues(Arrays.asList(25, "test22"))));
 
 
-            ResultSet resultSet = sqlServer.select(
-                    sqlClient.getSelectionExpressionBuilder(sqlClient.baseTableRef("table2", "DB1"))
-                            .addTableReference(sqlClient.baseTableRef("table1", "DB1"))
-                            .addPredicate(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
-                                    sqlClient.createColumnReference("column3", "table1")))
-                            .addPredicate(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))
-//                   .addPredicateWithOr(SelectionPredicate.equals(new ColumnReference("column3", "table1"), "test2"))
-                            .build());
+            ResultSet resultSet = sqlServer.select(SqlQueryFactory.select(Arrays.asList(
+                    TableRefFactory.dbTable("DB1", "table2"),
+                    TableRefFactory.dbTable("DB1", "table1")),
+                    Arrays.asList(SelectedItemFactory.all()), PredicateFactory
+                            .equals(ColumnExprFactory.columnRef("table2",
+                                    "column5"),
+                                    ColumnExprFactory.columnRef("table1", "column3"))
+                            .and(PredicateFactory
+                                    .equals(ColumnExprFactory
+                                                    .columnRef("table2", "column4"),
+                                            ColumnExprFactory.columnValue(23)))));
             printResultSet(resultSet);
 
-            ResultSet resultSet2 = sqlServer.select(SelectExpressionImpl.builder(
-                    sqlClient.innerJoin(sqlClient.baseTableRef("table2", "DB1"),
-                            sqlClient.baseTableRef("table1", "DB1"),
-                            sqlClient.getPredicateEquals(sqlClient.createColumnReference("column5", "table2"),
-                                    sqlClient.createColumnReference("column3", "table1"))
-                                    .and(sqlClient.getPredicateEquals(sqlClient.createColumnReference("column4", "table2"), 23))))
-                    .build());
+            ResultSet resultSet2 =
+                    sqlServer.select(SqlQueryFactory.select(Arrays.asList(TableRefFactory
+                                    .innerJoin(TableRefFactory.dbTable("DB1", "table2"),
+                                            TableRefFactory.dbTable("DB1", "table1"),
+                                            PredicateFactory
+                                                    .equals(ColumnExprFactory
+                                                                    .columnRef("table2", "column5"),
+                                                            ColumnExprFactory
+                                                                    .columnRef("table1",
+                                                                            "column3"))
+                                                    .and(PredicateFactory.equals(
+                                                            ColumnExprFactory
+                                                                    .columnRef("table2",
+                                                                            "column4"),
+                                                            ColumnExprFactory.columnValue(23))))),
+                            Arrays.asList(SelectedItemFactory.all()),
+                            PredicateFactory.empty()));
             printResultSet(resultSet2);
 
 
@@ -82,27 +117,23 @@ public class TestSimpleFileImpl {
         }
     }
 
-    public static void printResultSet(ResultSet resultSet) {
+    public static void printResultSet(ResultSet resultSet)
+            throws NoSuchColumnException {
         StringBuilder sb = new StringBuilder();
 
 
         String tableString = resultSet.getColumns().stream()
                 .collect(Collectors.joining(", "));
 
-        sb.append("Select result :\n");
+        sb.append("Select result:\n");
         sb.append(tableString);
         for (ResultRow row : resultSet.getRows()) {
             List<String> values = new ArrayList<>();
             for (String columnName : resultSet.getColumns()) {
-                String value = null;
-                try {
-                    value = row.getObject(columnName).toString();
-                } catch (NoSuchColumnException e) {
-                    e.printStackTrace();
-                }
-                values.add(value);
+                values.add(row.getObject(columnName).toString());
             }
-            String rowString = values.stream().collect(Collectors.joining(", "));
+            String rowString =
+                    values.stream().collect(Collectors.joining(", "));
             sb.append("\n" + rowString);
         }
         System.out.println(sb);

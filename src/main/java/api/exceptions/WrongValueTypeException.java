@@ -1,13 +1,13 @@
 package api.exceptions;
 
-import api.ColumnReference;
+import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
 public final class WrongValueTypeException extends SqlException {
 
 
     @NotNull
-    private final ColumnReference columnReference;
+    private final ColumnRef columnRef;
 
     @NotNull
     private final Class expectedClass;
@@ -15,8 +15,8 @@ public final class WrongValueTypeException extends SqlException {
     @NotNull
     private final Class actualClass;
 
-    public WrongValueTypeException(ColumnReference columnReference, Class expectedClass, Class actualClass) {
-        this.columnReference = columnReference;
+    public WrongValueTypeException(ColumnRef columnRef, Class expectedClass, Class actualClass) {
+        this.columnRef = columnRef;
         this.expectedClass = expectedClass;
         this.actualClass = actualClass;
     }
@@ -25,7 +25,7 @@ public final class WrongValueTypeException extends SqlException {
     public String getMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append("Wrong value type for the column ");
-        sb.append(columnReference.toString());
+        sb.append(columnRef.toString());
         sb.append("; Expected: ");
         sb.append(expectedClass.getSimpleName());
         sb.append("; Actual: ");
@@ -33,8 +33,8 @@ public final class WrongValueTypeException extends SqlException {
         return sb.toString();
     }
 
-    public ColumnReference getColumnReference() {
-        return columnReference;
+    public ColumnRef getColumnRef() {
+        return columnRef;
     }
 
     public Class getExpectedClass() {

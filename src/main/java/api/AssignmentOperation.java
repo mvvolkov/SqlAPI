@@ -1,8 +1,10 @@
 package api;
 
+import api.columnExpr.ColumnExpression;
+
 public interface AssignmentOperation {
 
     String getColumnName();
 
-    Object getValue();
+    ColumnExpression getValue();
 }

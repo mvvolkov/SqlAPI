@@ -1,6 +1,6 @@
 package api;
 
-import api.selectionPredicate.Predicate;
+import api.predicates.Predicate;
 
 public interface JoinTableReference extends TableReference {
 
