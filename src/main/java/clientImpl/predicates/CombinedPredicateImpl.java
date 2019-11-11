@@ -4,7 +4,7 @@ import api.predicates.CombinedPredicate;
 import api.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public final class CombinedPredicateImpl extends SelectionPredicateImpl
+public final class CombinedPredicateImpl extends PredicateImpl
         implements CombinedPredicate {
 
 

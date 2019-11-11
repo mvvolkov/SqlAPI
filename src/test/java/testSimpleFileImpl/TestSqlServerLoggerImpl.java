@@ -47,8 +47,9 @@ public class TestSqlServerLoggerImpl {
                             PredicateFactory.greaterThan(
                                     ColumnExprFactory.columnRef("column2"),
                                     ColumnExprFactory.columnValue("12"))).and(
-                            PredicateFactory.isNull(
-                                    ColumnExprFactory.columnRef("column3")))));
+                            PredicateFactory.equals(
+                                    ColumnExprFactory.columnRef("column3"),
+                                    ColumnExprFactory.columnValue(null)))));
 
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
@@ -63,7 +64,8 @@ public class TestSqlServerLoggerImpl {
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
                     Arrays.asList(new AssignmentOperationImpl("column1",
-                                    ColumnExprFactory.columnValue(10)),
+                                    ColumnExprFactory.add(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.columnValue(1))
+                            ),
                             new AssignmentOperationImpl("column2",
                                     ColumnExprFactory.columnValue("test3"))),
                     PredicateFactory.in(ColumnExprFactory.columnRef("column3"),

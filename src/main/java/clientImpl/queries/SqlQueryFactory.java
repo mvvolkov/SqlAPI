@@ -5,7 +5,7 @@ import api.columnExpr.ColumnValue;
 import api.metadata.ColumnMetadata;
 import api.predicates.Predicate;
 import api.queries.*;
-import clientImpl.predicates.SelectionPredicateImpl;
+import clientImpl.predicates.PredicateImpl;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class SqlQueryFactory {
 
     public static DeleteStatement delete(String databaseName, String tableName) {
         return new DeleteStatementImpl(databaseName, tableName,
-                new SelectionPredicateImpl(Predicate.Type.TRUE));
+                new PredicateImpl(Predicate.Type.TRUE));
     }
 
 
@@ -48,7 +48,7 @@ public class SqlQueryFactory {
     public static UpdateStatement update(String databaseName, String tableName,
                                          List<AssignmentOperation> assignmentOperations) {
         return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
-                new SelectionPredicateImpl(Predicate.Type.TRUE));
+                new PredicateImpl(Predicate.Type.TRUE));
     }
 
 

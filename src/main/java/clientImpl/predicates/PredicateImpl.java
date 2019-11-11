@@ -3,12 +3,12 @@ package clientImpl.predicates;
 import api.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public class SelectionPredicateImpl implements Predicate {
+public class PredicateImpl implements Predicate {
 
     @NotNull
     public final Type type;
 
-    public SelectionPredicateImpl(@NotNull Type type) {
+    public PredicateImpl(@NotNull Type type) {
         this.type = type;
     }
 

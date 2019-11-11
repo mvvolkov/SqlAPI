@@ -7,7 +7,6 @@ import api.columnExpr.ColumnValue;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
-import api.predicates.ColumnValuePredicate;
 import api.predicates.Predicate;
 import clientImpl.selectedItems.SelectedItemImpl;
 
@@ -52,79 +51,53 @@ public class Table implements Serializable {
 //        }
 //    }
 
-    private ColumnValuePredicate getColumnValuePredicate(ColumnRef columnRef,
-                                                         ColumnValue value) {
-        return new ColumnValuePredicate() {
-            @Override
-            public ColumnRef getColumnRef() {
-                return columnRef;
-            }
-
-            @Override
-            public ColumnValue getColumnValue() {
-                return value;
-            }
-
-            @Override
-            public Type getType() {
-                return Type.EQUALS;
-            }
-
-            @Override
-            public Predicate and(Predicate predicate) {
-                return null;
-            }
-
-            @Override
-            public Predicate or(Predicate predicate) {
-                return null;
-            }
-        };
-    }
 
     private ColumnRef createColumnReference(ColumnMetadata columnMetadata) {
         return new ColumnRef() {
 
-            @Override public String getColumnName() {
+            @Override
+            public String getColumnName() {
                 return columnMetadata.getName();
             }
 
-            @Override public String getTableName() {
+            @Override
+            public String getTableName() {
                 return tableName;
             }
 
-            @Override public String getDatabaseName() {
+            @Override
+            public String getDatabaseName() {
                 return database.getName();
             }
         };
     }
 
-    protected void checkConstraints(ColumnMetadata columnMetadata,
-                                    ColumnValue columnValue)
-            throws WrongValueTypeException, ConstraintException {
-        Object value = columnValue.getValue();
-        if (value != null &&
-                !columnMetadata.getJavaClass().isInstance(value)) {
-            throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
-                    columnMetadata.getJavaClass(), value.getClass());
-        }
-        if (value == null && columnMetadata.isNotNull()) {
-            throw new ConstraintException(this.createColumnReference(columnMetadata),
-                    "NOT NULL");
-        }
-        if (columnMetadata.isPrimaryKey()) {
-
-            for (Row row : rows) {
-                Value v2 = row.getValue(columnMetadata.getName());
-                if (v2.evaluate(this.getColumnValuePredicate(
-                        this.createColumnReference(columnMetadata), columnValue))) {
-                    throw new ConstraintException(
-                            this.createColumnReference(columnMetadata), "PRIMARY KEY");
-                }
-            }
-
-        }
-    }
+//    protected void checkConstraints(ColumnMetadata columnMetadata,
+//                                    ColumnValue columnValue)
+//            throws WrongValueTypeException, ConstraintException {
+//        Object value = columnValue.getValue();
+//        if (value != null &&
+//                !columnMetadata.getJavaClass().isInstance(value)) {
+//            throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
+//                    columnMetadata.getJavaClass(), value.getClass());
+//        }
+//        if (value == null && columnMetadata.isNotNull()) {
+//            throw new ConstraintException(this.createColumnReference(columnMetadata),
+//                    "NOT NULL");
+//        }
+//        if (columnMetadata.isPrimaryKey()) {
+//
+//            for (Row row : rows) {
+//                Value v2 = row.getValue(columnMetadata.getName());
+//                if (v2.evaluate(this.getColumnValuePredicate(
+//                        this.createColumnReference(columnMetadata), columnValue))) {
+//                    throw new ConstraintException(
+//                            this.createColumnReference(columnMetadata), "PRIMARY KEY");
+//                }
+//            }
+//
+//        }
+//    }
 
 
     public void insert(List<ColumnValue> values)
@@ -136,7 +109,7 @@ public class Table implements Serializable {
             ColumnMetadata columnMetadata = columns.get(i);
             ColumnValue columnValue = values.size() > i ? values.get(i) : null;
 //            columnMetadata.checkConstraints(this, value);
-            this.checkConstraints(columnMetadata, columnValue);
+//            this.checkConstraints(columnMetadata, columnValue);
             map.put(columnMetadata.getName(),
                     new Value(columnMetadata.getJavaClass(), columnValue.getValue()));
         }
@@ -185,15 +158,20 @@ public class Table implements Serializable {
         return new ResultRowImpl(columnNames, values);
     }
 
-    protected ResultSet selectAll() {
-        List<ResultRow> resultRows = new ArrayList<>();
-        for (Row row : rows) {
-
-            resultRows.add(this.getSelectionResultRow(row, Collections.EMPTY_LIST));
-
+    protected InternalResultSet getData() {
+        List<ColumnRefImpl> resultColumns = new ArrayList<>();
+        for (ColumnMetadata column : columns) {
+            resultColumns.add(new ColumnRefImpl(database.getName(), tableName, column.getName()));
         }
-        return new ResultSetImpl(resultRows, new ArrayList<>(columns.stream()
-                .map(ColumnMetadata::getName).collect(Collectors.toList())));
+        List<InternalResultRow> resultRows = new ArrayList<>();
+        for (Row row : rows) {
+            List<Value> values = new ArrayList<>();
+            for (ColumnMetadata column : columns) {
+                values.add(row.getValue(column.getName()));
+            }
+            resultRows.add(new InternalResultRow(resultColumns, values));
+        }
+        return new InternalResultSet(resultColumns, resultRows);
     }
 
 

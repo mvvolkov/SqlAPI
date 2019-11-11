@@ -83,12 +83,12 @@ public class TestSimpleFileImpl {
                     TableRefFactory.dbTable("DB1", "table2"),
                     TableRefFactory.dbTable("DB1", "table1")),
                     Arrays.asList(SelectedItemFactory.all()), PredicateFactory
-                            .equals(ColumnExprFactory.columnRef("table2",
+                            .equals(ColumnExprFactory.columnRef("DB1", "table2",
                                     "column5"),
-                                    ColumnExprFactory.columnRef("table1", "column3"))
+                                    ColumnExprFactory.columnRef("DB1", "table1", "column3"))
                             .and(PredicateFactory
                                     .equals(ColumnExprFactory
-                                                    .columnRef("table2", "column4"),
+                                                    .columnRef("DB1", "table2", "column4"),
                                             ColumnExprFactory.columnValue(23)))));
             printResultSet(resultSet);
 
@@ -98,13 +98,13 @@ public class TestSimpleFileImpl {
                                             TableRefFactory.dbTable("DB1", "table1"),
                                             PredicateFactory
                                                     .equals(ColumnExprFactory
-                                                                    .columnRef("table2", "column5"),
+                                                                    .columnRef("DB1", "table2", "column5"),
                                                             ColumnExprFactory
-                                                                    .columnRef("table1",
+                                                                    .columnRef("DB1", "table1",
                                                                             "column3"))
                                                     .and(PredicateFactory.equals(
                                                             ColumnExprFactory
-                                                                    .columnRef("table2",
+                                                                    .columnRef("DB1", "table2",
                                                                             "column4"),
                                                             ColumnExprFactory.columnValue(23))))),
                             Arrays.asList(SelectedItemFactory.all()),

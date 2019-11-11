@@ -1,8 +1,10 @@
 package serverLoggerImpl;
 
 import api.*;
+import api.columnExpr.BinaryColumnExpression;
 import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
+import api.columnExpr.ColumnValue;
 import api.exceptions.*;
 import api.metadata.ColumnMetadata;
 import api.metadata.TableMetadata;
@@ -145,8 +147,7 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static String getAssignmentOperationString(
             AssignmentOperation assignmentOperation) {
-        return assignmentOperation.getColumnName() + "=" +
-                getStringFromValue(assignmentOperation.getValue());
+        return assignmentOperation.getColumnName() + "=" + getColumnExpressionString(assignmentOperation.getValue());
     }
 
     private static void update(UpdateStatement stmt) {
@@ -230,14 +231,46 @@ public class SqlServerLoggerImpl implements SqlServer {
         if (predicate instanceof CombinedPredicate) {
             return getCombinedPredicateString((CombinedPredicate) predicate);
         }
-        if (predicate instanceof ColumnValuePredicate) {
-            return getColumnValuePredicateString((ColumnValuePredicate) predicate);
-        }
-        if (predicate instanceof ColumnColumnPredicate) {
-            return getColumnColumnPredicateString((ColumnColumnPredicate) predicate);
+        if (predicate instanceof BinaryPredicate) {
+            return getBinaryPredicateString((BinaryPredicate) predicate);
         }
         if (predicate instanceof ColumnInPredicateImpl) {
             return getColumnInPredicateString((ColumnInPredicate) predicate);
+        }
+        return "";
+    }
+
+    private static String getBinaryPredicateString(BinaryPredicate bp) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getColumnExpressionString(bp.getLeftOperand()));
+        sb.append(" ");
+        sb.append(getComparisonOperatorString(bp.getType()));
+        sb.append(" ");
+        sb.append(getColumnExpressionString(bp.getRightOperand()));
+        return sb.toString();
+    }
+
+    private static String getBinaryColumnExpressionString(BinaryColumnExpression bce) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getColumnExpressionString(bce.getLeftOperand()));
+        sb.append(" ");
+        sb.append(getOperatorString(bce.getType()));
+        sb.append(" ");
+        sb.append(getColumnExpressionString(bce.getRightOperand()));
+        return sb.toString();
+    }
+
+    private static String getColumnExpressionString(ColumnExpression ce) {
+
+        if (ce instanceof BinaryColumnExpression) {
+            return getBinaryColumnExpressionString((BinaryColumnExpression) ce);
+        }
+        if (ce instanceof ColumnRef) {
+            return getColumnRefString((ColumnRef) ce);
+        }
+
+        if (ce instanceof ColumnValue) {
+            return getStringFromValue(((ColumnValue) ce).getValue());
         }
         return "";
     }
@@ -256,17 +289,23 @@ public class SqlServerLoggerImpl implements SqlServer {
     }
 
 
-    private static String getColumnColumnPredicateString(ColumnColumnPredicate ccp) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(ccp.getLeftColumnRef()));
-        sb.append(" ");
-        sb.append(getOperatorString(ccp.getType()));
-        sb.append(" ");
-        sb.append(ccp.getRightColumnRef());
-        return sb.toString();
+    private static String getOperatorString(ColumnExpression.Type type) {
+
+        switch (type) {
+            case ADD:
+                return "+";
+            case SUBTRACT:
+                return "-";
+            case MULTIPLY:
+                return "*";
+            case DIVIDE:
+                return "/";
+            default:
+                return "";
+        }
     }
 
-    private static String getOperatorString(Predicate.Type type) {
+    private static String getComparisonOperatorString(Predicate.Type type) {
         switch (type) {
             case AND:
                 return "AND";
@@ -291,24 +330,6 @@ public class SqlServerLoggerImpl implements SqlServer {
         }
     }
 
-    private static String getColumnValuePredicateString(ColumnValuePredicate cvp) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getColumnRefString(cvp.getColumnRef()));
-        sb.append(" ");
-        if (cvp.getColumnValue().getType() == ColumnExpression.Type.NULL_VALUE) {
-            if (cvp.getType() == Predicate.Type.EQUALS) {
-                sb.append("IS NULL");
-            } else if (cvp.getType() == Predicate.Type.NOT_EQUALS) {
-                sb.append("IS NOT NULL");
-            }
-            return sb.toString();
-        }
-        sb.append(getOperatorString(cvp.getType()));
-        sb.append(" ");
-        sb.append(getStringFromValue(cvp.getColumnValue().getValue()));
-        return sb.toString();
-    }
-
 
     private static String getColumnRefString(ColumnRef cr) {
         StringBuilder sb = new StringBuilder(cr.getColumnName());
@@ -329,7 +350,7 @@ public class SqlServerLoggerImpl implements SqlServer {
         sb.append(getPredicateString(cp.getLeftPredicate()));
         sb.append(")");
         sb.append(" ");
-        sb.append(getOperatorString(cp.getType()));
+        sb.append(getComparisonOperatorString(cp.getType()));
         sb.append(" ");
         sb.append("(");
         sb.append(getPredicateString(cp.getRightPredicate()));

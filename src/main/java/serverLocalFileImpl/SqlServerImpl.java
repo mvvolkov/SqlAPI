@@ -1,7 +1,10 @@
 package serverLocalFileImpl;
 
 import api.*;
+import api.columnExpr.BinaryColumnExpression;
+import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
+import api.columnExpr.ColumnValue;
 import api.exceptions.*;
 import api.metadata.TableMetadata;
 import api.predicates.*;
@@ -104,49 +107,49 @@ public class SqlServerImpl implements SqlServer {
         return database;
     }
 
-    private static List<Object> getValuesFromResultSets(List<ResultSet> resultSets,
-                                                        Deque<Integer> stack) {
+    private static List<Value> getValuesFromResultSets(List<InternalResultSet> resultSets,
+                                                       Deque<Integer> stack) {
         Deque<Integer> rowNumbers = new ArrayDeque<>(stack);
-        List<Object> values = new ArrayList<>();
+        List<Value> values = new ArrayList<>();
         while (!rowNumbers.isEmpty()) {
             int rowNumber = rowNumbers.pop();
-            ResultSet resultSet = resultSets.get(rowNumbers.size());
-            ResultRow row = resultSet.getRows().get(rowNumber);
+            InternalResultSet resultSet = resultSets.get(rowNumbers.size());
+            InternalResultRow row = resultSet.getRows().get(rowNumber);
             values.addAll(0, row.getValues());
         }
         return values;
     }
 
-    private static ResultSet joinResultSets(List<ResultSet> resultSets,
-                                            Predicate selectionPredicate)
+    private static InternalResultSet joinResultSets(List<InternalResultSet> resultSets,
+                                                    Predicate selectionPredicate)
             throws NoSuchColumnException, WrongValueTypeException {
 
         // Create full list of columns.
-        List<String> columns = new ArrayList<>();
+        List<ColumnRefImpl> columns = new ArrayList<>();
         boolean hasEmptyResultSet = false;
-        for (ResultSet resultSet : resultSets) {
+        for (InternalResultSet resultSet : resultSets) {
             columns.addAll(resultSet.getColumns());
             if (resultSet.getRows().isEmpty()) {
                 hasEmptyResultSet = true;
             }
         }
         if (hasEmptyResultSet) {
-            return new ResultSetImpl(Collections.EMPTY_LIST, columns);
+            return new InternalResultSet(columns, Collections.EMPTY_LIST);
         }
 
         if (resultSets.size() == 1) {
-            ResultSet resultSet = resultSets.get(0);
-            List<ResultRow> rows = new ArrayList<>();
-            for (ResultRow row : resultSet.getRows()) {
+            InternalResultSet resultSet = resultSets.get(0);
+            List<InternalResultRow> rows = new ArrayList<>();
+            for (InternalResultRow row : resultSet.getRows()) {
                 if (evaluate(row, selectionPredicate)) {
                     rows.add(row);
                 }
             }
-            return new ResultSetImpl(rows, columns);
+            return new InternalResultSet(columns, rows);
         }
 
         // Create all possible combinations of rows from different result sets.
-        List<ResultRow> rows = new ArrayList<>();
+        List<InternalResultRow> rows = new ArrayList<>();
         // Use stack here to get all combinations.
         Deque<Integer> rowNumbers = new ArrayDeque<>(resultSets.size());
         rowNumbers.push(0);
@@ -164,50 +167,80 @@ public class SqlServerImpl implements SqlServer {
             while (rowNumbers.size() < resultSets.size()) {
                 rowNumbers.push(0);
             }
-            ResultRow row = new ResultRowImpl(columns,
+            InternalResultRow row = new InternalResultRow(columns,
                     getValuesFromResultSets(resultSets, rowNumbers));
             if (evaluate(row, selectionPredicate)) {
                 rows.add(row);
             }
         }
-        return new ResultSetImpl(rows, columns);
+        return new InternalResultSet(columns, rows);
     }
 
-    private static ResultSet innerJoin(ResultSet left, ResultSet right, Predicate sc)
+    private static InternalResultSet innerJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        List<String> columns = new ArrayList<>();
+        List<ColumnRefImpl> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
-        List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow leftRow : left.getRows()) {
-            for (ResultRow rightRow : right.getRows()) {
-                List<Object> values = new ArrayList<>();
+        List<InternalResultRow> rows = new ArrayList<>();
+        for (InternalResultRow leftRow : left.getRows()) {
+            for (InternalResultRow rightRow : right.getRows()) {
+                List<Value> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(columns, values);
+                InternalResultRow row = new InternalResultRow(columns, values);
                 if (evaluate(row, sc)) {
                     rows.add(row);
                 }
             }
         }
-        return new ResultSetImpl(rows, columns);
+        return new InternalResultSet(columns, rows);
     }
 
-    private static ResultSet leftOutJoin(ResultSet left, ResultSet right, Predicate sc)
+    private static InternalResultSet leftOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        List<String> columns = new ArrayList<>();
+        List<ColumnRefImpl> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
-        List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow leftRow : left.getRows()) {
+        List<InternalResultRow> rows = new ArrayList<>();
+        for (InternalResultRow leftRow : left.getRows()) {
             boolean matchFound = false;
-            for (ResultRow rightRow : right.getRows()) {
-                List<Object> values = new ArrayList<>();
+            for (InternalResultRow rightRow : right.getRows()) {
+                List<Value> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(columns, values);
+                InternalResultRow row = new InternalResultRow(columns, values);
+                if (evaluate(row, sc)) {
+                    rows.add(row);
+                    matchFound = true;
+                }
+            }
+            if (!matchFound) {
+                List<Value> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                for (ColumnRef column : right.getColumns()) {
+                    values.add(new Value(null, null));
+                }
+            }
+        }
+        return new InternalResultSet(columns, rows);
+    }
+
+    private static InternalResultSet rightOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
+            throws NoSuchColumnException, WrongValueTypeException {
+
+        List<ColumnRefImpl> columns = new ArrayList<>();
+        columns.addAll(left.getColumns());
+        columns.addAll(right.getColumns());
+        List<InternalResultRow> rows = new ArrayList<>();
+        for (InternalResultRow rightRow : right.getRows()) {
+            boolean matchFound = false;
+            for (InternalResultRow leftRow : left.getRows()) {
+                List<Value> values = new ArrayList<>();
+                values.addAll(leftRow.getValues());
+                values.addAll(rightRow.getValues());
+                InternalResultRow row = new InternalResultRow(columns, values);
                 if (evaluate(row, sc)) {
                     rows.add(row);
                     matchFound = true;
@@ -215,46 +248,16 @@ public class SqlServerImpl implements SqlServer {
             }
             if (!matchFound) {
                 List<Object> values = new ArrayList<>();
-                values.addAll(leftRow.getValues());
-                for (String columnName : right.getColumns()) {
-                    values.add(null);
-                }
-            }
-        }
-        return new ResultSetImpl(rows, columns);
-    }
-
-    private static ResultSet rightOutJoin(ResultSet left, ResultSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException {
-
-        List<String> columns = new ArrayList<>();
-        columns.addAll(left.getColumns());
-        columns.addAll(right.getColumns());
-        List<ResultRow> rows = new ArrayList<>();
-        for (ResultRow rightRow : right.getRows()) {
-            boolean matchFound = false;
-            for (ResultRow leftRow : left.getRows()) {
-                List<Object> values = new ArrayList<>();
-                values.addAll(leftRow.getValues());
-                values.addAll(rightRow.getValues());
-                ResultRow row = new ResultRowImpl(columns, values);
-                if (evaluate(row, sc)) {
-                    rows.add(row);
-                    matchFound = true;
-                }
-            }
-            if (!matchFound) {
-                List<Object> values = new ArrayList<>();
-                for (String columnName : left.getColumns()) {
-                    values.add(null);
+                for (ColumnRef column : left.getColumns()) {
+                    values.add(new Value(null, null));
                 }
                 values.addAll(rightRow.getValues());
             }
         }
-        return new ResultSetImpl(rows, columns);
+        return new InternalResultSet(columns, rows);
     }
 
-    static boolean evaluate(ResultRow resultRow, Predicate predicate)
+    static boolean evaluate(InternalResultRow resultRow, Predicate predicate)
             throws NoSuchColumnException, WrongValueTypeException {
 
         if (predicate.getType() == Predicate.Type.TRUE) {
@@ -262,56 +265,40 @@ public class SqlServerImpl implements SqlServer {
         } else if (predicate.getType() == Predicate.Type.FALSE) {
             return false;
         }
-        switch (predicate.getType()) {
-            case AND:
-                CombinedPredicate cp1 = (CombinedPredicate) predicate;
-                return evaluate(resultRow, cp1.getLeftPredicate()) &&
-                        evaluate(resultRow, cp1.getRightPredicate());
-            case OR:
-                CombinedPredicate cp2 = (CombinedPredicate) predicate;
-                return evaluate(resultRow, cp2.getLeftPredicate()) ||
-                        evaluate(resultRow, cp2.getRightPredicate());
-            case EQUALS:
-            case NOT_EQUALS:
-            case GREATER_THAN:
-            case GREATER_THAN_OR_EQUALS:
-            case LESS_THAN:
-            case LESS_THAN_OR_EQUALS:
-                return compareValues(resultRow, predicate);
-            default:
-                return false;
+        if (predicate instanceof CombinedPredicate) {
+            switch (predicate.getType()) {
+                case AND:
+                    CombinedPredicate cp1 = (CombinedPredicate) predicate;
+                    return evaluate(resultRow, cp1.getLeftPredicate()) &&
+                            evaluate(resultRow, cp1.getRightPredicate());
+                case OR:
+                    CombinedPredicate cp2 = (CombinedPredicate) predicate;
+                    return evaluate(resultRow, cp2.getLeftPredicate()) ||
+                            evaluate(resultRow, cp2.getRightPredicate());
+            }
         }
+        if (predicate instanceof BinaryPredicate) {
+            return compareValues(resultRow, (BinaryPredicate) predicate);
+        }
+        return false;
     }
 
-    static boolean compareValues(ResultRow resultRow, Predicate predicate)
+    static boolean compareValues(InternalResultRow resultRow, BinaryPredicate predicate)
             throws WrongValueTypeException, NoSuchColumnException {
 
-        Comparable leftValue = null;
-        Comparable rightValue = null;
-        ColumnRef cr = null;
 
-        if (predicate instanceof ColumnValuePredicate) {
-            cr = ((ColumnValuePredicate) predicate).getColumnRef();
-            leftValue = (Comparable) resultRow.getObject(cr.getColumnName());
-            rightValue = (Comparable) ((ColumnValuePredicate) predicate).getColumnValue()
-                    .getValue();
-        }
+        Comparable leftValue = (Comparable) evaluateColumnExpr(resultRow, predicate.getLeftOperand());
+        Comparable rightValue = (Comparable) evaluateColumnExpr(resultRow, predicate.getRightOperand());
 
-        if (predicate instanceof ColumnColumnPredicate) {
-            cr = ((ColumnColumnPredicate) predicate).getLeftColumnRef();
-            leftValue = (Comparable) resultRow.getObject(cr.getColumnName());
-            ColumnRef cr2 = ((ColumnColumnPredicate) predicate).getRightColumnRef();
-            rightValue = (Comparable) resultRow.getObject(cr2.getColumnName());
-        }
 
         if (leftValue == null || rightValue == null) {
             return false;
         }
 
-        if (!leftValue.getClass().equals(rightValue.getClass())) {
-            throw new WrongValueTypeException(cr, leftValue.getClass(),
-                    rightValue.getClass());
-        }
+//        if (!leftValue.getClass().equals(rightValue.getClass())) {
+//            throw new WrongValueTypeException(cr, leftValue.getClass(),
+//                    rightValue.getClass());
+//        }
 
 
         int compResult = leftValue.compareTo(rightValue);
@@ -333,21 +320,71 @@ public class SqlServerImpl implements SqlServer {
         }
     }
 
-    protected ResultSet selectFromBaseTable(TableReference tableReference)
-            throws SqlException {
-        if (!(tableReference instanceof DatabaseTableReference)) {
-            throw new IllegalArgumentException();
+    protected static Object evaluateColumnExpr(InternalResultRow row, ColumnExpression ce) {
+
+        if (ce instanceof BinaryColumnExpression) {
+            return evaluateBinaryColumnExpr(row, (BinaryColumnExpression) ce);
         }
-        Table table = (Table) this.getTable((DatabaseTableReference) tableReference);
-        return table.selectAll();
+        if (ce instanceof ColumnRef) {
+            return evaluateColumnRef(row, (ColumnRef) ce);
+        }
+        if (ce instanceof ColumnValue) {
+            return ((ColumnValue) ce).getValue();
+        }
+        return null;
     }
 
-    protected ResultSet selectFromJoinedTable(JoinTableReference tableReference)
+    protected static Object evaluateBinaryColumnExpr(InternalResultRow row, BinaryColumnExpression bce) {
+        Object leftValue = evaluateColumnExpr(row, bce.getLeftOperand());
+        Object rightValue = evaluateColumnExpr(row, bce.getRightOperand());
+        switch (bce.getType()) {
+            case ADD:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) + ((Integer) rightValue));
+                }
+                if (leftValue instanceof String && rightValue instanceof String) {
+                    return (String) (((String) leftValue) + ((String) rightValue));
+                }
+            case SUBTRACT:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) - ((Integer) rightValue));
+                }
+            case MULTIPLY:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) * ((Integer) rightValue));
+                }
+            case DIVIDE:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) / ((Integer) rightValue));
+                }
+        }
+        return null;
+    }
+
+    protected static Object evaluateColumnRef(InternalResultRow row, ColumnRef cr) {
+
+        for (int i = 0; i < row.getColumns().size(); i++) {
+            ColumnRef cr1 = row.getColumns().get(i);
+            if (cr1.getDatabaseName().equals(cr.getDatabaseName()) && cr1.getTableName().equals(cr.getTableName())
+                    && cr1.getColumnName().equals(cr.getColumnName())) {
+                return row.getValues().get(i).getValue();
+            }
+        }
+        return null;
+    }
+
+
+    protected InternalResultSet selectFromBaseTable(DatabaseTableReference dtr)
+            throws SqlException {
+        return this.getTable(dtr).getData();
+    }
+
+    protected InternalResultSet selectFromJoinedTable(JoinTableReference tableReference)
             throws SqlException {
 
 
-        ResultSet left = this.selectAll(tableReference.getLeftTableReference());
-        ResultSet right = this.selectAll(tableReference.getRightTableReference());
+        InternalResultSet left = this.selectAll(tableReference.getLeftTableReference());
+        InternalResultSet right = this.selectAll(tableReference.getRightTableReference());
         switch (tableReference.getType()) {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getSelectionPredicate());
@@ -356,7 +393,7 @@ public class SqlServerImpl implements SqlServer {
             case RIGHT_OUTER_JOIN:
                 return rightOutJoin(left, right, tableReference.getSelectionPredicate());
         }
-        return new ResultSetImpl(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        return new InternalResultSet(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
 
     @Override
@@ -366,34 +403,48 @@ public class SqlServerImpl implements SqlServer {
 
         logger.select(selectExpression);
 
-        List<ResultSet> resultSets = new ArrayList<>();
-        for (TableReference tableReference : selectExpression.getTableReferences()) {
-            if (tableReference instanceof DatabaseTableReference) {
-                resultSets.add(this.selectFromBaseTable(tableReference));
+        List<InternalResultSet> resultSets = new ArrayList<>();
+        for (TableReference tr : selectExpression.getTableReferences()) {
+            if (tr instanceof DatabaseTableReference) {
+                resultSets.add(this.selectFromBaseTable((DatabaseTableReference) tr));
                 continue;
-            } else if (tableReference instanceof JoinTableReference) {
-                resultSets.add(this
-                        .selectFromJoinedTable((JoinTableReference) tableReference));
+            } else if (tr instanceof JoinTableReference) {
+                resultSets.add(this.selectFromJoinedTable((JoinTableReference) tr));
                 continue;
-            } else if (tableReference instanceof SelectExpression) {
-                resultSets.add(this.select((SelectExpression) tableReference));
             }
+//            else if (tr instanceof SelectExpression) {
+//                resultSets.add(this.select((SelectExpression) tr));
+//            }
         }
-        ResultSet resultSet =
+        InternalResultSet internalResultSet =
                 this.joinResultSets(resultSets, selectExpression.getPredicate());
-        return resultSet;
+
+        List<ResultRow> resultRows = new ArrayList<>();
+        List<String> resultColumns = new ArrayList<>();
+        for (ColumnRef columnRef : internalResultSet.getColumns()) {
+            resultColumns.add(columnRef.getColumnName());
+        }
+        for (InternalResultRow row : internalResultSet.getRows()) {
+            List<Object> values = new ArrayList<>();
+            for (Value value : row.getValues()) {
+                values.add(value.getValue());
+            }
+            resultRows.add(new ResultRowImpl(resultColumns, values));
+        }
+        return new ResultSetImpl(resultRows, resultColumns);
     }
 
-    protected @NotNull ResultSet selectAll(TableReference tableReference) throws
+    protected @NotNull InternalResultSet selectAll(TableReference tableReference) throws
             SqlException {
 
         if (tableReference instanceof DatabaseTableReference) {
-            return this.selectFromBaseTable(tableReference);
+            return this.selectFromBaseTable((DatabaseTableReference) tableReference);
         } else if (tableReference instanceof JoinTableReference) {
             return this.selectFromJoinedTable((JoinTableReference) tableReference);
-        } else if (tableReference instanceof SelectExpression) {
-            return this.select((SelectExpression) tableReference);
         }
+//        else if (tableReference instanceof SelectExpression) {
+//            return this.select((SelectExpression) tableReference);
+//        }
         throw new IllegalArgumentException("");
     }
 

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ColumnInPredicateImpl extends SelectionPredicateImpl
+public class ColumnInPredicateImpl extends PredicateImpl
         implements ColumnInPredicate {
 
     @NotNull
