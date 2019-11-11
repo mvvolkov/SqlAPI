@@ -5,16 +5,13 @@ import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
 import api.columnExpr.ColumnValue;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class ColumnExprFactory {
 
     private ColumnExprFactory() {
     }
 
     public static ColumnValue nullValue() {
-        return new ColumnValueImpl(null);
+        return new ColumnValueImpl(null, null);
     }
 
     public static ColumnRef columnRef(String columnName) {
@@ -30,14 +27,14 @@ public class ColumnExprFactory {
         return new ColumnRefImpl(databaseName, tableName, columnName);
     }
 
-    public static ColumnValue columnValue(Object value) {
-        return new ColumnValueImpl(value);
+    public static ColumnValue<Integer> integer(Integer value) {
+        return new ColumnValueImpl(value, Integer.class);
     }
 
-    public static List<ColumnValue> columnValues(List<Object> values) {
-        return values.stream().map(value -> new ColumnValueImpl(value))
-                .collect(Collectors.toList());
+    public static ColumnValue<Integer> string(String value) {
+        return new ColumnValueImpl(value, String.class);
     }
+
 
     public static BinaryColumnExpression add(ColumnExpression leftOperand,
                                              ColumnExpression rightOperand) {

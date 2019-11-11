@@ -18,7 +18,8 @@ public final class ConstraintException extends SqlException {
 
     @Override
     public String getMessage() {
-        return "Constraint violation for the column " + columnRef + ": " + errorMessage;
+        return "Constraint violation for the column " + columnRef.getDatabaseName()
+                + "." + columnRef.getTableName() + "." + columnRef.getColumnName() + ": " + errorMessage;
     }
 
     @NotNull

@@ -1,23 +1,21 @@
 package serverLocalFileImpl;
 
-import api.ResultRow;
 import api.ResultSet;
 import api.columnExpr.ColumnRef;
 import api.columnExpr.ColumnValue;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
-import api.predicates.Predicate;
-import clientImpl.selectedItems.SelectedItemImpl;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Table implements Serializable {
 
-    private final Database database;
-
+    private final String dbName;
 
     private final String tableName;
 
@@ -25,8 +23,8 @@ public class Table implements Serializable {
 
     private final List<Row> rows = new ArrayList<>();
 
-    public Table(Database database, String tableName, List<ColumnMetadata> columns) {
-        this.database = database;
+    public Table(String dbName, String tableName, List<ColumnMetadata> columns) {
+        this.dbName = dbName;
         this.tableName = tableName;
         this.columns = columns;
     }
@@ -40,24 +38,12 @@ public class Table implements Serializable {
     }
 
 
-//    public void checkPrimaryKey(ColumnRef columnRef, Object value)
-//            throws ConstraintException, WrongValueTypeException {
-//
-//        for (Row row : rows) {
-//            Value v2 = row.getValue(columnRef.getColumnName());
-//            if (v2.evaluate(this.getColumnValuePredicate(columnRef, value))) {
-//                throw new ConstraintException(columnRef, "PRIMARY KEY");
-//            }
-//        }
-//    }
-
-
-    private ColumnRef createColumnReference(ColumnMetadata columnMetadata) {
+    private ColumnRef createColumnRef(String columnName) {
         return new ColumnRef() {
 
             @Override
             public String getColumnName() {
-                return columnMetadata.getName();
+                return columnName;
             }
 
             @Override
@@ -67,37 +53,35 @@ public class Table implements Serializable {
 
             @Override
             public String getDatabaseName() {
-                return database.getName();
+                return dbName;
             }
         };
     }
 
-//    protected void checkConstraints(ColumnMetadata columnMetadata,
-//                                    ColumnValue columnValue)
-//            throws WrongValueTypeException, ConstraintException {
-//        Object value = columnValue.getValue();
-//        if (value != null &&
-//                !columnMetadata.getJavaClass().isInstance(value)) {
-//            throw new WrongValueTypeException(this.createColumnReference(columnMetadata),
-//                    columnMetadata.getJavaClass(), value.getClass());
-//        }
-//        if (value == null && columnMetadata.isNotNull()) {
-//            throw new ConstraintException(this.createColumnReference(columnMetadata),
-//                    "NOT NULL");
-//        }
-//        if (columnMetadata.isPrimaryKey()) {
-//
-//            for (Row row : rows) {
-//                Value v2 = row.getValue(columnMetadata.getName());
-//                if (v2.evaluate(this.getColumnValuePredicate(
-//                        this.createColumnReference(columnMetadata), columnValue))) {
-//                    throw new ConstraintException(
-//                            this.createColumnReference(columnMetadata), "PRIMARY KEY");
-//                }
-//            }
-//
-//        }
-//    }
+    protected void checkConstraints(ColumnMetadata columnMetadata,
+                                    ColumnValue columnValue)
+            throws WrongValueTypeException, ConstraintException {
+        Object value = columnValue.getValue();
+        if (value != null &&
+                !columnMetadata.getJavaClass().isInstance(value)) {
+            throw new WrongValueTypeException(this.createColumnRef(columnMetadata.getName()),
+                    columnMetadata.getJavaClass(), value.getClass());
+        }
+        if (value == null && columnMetadata.isNotNull()) {
+            throw new ConstraintException(this.createColumnRef(columnMetadata.getName()),
+                    "NOT NULL");
+        }
+        if (columnMetadata.isPrimaryKey()) {
+
+            for (Row row : rows) {
+                Value v2 = row.getValue(columnMetadata.getName());
+                if (v2.getValue().compareTo(columnValue.getValue()) == 0) {
+                    throw new ConstraintException(
+                            this.createColumnRef(columnMetadata.getName()), "PRIMARY KEY");
+                }
+            }
+        }
+    }
 
 
     public void insert(List<ColumnValue> values)
@@ -108,8 +92,7 @@ public class Table implements Serializable {
         for (int i = 0; i < columns.size(); i++) {
             ColumnMetadata columnMetadata = columns.get(i);
             ColumnValue columnValue = values.size() > i ? values.get(i) : null;
-//            columnMetadata.checkConstraints(this, value);
-//            this.checkConstraints(columnMetadata, columnValue);
+            this.checkConstraints(columnMetadata, columnValue);
             map.put(columnMetadata.getName(),
                     new Value(columnMetadata.getJavaClass(), columnValue.getValue()));
         }
@@ -123,45 +106,15 @@ public class Table implements Serializable {
     }
 
 
-    public void insert(ResultSet rows) {
+    public void insert(ResultSet resultSet) {
 
     }
 
-
-    private ResultRow getSelectionResultRow(Row row,
-                                            List<SelectedItemImpl> selectedItems) {
-        List<Object> values = new ArrayList<>();
-        List<String> columnNames = new ArrayList<>();
-        if (selectedItems.isEmpty()) {
-            for (ColumnMetadata columnMetadata : columns) {
-                Value tableValue = row.getValue(columnMetadata.getName());
-                values.add(tableValue.getValue());
-                columnNames.add(columnMetadata.getName());
-            }
-            return new ResultRowImpl(columnNames, values);
-        }
-        for (SelectedItemImpl selectedItem : selectedItems) {
-            switch (selectedItem.getType()) {
-                case SELECT_ALL:
-                    for (ColumnMetadata columnMetadata : columns) {
-                        Value tableValue = row.getValue(columnMetadata.getName());
-                        values.add(tableValue.getValue());
-                        columnNames.add(columnMetadata.getName());
-                    }
-                    break;
-                case SELECT_ALL_FROM_TABLE:
-                    break;
-                case SELECT_COLUMN_EXPRESSION:
-                    break;
-            }
-        }
-        return new ResultRowImpl(columnNames, values);
-    }
 
     protected InternalResultSet getData() {
-        List<ColumnRefImpl> resultColumns = new ArrayList<>();
+        List<ColumnRef> resultColumns = new ArrayList<>();
         for (ColumnMetadata column : columns) {
-            resultColumns.add(new ColumnRefImpl(database.getName(), tableName, column.getName()));
+            resultColumns.add(this.createColumnRef(column.getName()));
         }
         List<InternalResultRow> resultRows = new ArrayList<>();
         for (Row row : rows) {
@@ -172,22 +125,5 @@ public class Table implements Serializable {
             resultRows.add(new InternalResultRow(resultColumns, values));
         }
         return new InternalResultSet(resultColumns, resultRows);
-    }
-
-
-    public ResultSet select(List<SelectedItemImpl> selectedItems,
-                            Predicate selectionPredicate)
-            throws WrongValueTypeException {
-
-
-        List<ResultRow> resultRows = new ArrayList<>();
-        for (Row row : rows) {
-
-            resultRows.add(this.getSelectionResultRow(row, selectedItems));
-
-        }
-        return new ResultSetImpl(resultRows,
-                new ArrayList<>(columns.stream()
-                        .map(ColumnMetadata::getName).collect(Collectors.toList())));
     }
 }

@@ -53,7 +53,7 @@ public class SqlServerImpl implements SqlServer {
             throw new TableAlreadyExistsException(database.getName(),
                     stmt.getTableName());
         }
-        database.addTable(new Table(database, stmt.getTableName(), stmt.getColumns()));
+        database.addTable(new Table(database.getName(), stmt.getTableName(), stmt.getColumns()));
     }
 
     private void insert(InsertStatement stmt)
@@ -125,7 +125,7 @@ public class SqlServerImpl implements SqlServer {
             throws NoSuchColumnException, WrongValueTypeException {
 
         // Create full list of columns.
-        List<ColumnRefImpl> columns = new ArrayList<>();
+        List<ColumnRef> columns = new ArrayList<>();
         boolean hasEmptyResultSet = false;
         for (InternalResultSet resultSet : resultSets) {
             columns.addAll(resultSet.getColumns());
@@ -179,7 +179,7 @@ public class SqlServerImpl implements SqlServer {
     private static InternalResultSet innerJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnRefImpl> columns = new ArrayList<>();
+        List<ColumnRef> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<InternalResultRow> rows = new ArrayList<>();
@@ -200,7 +200,7 @@ public class SqlServerImpl implements SqlServer {
     private static InternalResultSet leftOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnRefImpl> columns = new ArrayList<>();
+        List<ColumnRef> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<InternalResultRow> rows = new ArrayList<>();
@@ -230,7 +230,7 @@ public class SqlServerImpl implements SqlServer {
     private static InternalResultSet rightOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        List<ColumnRefImpl> columns = new ArrayList<>();
+        List<ColumnRef> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
         List<InternalResultRow> rows = new ArrayList<>();

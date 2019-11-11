@@ -1,10 +1,13 @@
 package api.columnExpr;
 
-public interface ColumnValue extends ColumnExpression {
+public interface ColumnValue<T extends Comparable<T>> extends ColumnExpression {
 
-    Object getValue();
+    T getValue();
 
-    @Override default Type getType() {
+    Class<T> getJavaClass();
+
+    @Override
+    default Type getType() {
         return Type.COLUMN_VALUE;
     }
 }

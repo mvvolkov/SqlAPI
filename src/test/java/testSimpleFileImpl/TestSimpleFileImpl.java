@@ -41,24 +41,25 @@ public class TestSimpleFileImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            ColumnExprFactory.columnValues(Arrays.asList(10, 20, "test1"))
+                            Arrays.asList(ColumnExprFactory.integer(10), ColumnExprFactory.integer(20),
+                                    ColumnExprFactory.string("test1"))
                     ));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            ColumnExprFactory
-                                    .columnValues(Arrays.asList(11, 20, "test1"))));
+                            Arrays.asList(ColumnExprFactory.integer(11), ColumnExprFactory.integer(20),
+                                    ColumnExprFactory.string("test1"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            ColumnExprFactory
-                                    .columnValues(Arrays.asList(12, 20, "test1"))));
+                            Arrays.asList(ColumnExprFactory.integer(12), ColumnExprFactory.integer(20),
+                                    ColumnExprFactory.string("test1"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            ColumnExprFactory
-                                    .columnValues(Arrays.asList(13, 20, "test2"))));
+                            Arrays.asList(ColumnExprFactory.integer(13), ColumnExprFactory.integer(20),
+                                    ColumnExprFactory.string("test2"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            ColumnExprFactory
-                                    .columnValues(Arrays.asList(15, 21, "test1"))));
+                            Arrays.asList(ColumnExprFactory.integer(15), ColumnExprFactory.integer(21),
+                                    ColumnExprFactory.string("test1"))));
 
 
             sqlServer.executeStatement(
@@ -70,13 +71,16 @@ public class TestSimpleFileImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.columnValues(Arrays.asList(22, "test2"))));
+                            Arrays.asList(ColumnExprFactory.integer(22),
+                                    ColumnExprFactory.string("test2"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.columnValues(Arrays.asList(23, "test2"))));
+                            Arrays.asList(ColumnExprFactory.integer(23),
+                                    ColumnExprFactory.string("test2"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.columnValues(Arrays.asList(25, "test22"))));
+                            Arrays.asList(ColumnExprFactory.integer(25),
+                                    ColumnExprFactory.string("test22"))));
 
 
             ResultSet resultSet = sqlServer.select(SqlQueryFactory.select(Arrays.asList(
@@ -89,7 +93,7 @@ public class TestSimpleFileImpl {
                             .and(PredicateFactory
                                     .equals(ColumnExprFactory
                                                     .columnRef("DB1", "table2", "column4"),
-                                            ColumnExprFactory.columnValue(23)))));
+                                            ColumnExprFactory.integer(23)))));
             printResultSet(resultSet);
 
             ResultSet resultSet2 =
@@ -106,7 +110,7 @@ public class TestSimpleFileImpl {
                                                             ColumnExprFactory
                                                                     .columnRef("DB1", "table2",
                                                                             "column4"),
-                                                            ColumnExprFactory.columnValue(23))))),
+                                                            ColumnExprFactory.integer(23))))),
                             Arrays.asList(SelectedItemFactory.all()),
                             PredicateFactory.empty()));
             printResultSet(resultSet2);

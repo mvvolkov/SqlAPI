@@ -2,16 +2,24 @@ package clientImpl.columnExpr;
 
 import api.columnExpr.ColumnValue;
 
-public class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {
+public class ColumnValueImpl<T extends Comparable<T>> extends ColumnExprImpl implements ColumnValue<T> {
 
-    private final Object value;
+    private final T value;
 
-    public ColumnValueImpl(Object value) {
+    private final Class<T> javaClass;
+
+    public ColumnValueImpl(T value, Class<T> javaClass) {
         super(Type.COLUMN_VALUE);
         this.value = value;
+        this.javaClass = javaClass;
     }
 
-    @Override public Object getValue() {
+    @Override
+    public T getValue() {
         return value;
+    }
+
+    public Class<T> getJavaClass() {
+        return javaClass;
     }
 }

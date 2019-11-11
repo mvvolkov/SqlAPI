@@ -30,47 +30,45 @@ public class TestSqlServerLoggerImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory
-                                    .columnValues(Arrays.asList(10, null, "test"))));
+                            Arrays.asList(ColumnExprFactory.integer(10), ColumnExprFactory.integer(null), ColumnExprFactory.string("test"))));
 
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList("column1", "column2", "column3"),
-                    ColumnExprFactory.columnValues(Arrays.asList(10,
-                            null, "test"))));
+                    Arrays.asList(ColumnExprFactory.integer(10), ColumnExprFactory.integer(null), ColumnExprFactory.string("test"))));
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1"));
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1",
                     PredicateFactory
                             .equals(ColumnExprFactory.columnRef("column1"),
-                                    ColumnExprFactory.columnValue(3)).or(
+                                    ColumnExprFactory.integer(3)).or(
                             PredicateFactory.greaterThan(
                                     ColumnExprFactory.columnRef("column2"),
-                                    ColumnExprFactory.columnValue("12"))).and(
+                                    ColumnExprFactory.string("12"))).and(
                             PredicateFactory.equals(
                                     ColumnExprFactory.columnRef("column3"),
-                                    ColumnExprFactory.columnValue(null)))));
+                                    ColumnExprFactory.integer(null)))));
 
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
                     Arrays.asList(new AssignmentOperationImpl("column1",
-                                    ColumnExprFactory.columnValue(10)),
+                                    ColumnExprFactory.integer(10)),
                             new AssignmentOperationImpl("column2",
-                                    ColumnExprFactory.columnValue("test3"))),
+                                    ColumnExprFactory.string("test3"))),
                     PredicateFactory
                             .lessThan(ColumnExprFactory.columnRef("column3"),
-                                    ColumnExprFactory.columnValue("abs"))));
+                                    ColumnExprFactory.string("abs"))));
 
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
                     Arrays.asList(new AssignmentOperationImpl("column1",
-                                    ColumnExprFactory.add(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.columnValue(1))
+                                    ColumnExprFactory.add(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.integer(1))
                             ),
                             new AssignmentOperationImpl("column2",
-                                    ColumnExprFactory.columnValue("test3"))),
+                                    ColumnExprFactory.string("test3"))),
                     PredicateFactory.in(ColumnExprFactory.columnRef("column3"),
-                            ColumnExprFactory.columnValues(Arrays.asList("12", "13",
-                                    "14")))
+                            Arrays.asList(ColumnExprFactory.string("12"), ColumnExprFactory.string("13"),
+                                    ColumnExprFactory.string("14")))
             ));
 
 
