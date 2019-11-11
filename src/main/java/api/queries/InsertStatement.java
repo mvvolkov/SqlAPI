@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface InsertStatement extends SqlStatement {
 
-    List<ColumnValue> getValues();
+    List<ColumnValue<?>> getValues();
 
     List<String> getColumns();
 

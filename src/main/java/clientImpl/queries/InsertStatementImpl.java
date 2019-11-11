@@ -9,23 +9,23 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
 
 
     private final List<String> columns;
-    private final List<ColumnValue> values;
+    private final List<ColumnValue<?>> values;
 
     public InsertStatementImpl(String databaseName, String tableName,
-                               List<String> columns, List<ColumnValue> values) {
+                               List<String> columns, List<ColumnValue<?>> values) {
         super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
     }
 
     public InsertStatementImpl(String databaseName, String tableName,
-                               List<ColumnValue> values) {
+                               List<ColumnValue<?>> values) {
         this(databaseName, tableName, null, values);
     }
 
 
     @Override
-    public List<ColumnValue> getValues() {
+    public List<ColumnValue<?>> getValues() {
         return values;
     }
 

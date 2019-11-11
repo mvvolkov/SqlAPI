@@ -8,7 +8,6 @@ import api.columnExpr.ColumnValue;
 import api.exceptions.*;
 import api.metadata.ColumnMetadata;
 import api.metadata.TableMetadata;
-import api.metadata.VarcharColumnMetadata;
 import api.predicates.*;
 import api.queries.*;
 import clientImpl.predicates.ColumnInPredicateImpl;
@@ -74,12 +73,12 @@ public class SqlServerLoggerImpl implements SqlServer {
     }
 
     private static String getColumnMetadataString(ColumnMetadata columnMetadata) {
-        StringBuilder sb = new StringBuilder(columnMetadata.getName());
+        StringBuilder sb = new StringBuilder(columnMetadata.getColumnName());
         sb.append(" ");
         sb.append(columnMetadata.getSqlTypeName());
-        if (columnMetadata instanceof VarcharColumnMetadata) {
+        if (columnMetadata.getSize() != -1) {
             sb.append("(");
-            sb.append(((VarcharColumnMetadata) columnMetadata).getMaxLength());
+            sb.append(columnMetadata.getSize());
             sb.append(")");
         }
         if (columnMetadata.isNotNull()) {
@@ -147,7 +146,8 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static String getAssignmentOperationString(
             AssignmentOperation assignmentOperation) {
-        return assignmentOperation.getColumnName() + "=" + getColumnExpressionString(assignmentOperation.getValue());
+        return assignmentOperation.getColumnName() + "=" +
+                getColumnExpressionString(assignmentOperation.getValue());
     }
 
     private static void update(UpdateStatement stmt) {

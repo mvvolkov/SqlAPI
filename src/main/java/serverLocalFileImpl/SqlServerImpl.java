@@ -8,65 +8,19 @@ import api.columnExpr.ColumnValue;
 import api.exceptions.*;
 import api.metadata.TableMetadata;
 import api.predicates.*;
-import api.queries.CreateTableStatement;
-import api.queries.InsertStatement;
-import api.queries.SelectExpression;
-import api.queries.SqlStatement;
+import api.queries.*;
 import org.jetbrains.annotations.NotNull;
 import serverLoggerImpl.SqlServerLoggerImpl;
 
 import java.util.*;
 
-public class SqlServerImpl implements SqlServer {
+public final class SqlServerImpl implements SqlServer {
 
 
     private final transient SqlServer logger = new SqlServerLoggerImpl();
 
     private final Collection<Database> databases = new ArrayList<>();
 
-
-    @Override
-    public void executeStatement(SqlStatement stmt) throws SqlException {
-        logger.executeStatement(stmt);
-        switch (stmt.getType()) {
-            case CREATE_TABLE:
-                this.createTable((CreateTableStatement) stmt);
-                return;
-            case INSERT:
-                this.insert((InsertStatement) stmt);
-                return;
-            case DELETE:
-//                delete((DeleteStatement) stmt);
-                return;
-            case UPDATE:
-//                update((UpdateStatement) stmt);
-                return;
-        }
-    }
-
-
-    private void createTable(CreateTableStatement stmt)
-            throws TableAlreadyExistsException, NoSuchDatabaseException {
-        Database database = this.getDatabase(stmt.getDatabaseName());
-        Table table = database.getTableOrNull(stmt.getTableName());
-        if (table != null) {
-            throw new TableAlreadyExistsException(database.getName(),
-                    stmt.getTableName());
-        }
-        database.addTable(new Table(database.getName(), stmt.getTableName(), stmt.getColumns()));
-    }
-
-    private void insert(InsertStatement stmt)
-            throws NoSuchDatabaseException, NoSuchTableException, ConstraintException,
-            WrongValueTypeException {
-        Database database = this.getDatabase(stmt.getDatabaseName());
-        Table table = database.getTable(stmt.getTableName());
-        if (stmt.getColumns() == null) {
-            table.insert(stmt.getValues());
-        } else {
-            table.insert(stmt.getColumns(), stmt.getValues());
-        }
-    }
 
     @Override
     public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
@@ -89,7 +43,69 @@ public class SqlServerImpl implements SqlServer {
     }
 
 
-    public Database getDatabaseOrNull(String dbName) {
+    @Override
+    public void executeStatement(SqlStatement stmt) throws SqlException {
+        logger.executeStatement(stmt);
+        switch (stmt.getType()) {
+            case CREATE_TABLE:
+                this.createTable((CreateTableStatement) stmt);
+                return;
+            case INSERT:
+                this.insert((InsertStatement) stmt);
+                return;
+            case DELETE:
+                this.delete((DeleteStatement) stmt);
+                return;
+            case UPDATE:
+                this.update((UpdateStatement) stmt);
+                return;
+        }
+    }
+
+
+    private void createTable(CreateTableStatement stmt)
+            throws TableAlreadyExistsException, NoSuchDatabaseException {
+        Database database = this.getDatabase(stmt.getDatabaseName());
+        Table table = database.getTableOrNull(stmt.getTableName());
+        if (table != null) {
+            throw new TableAlreadyExistsException(database.getName(),
+                    stmt.getTableName());
+        }
+        database.addTable(
+                new Table(database.getName(), stmt.getTableName(), stmt.getColumns()));
+    }
+
+    private void insert(InsertStatement stmt)
+            throws NoSuchDatabaseException, NoSuchTableException, ConstraintException,
+            WrongValueTypeException {
+        Table table = this.getTableForStatement(stmt);
+        if (stmt.getColumns() == null) {
+            table.insert(stmt.getValues());
+        } else {
+            table.insert(stmt.getColumns(), stmt.getValues());
+        }
+    }
+
+    private Table getTableForStatement(SqlStatement stmt)
+            throws NoSuchDatabaseException, NoSuchTableException {
+        Database database = this.getDatabase(stmt.getDatabaseName());
+        return database.getTable(stmt.getTableName());
+    }
+
+    private void delete(DeleteStatement stmt)
+            throws NoSuchDatabaseException, NoSuchTableException {
+        Table table = this.getTableForStatement(stmt);
+        table.delete(stmt);
+    }
+
+    private void update(UpdateStatement stmt)
+            throws NoSuchDatabaseException, NoSuchTableException {
+        Table table = this.getTableForStatement(stmt);
+        table.update(stmt);
+    }
+
+
+    private Database getDatabaseOrNull(String dbName) {
         for (Database database : databases) {
             if (database.getName().equals(dbName)) {
                 return database;
@@ -99,7 +115,7 @@ public class SqlServerImpl implements SqlServer {
     }
 
 
-    public @NotNull Database getDatabase(String dbName) throws NoSuchDatabaseException {
+    private @NotNull Database getDatabase(String dbName) throws NoSuchDatabaseException {
         Database database = this.getDatabaseOrNull(dbName);
         if (database == null) {
             throw new NoSuchDatabaseException(dbName);
@@ -176,7 +192,8 @@ public class SqlServerImpl implements SqlServer {
         return new InternalResultSet(columns, rows);
     }
 
-    private static InternalResultSet innerJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
+    private static InternalResultSet innerJoin(InternalResultSet left,
+                                               InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnRef> columns = new ArrayList<>();
@@ -197,7 +214,8 @@ public class SqlServerImpl implements SqlServer {
         return new InternalResultSet(columns, rows);
     }
 
-    private static InternalResultSet leftOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
+    private static InternalResultSet leftOutJoin(InternalResultSet left,
+                                                 InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnRef> columns = new ArrayList<>();
@@ -227,7 +245,8 @@ public class SqlServerImpl implements SqlServer {
         return new InternalResultSet(columns, rows);
     }
 
-    private static InternalResultSet rightOutJoin(InternalResultSet left, InternalResultSet right, Predicate sc)
+    private static InternalResultSet rightOutJoin(InternalResultSet left,
+                                                  InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnRef> columns = new ArrayList<>();
@@ -287,8 +306,10 @@ public class SqlServerImpl implements SqlServer {
             throws WrongValueTypeException, NoSuchColumnException {
 
 
-        Comparable leftValue = (Comparable) evaluateColumnExpr(resultRow, predicate.getLeftOperand());
-        Comparable rightValue = (Comparable) evaluateColumnExpr(resultRow, predicate.getRightOperand());
+        Comparable leftValue =
+                (Comparable) evaluateColumnExpr(resultRow, predicate.getLeftOperand());
+        Comparable rightValue =
+                (Comparable) evaluateColumnExpr(resultRow, predicate.getRightOperand());
 
 
         if (leftValue == null || rightValue == null) {
@@ -320,7 +341,8 @@ public class SqlServerImpl implements SqlServer {
         }
     }
 
-    protected static Object evaluateColumnExpr(InternalResultRow row, ColumnExpression ce) {
+    protected static Object evaluateColumnExpr(InternalResultRow row,
+                                               ColumnExpression ce) {
 
         if (ce instanceof BinaryColumnExpression) {
             return evaluateBinaryColumnExpr(row, (BinaryColumnExpression) ce);
@@ -334,7 +356,8 @@ public class SqlServerImpl implements SqlServer {
         return null;
     }
 
-    protected static Object evaluateBinaryColumnExpr(InternalResultRow row, BinaryColumnExpression bce) {
+    protected static Object evaluateBinaryColumnExpr(InternalResultRow row,
+                                                     BinaryColumnExpression bce) {
         Object leftValue = evaluateColumnExpr(row, bce.getLeftOperand());
         Object rightValue = evaluateColumnExpr(row, bce.getRightOperand());
         switch (bce.getType()) {
@@ -365,7 +388,8 @@ public class SqlServerImpl implements SqlServer {
 
         for (int i = 0; i < row.getColumns().size(); i++) {
             ColumnRef cr1 = row.getColumns().get(i);
-            if (cr1.getDatabaseName().equals(cr.getDatabaseName()) && cr1.getTableName().equals(cr.getTableName())
+            if (cr1.getDatabaseName().equals(cr.getDatabaseName()) &&
+                    cr1.getTableName().equals(cr.getTableName())
                     && cr1.getColumnName().equals(cr.getColumnName())) {
                 return row.getValues().get(i).getValue();
             }

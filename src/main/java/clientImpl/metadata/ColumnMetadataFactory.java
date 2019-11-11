@@ -2,13 +2,15 @@ package clientImpl.metadata;
 
 public class ColumnMetadataFactory {
 
-    public static ColumnMetadataBuilder integerBuilder(
+    public static ColumnMetadataImpl.Builder integerBuilder(
             String columnName) {
-        return IntegerColumnMetadataImpl.builder(columnName);
+        return new ColumnMetadataImpl.Builder<Integer>(columnName, "INTEGER",
+                Integer.class);
     }
 
-    public static ColumnMetadataBuilder varcharBuilder(String columnName,
-                                                       int maxLength) {
-        return VarcharColumnMetadataImpl.builder(columnName, maxLength);
+    public static ColumnMetadataImpl.Builder<String> varcharBuilder(String columnName,
+                                                                    int maxLength) {
+        return new ColumnMetadataImpl.Builder<String>(columnName, "VARCHAR", String.class,
+                maxLength);
     }
 }

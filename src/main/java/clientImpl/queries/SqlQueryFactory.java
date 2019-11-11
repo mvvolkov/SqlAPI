@@ -16,20 +16,20 @@ public class SqlQueryFactory {
 
     public static CreateTableStatement createTable(String databaseName,
                                                    String tableName,
-                                                   List<ColumnMetadata> columns) {
+                                                   List<ColumnMetadata<?>> columns) {
         return new CreateTableStatementImpl(databaseName, tableName, columns);
     }
 
 
     public static InsertStatement insert(String databaseName, String tableName,
-                                         List<ColumnValue> values) {
+                                         List<ColumnValue<?>> values) {
         return new InsertStatementImpl(databaseName, tableName, values);
     }
 
 
     public static InsertStatement insert(String databaseName, String tableName,
                                          List<String> columns,
-                                         List<ColumnValue> values) {
+                                         List<ColumnValue<?>> values) {
         return new InsertStatementImpl(databaseName, tableName, columns, values);
     }
 

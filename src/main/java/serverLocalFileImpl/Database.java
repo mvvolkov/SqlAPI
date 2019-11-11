@@ -2,11 +2,13 @@ package serverLocalFileImpl;
 
 import api.exceptions.NoSuchTableException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Database {
+public final class Database implements Serializable {
 
+    public static final long serialVersionUID = -2259554024372972206L;
 
     private final String name;
 

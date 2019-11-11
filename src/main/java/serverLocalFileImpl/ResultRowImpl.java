@@ -5,7 +5,7 @@ import api.ResultRow;
 
 import java.util.List;
 
-public class ResultRowImpl implements ResultRow {
+public final class ResultRowImpl implements ResultRow {
 
 
     private final List<String> columns;

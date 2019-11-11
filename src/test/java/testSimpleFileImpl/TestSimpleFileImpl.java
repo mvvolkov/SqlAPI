@@ -5,6 +5,7 @@ import api.ResultSet;
 import api.SqlServer;
 import api.exceptions.NoSuchColumnException;
 import api.exceptions.SqlException;
+import api.metadata.ColumnMetadata;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.ColumnMetadataFactory;
 import clientImpl.predicates.PredicateFactory;
@@ -15,6 +16,7 @@ import sqlFactory.SqlManagerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ public class TestSimpleFileImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.createTable("DB1", "table1",
-                            Arrays.asList(
+                            Arrays.<ColumnMetadata<?>>asList(
                                     ColumnMetadataFactory.integerBuilder("column1")
                                             .notNull().primaryKey().build(),
                                     ColumnMetadataFactory.integerBuilder("column2")
@@ -41,33 +43,40 @@ public class TestSimpleFileImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            Arrays.asList(ColumnExprFactory.integer(10), ColumnExprFactory.integer(20),
+                            Arrays.asList(ColumnExprFactory.integer(10),
+                                    ColumnExprFactory.integer(20),
                                     ColumnExprFactory.string("test1"))
                     ));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            Arrays.asList(ColumnExprFactory.integer(11), ColumnExprFactory.integer(20),
+                            Arrays.asList(ColumnExprFactory.integer(11),
+                                    ColumnExprFactory.integer(20),
                                     ColumnExprFactory.string("test1"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            Arrays.asList(ColumnExprFactory.integer(12), ColumnExprFactory.integer(20),
+                            Arrays.asList(ColumnExprFactory.integer(12),
+                                    ColumnExprFactory.integer(20),
                                     ColumnExprFactory.string("test1"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            Arrays.asList(ColumnExprFactory.integer(13), ColumnExprFactory.integer(20),
+                            Arrays.asList(ColumnExprFactory.integer(13),
+                                    ColumnExprFactory.integer(20),
                                     ColumnExprFactory.string("test2"))));
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table1",
-                            Arrays.asList(ColumnExprFactory.integer(15), ColumnExprFactory.integer(21),
+                            Arrays.asList(ColumnExprFactory.integer(15),
+                                    ColumnExprFactory.integer(21),
                                     ColumnExprFactory.string("test1"))));
 
 
             sqlServer.executeStatement(
-                    SqlQueryFactory.createTable("DB1", "table2", Arrays.asList(
-                            ColumnMetadataFactory.integerBuilder("column4")
-                                    .notNull().primaryKey().build(),
-                            ColumnMetadataFactory.varcharBuilder("column5", 15).build()
-                    )));
+                    SqlQueryFactory.createTable("DB1", "table2",
+                            Arrays.<ColumnMetadata<?>>asList(
+                                    ColumnMetadataFactory.integerBuilder("column4")
+                                            .notNull().primaryKey().build(),
+                                    ColumnMetadataFactory.varcharBuilder("column5", 15)
+                                            .build()
+                            )));
 
             sqlServer.executeStatement(
                     SqlQueryFactory.insert("DB1", "table2",
@@ -89,29 +98,27 @@ public class TestSimpleFileImpl {
                     Arrays.asList(SelectedItemFactory.all()), PredicateFactory
                             .equals(ColumnExprFactory.columnRef("DB1", "table2",
                                     "column5"),
-                                    ColumnExprFactory.columnRef("DB1", "table1", "column3"))
+                                    ColumnExprFactory
+                                            .columnRef("DB1", "table1", "column3"))
                             .and(PredicateFactory
                                     .equals(ColumnExprFactory
                                                     .columnRef("DB1", "table2", "column4"),
                                             ColumnExprFactory.integer(23)))));
             printResultSet(resultSet);
 
-            ResultSet resultSet2 =
-                    sqlServer.select(SqlQueryFactory.select(Arrays.asList(TableRefFactory
+            ResultSet resultSet2 = sqlServer.select(SqlQueryFactory
+                    .select(Collections.singletonList(TableRefFactory
                                     .innerJoin(TableRefFactory.dbTable("DB1", "table2"),
                                             TableRefFactory.dbTable("DB1", "table1"),
-                                            PredicateFactory
-                                                    .equals(ColumnExprFactory
-                                                                    .columnRef("DB1", "table2", "column5"),
-                                                            ColumnExprFactory
-                                                                    .columnRef("DB1", "table1",
-                                                                            "column3"))
-                                                    .and(PredicateFactory.equals(
-                                                            ColumnExprFactory
+                                            PredicateFactory.equals(ColumnExprFactory
+                                                            .columnRef("DB1", "table2", "column5"),
+                                                    ColumnExprFactory.columnRef("DB1", "table1",
+                                                            "column3"))
+                                                    .and(PredicateFactory.equals(ColumnExprFactory
                                                                     .columnRef("DB1", "table2",
                                                                             "column4"),
                                                             ColumnExprFactory.integer(23))))),
-                            Arrays.asList(SelectedItemFactory.all()),
+                            Collections.singletonList(SelectedItemFactory.all()),
                             PredicateFactory.empty()));
             printResultSet(resultSet2);
 

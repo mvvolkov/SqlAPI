@@ -3,33 +3,43 @@ package clientImpl.metadata;
 import api.metadata.ColumnMetadata;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ColumnMetadataImpl<V extends Comparable<V>>
-        implements ColumnMetadata<V> {
+public class ColumnMetadataImpl<T extends Comparable<T>>
+        implements ColumnMetadata<T> {
 
     @NotNull
     private final String columnName;
 
     @NotNull
-    private final Class<V> type;
+    public final String typeName;
+
+    @NotNull
+    private final Class<T> javaClass;
 
     private final boolean isNotNull;
 
     private final boolean isPrimaryKey;
 
+    private final int size;
 
-    protected ColumnMetadataImpl(@NotNull Builder<?, V> builder) {
+
+    protected ColumnMetadataImpl(@NotNull Builder<T> builder) {
         this.columnName = builder.columnName;
+        this.typeName = builder.typeName;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
-        this.type = builder.javaClass;
+        this.javaClass = builder.javaClass;
+        this.size = builder.size;
     }
 
     @NotNull
     @Override
-    public String getName() {
+    public String getColumnName() {
         return columnName;
     }
 
+    @Override public String getSqlTypeName() {
+        return null;
+    }
 
     @Override
     public boolean isNotNull() {
@@ -63,66 +73,65 @@ public abstract class ColumnMetadataImpl<V extends Comparable<V>>
 
     @NotNull
     @Override
-    public Class<V> getJavaClass() {
-        return type;
+    public Class<T> getJavaClass() {
+        return javaClass;
     }
 
-    public abstract static class Builder<T extends Builder<T, V>, V extends Comparable<V>>
-            implements ColumnMetadataBuilder {
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    public static class Builder<T extends Comparable<T>> {
 
         @NotNull
         private final String columnName;
 
         @NotNull
-        private Class<V> javaClass;
+        private final String typeName;
+
+        @NotNull
+        private Class<T> javaClass;
 
         private boolean isNotNull = false;
 
         private boolean isPrimaryKey = false;
 
+        private int size = -1;
 
-        public Builder(@NotNull String columnName, Class<V> javaClass) {
+
+        public Builder(@NotNull String columnName, @NotNull String typeName,
+                       @NotNull Class javaClass) {
             this.columnName = columnName;
+            this.typeName = typeName;
             this.javaClass = javaClass;
         }
 
-        public T notNull() {
+        public Builder(@NotNull String columnName, @NotNull String typeName,
+                       @NotNull Class javaClass, int size) {
+            this(columnName, typeName, javaClass);
+            this.size = size;
+        }
+
+        public Builder notNull() {
             isNotNull = true;
-            return this.self();
+            return this;
         }
 
-        public T primaryKey() {
+        public Builder primaryKey() {
             isPrimaryKey = true;
-            return this.self();
+            return this;
         }
 
-        // Subclasses must override this method to return "this"
-        protected abstract T self();
 
-        public abstract ColumnMetadataImpl build();
+        public ColumnMetadataImpl<T> build() {
+            return new ColumnMetadataImpl<T>(this);
+        }
+
+        public void setSize(int size) {
+            this.size = size;
+        }
     }
 
 
-//    public void checkConstraints(Table table, Object value)
-//            throws WrongValueTypeException, ConstraintException {
-//
-//        TableMetadata tableMetadata = table.getMetadata();
-//        Database database = table.getDatabase();
-//        String tableName = tableMetadata.getName();
-//        String dbName = database.getName();
-//
-//        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
-//
-//        if (value != null && !this.getJavaClass().isInstance(value)) {
-//            throw new WrongValueTypeException(this.createColumnReference(this,
-//                    tableMetadata.getName(), database.getName()),
-//                    this.getJavaClass(), value.getClass());
-//        }
-//        if (value == null && this.isNotNull()) {
-//            throw new ConstraintException(columnReference, "NOT NULL");
-//        }
-//        if (this.isPrimaryKey()) {
-//            table.checkPrimaryKey(columnReference, value);
-//        }
-//    }
 }

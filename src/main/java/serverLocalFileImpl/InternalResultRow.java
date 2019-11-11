@@ -4,7 +4,7 @@ import api.columnExpr.ColumnRef;
 
 import java.util.List;
 
-public class InternalResultRow {
+public final class InternalResultRow {
 
 
     private final List<ColumnRef> columns;

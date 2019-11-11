@@ -5,7 +5,7 @@ import api.ResultSet;
 
 import java.util.List;
 
-public class ResultSetImpl implements ResultSet {
+public final class ResultSetImpl implements ResultSet {
 
     private final List<ResultRow> rows;
 

@@ -5,6 +5,7 @@ import java.util.Map;
 
 public final class Row implements Serializable {
 
+    public static final long serialVersionUID = 8515497022392723148L;
 
     private final Map<String, Value> values;
 
