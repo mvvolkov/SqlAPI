@@ -38,7 +38,7 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
     }
 
     @Override public String getSqlTypeName() {
-        return null;
+        return typeName;
     }
 
     @Override

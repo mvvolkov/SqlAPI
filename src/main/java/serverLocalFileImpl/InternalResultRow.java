@@ -8,23 +8,23 @@ public final class InternalResultRow {
 
 
     private final List<ColumnRef> columns;
-    private final List<Value> values;
+    private final List<Object> values;
 
-    public InternalResultRow(List<ColumnRef> columns, List<Value> values) {
+    public InternalResultRow(List<ColumnRef> columns, List<Object> values) {
         this.columns = columns;
         this.values = values;
     }
 
 
-    public void addValues(List<Value> values) {
+    public void addValues(List<Object> values) {
         this.values.addAll(values);
     }
 
-    public void addValue(Value value) {
+    public void addValue(Object value) {
         this.values.add(value);
     }
 
-    public List<Value> getValues() {
+    public List<Object> getValues() {
         return values;
     }
 

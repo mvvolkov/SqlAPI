@@ -1,7 +1,8 @@
 package clientImpl.queries;
 
-import api.*;
-import api.columnExpr.ColumnValue;
+import api.AssignmentOperation;
+import api.SelectedItem;
+import api.TableReference;
 import api.metadata.ColumnMetadata;
 import api.predicates.Predicate;
 import api.queries.*;
@@ -22,14 +23,14 @@ public class SqlQueryFactory {
 
 
     public static InsertStatement insert(String databaseName, String tableName,
-                                         List<ColumnValue<?>> values) {
+                                         List<Object> values) {
         return new InsertStatementImpl(databaseName, tableName, values);
     }
 
 
     public static InsertStatement insert(String databaseName, String tableName,
                                          List<String> columns,
-                                         List<ColumnValue<?>> values) {
+                                         List<Object> values) {
         return new InsertStatementImpl(databaseName, tableName, columns, values);
     }
 

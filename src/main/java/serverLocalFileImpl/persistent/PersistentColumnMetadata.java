@@ -1,8 +1,8 @@
-package serverLocalFileImpl;
+package serverLocalFileImpl.persistent;
 
 import java.io.Serializable;
 
-public final class InternalColumnMetadata implements Serializable {
+public final class PersistentColumnMetadata implements Serializable {
 
     public static final long serialVersionUID = 1318768379416289869L;
 
@@ -18,9 +18,9 @@ public final class InternalColumnMetadata implements Serializable {
 
     private final int size;
 
-    public InternalColumnMetadata(String columnName, String sqlTypeName,
-                                  Class javaClass, boolean isNotNull,
-                                  boolean isPrimaryKey, int size) {
+    public PersistentColumnMetadata(String columnName, String sqlTypeName,
+                                    Class javaClass, boolean isNotNull,
+                                    boolean isPrimaryKey, int size) {
         this.columnName = columnName;
         this.sqlTypeName = sqlTypeName;
         this.javaClass = javaClass;
@@ -47,5 +47,9 @@ public final class InternalColumnMetadata implements Serializable {
 
     public int getSize() {
         return size;
+    }
+
+    public String getSqlTypeName() {
+        return sqlTypeName;
     }
 }

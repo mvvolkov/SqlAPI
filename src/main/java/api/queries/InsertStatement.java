@@ -1,12 +1,10 @@
 package api.queries;
 
-import api.columnExpr.ColumnValue;
-
 import java.util.List;
 
 public interface InsertStatement extends SqlStatement {
 
-    List<ColumnValue<?>> getValues();
+    List<Object> getValues();
 
     List<String> getColumns();
 

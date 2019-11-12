@@ -11,7 +11,7 @@ public class ColumnExprFactory {
     }
 
     public static ColumnValue nullValue() {
-        return new ColumnValueImpl(null, null);
+        return new ColumnValueImpl(null);
     }
 
     public static ColumnRef columnRef(String columnName) {
@@ -27,29 +27,29 @@ public class ColumnExprFactory {
         return new ColumnRefImpl(databaseName, tableName, columnName);
     }
 
-    public static ColumnValue<Integer> integer(Integer value) {
-        return new ColumnValueImpl(value, Integer.class);
+    public static ColumnValue integer(Integer value) {
+        return new ColumnValueImpl(value);
     }
 
-    public static ColumnValue<Integer> string(String value) {
-        return new ColumnValueImpl(value, String.class);
+    public static ColumnValue string(String value) {
+        return new ColumnValueImpl(value);
     }
 
 
-    public static BinaryColumnExpression add(ColumnExpression leftOperand,
+    public static BinaryColumnExpression sum(ColumnExpression leftOperand,
                                              ColumnExpression rightOperand) {
         return new BinaryColumnExprImpl(ColumnExpression.Type.ADD, leftOperand,
                 rightOperand);
     }
 
-    public static BinaryColumnExpression subtract(ColumnExpression leftOperand,
-                                                  ColumnExpression rightOperand) {
+    public static BinaryColumnExpression diff(ColumnExpression leftOperand,
+                                              ColumnExpression rightOperand) {
         return new BinaryColumnExprImpl(ColumnExpression.Type.SUBTRACT, leftOperand,
                 rightOperand);
     }
 
-    public static BinaryColumnExpression multiply(ColumnExpression leftOperand,
-                                                  ColumnExpression rightOperand) {
+    public static BinaryColumnExpression product(ColumnExpression leftOperand,
+                                                 ColumnExpression rightOperand) {
         return new BinaryColumnExprImpl(ColumnExpression.Type.MULTIPLY, leftOperand,
                 rightOperand);
     }

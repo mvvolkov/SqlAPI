@@ -1,13 +1,14 @@
-package serverLocalFileImpl;
+package serverLocalFileImpl.persistent;
 
 import api.ResultSet;
 import api.columnExpr.ColumnRef;
-import api.columnExpr.ColumnValue;
 import api.exceptions.ConstraintException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
 import api.queries.DeleteStatement;
 import api.queries.UpdateStatement;
+import serverLocalFileImpl.InternalResultRow;
+import serverLocalFileImpl.InternalResultSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class Table implements Serializable {
+public final class PersistentTable implements Serializable {
 
     public static final long serialVersionUID = 9082226890498779849L;
 
@@ -23,15 +24,16 @@ public final class Table implements Serializable {
 
     private final String tableName;
 
-    private final List<InternalColumnMetadata> columns = new ArrayList<>();
+    private final List<PersistentColumnMetadata> columns = new ArrayList<>();
 
-    private final List<Row> rows = new ArrayList<>();
+    private final List<PersistentRow> rows = new ArrayList<>();
 
-    public Table(String dbName, String tableName, List<ColumnMetadata<?>> columns) {
+
+    public PersistentTable(String dbName, String tableName, List<ColumnMetadata<?>> columns) {
         this.dbName = dbName;
         this.tableName = tableName;
         for (ColumnMetadata c : columns) {
-            this.columns.add(new InternalColumnMetadata(c.getColumnName(),
+            this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
                     c.getSqlTypeName(), c.getJavaClass(), c.isNotNull(),
                     c.isPrimaryKey(), c.getSize()));
         }
@@ -41,28 +43,27 @@ public final class Table implements Serializable {
         return tableName;
     }
 
-    public List<InternalColumnMetadata> getColumns() {
+    public List<PersistentColumnMetadata> getColumns() {
         return columns;
     }
 
-    public void insert(List<ColumnValue<?>> values)
+
+    public void insert(List<Object> values)
             throws WrongValueTypeException, ConstraintException {
-
-
-        Map<String, Value> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < columns.size(); i++) {
-            InternalColumnMetadata columnMetadata = columns.get(i);
-            ColumnValue<?> columnValue = values.size() > i ? values.get(i) : null;
-            this.checkConstraints(columnMetadata, columnValue);
-            map.put(columnMetadata.getColumnName(),
-                    new Value(columnMetadata.getJavaClass(), columnValue.getValue()));
+            PersistentColumnMetadata columnMetadata = columns.get(i);
+            Object value = values.size() > i ? values.get(i) : null;
+            this.checkConstraints(columnMetadata, value);
+            map.put(columnMetadata.getColumnName(), value);
         }
-        rows.add(new Row(map));
+        rows.add(new PersistentRow(map));
     }
 
 
-    public void insert(List<String> columns, List<ColumnValue<?>> values)
+    public void insert(List<String> columns, List<Object> values)
             throws WrongValueTypeException, ConstraintException {
+
 
     }
 
@@ -80,41 +81,46 @@ public final class Table implements Serializable {
     }
 
 
-    private void checkConstraints(InternalColumnMetadata cm,
-                                  ColumnValue cv)
+    private void checkConstraints(PersistentColumnMetadata cm,
+                                  Object newValue)
             throws WrongValueTypeException, ConstraintException {
-        Object value = cv.getValue();
-        if (value != null &&
-                !cm.getJavaClass().isInstance(value)) {
-            throw new WrongValueTypeException(
-                    this.createColumnRef(cm.getColumnName()),
-                    cm.getJavaClass(), value.getClass());
-        }
-        if (value == null && cm.isNotNull()) {
+
+        if (newValue == null && cm.isNotNull()) {
             throw new ConstraintException(dbName, tableName,
                     cm.getColumnName(), "NOT NULL");
         }
+        if (newValue != null && !cm.getJavaClass().isInstance(newValue)) {
+            throw new WrongValueTypeException(
+                    this.createColumnRef(cm.getColumnName()),
+                    cm.getJavaClass(), newValue.getClass());
+        }
         if (cm.isPrimaryKey()) {
-            for (Row row : rows) {
-                Value v2 = row.getValue(cm.getColumnName());
-                if (v2.getValue().compareTo(cv.getValue()) == 0) {
+            for (PersistentRow row : rows) {
+                if (row.getValue(cm.getColumnName()).equals(newValue)) {
                     throw new ConstraintException(dbName, tableName,
                             cm.getColumnName(), "PRIMARY KEY");
                 }
             }
         }
+        if (cm.getSize() != -1) {
+            String strValue = (String) newValue;
+            if (strValue.length() > cm.getSize()) {
+                throw new ConstraintException(dbName, tableName,
+                        cm.getColumnName(), "SIZE EXCEEDED");
+            }
+        }
     }
 
 
-    InternalResultSet getData() {
+    public InternalResultSet getData() {
         List<ColumnRef> resultColumns = new ArrayList<>();
-        for (InternalColumnMetadata column : columns) {
+        for (PersistentColumnMetadata column : columns) {
             resultColumns.add(this.createColumnRef(column.getColumnName()));
         }
         List<InternalResultRow> resultRows = new ArrayList<>();
-        for (Row row : rows) {
-            List<Value> values = new ArrayList<>();
-            for (InternalColumnMetadata column : columns) {
+        for (PersistentRow row : rows) {
+            List<Object> values = new ArrayList<>();
+            for (PersistentColumnMetadata column : columns) {
                 values.add(row.getValue(column.getColumnName()));
             }
             resultRows.add(new InternalResultRow(resultColumns, values));

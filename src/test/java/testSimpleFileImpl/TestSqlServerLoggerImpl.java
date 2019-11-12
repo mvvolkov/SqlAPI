@@ -62,7 +62,7 @@ public class TestSqlServerLoggerImpl {
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
                     Arrays.asList(new AssignmentOperationImpl("column1",
-                                    ColumnExprFactory.add(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.integer(1))
+                                    ColumnExprFactory.sum(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.integer(1))
                             ),
                             new AssignmentOperationImpl("column2",
                                     ColumnExprFactory.string("test3"))),

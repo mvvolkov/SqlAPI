@@ -1,6 +1,5 @@
 package clientImpl.queries;
 
-import api.columnExpr.ColumnValue;
 import api.queries.InsertStatement;
 
 import java.util.List;
@@ -9,23 +8,23 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
 
 
     private final List<String> columns;
-    private final List<ColumnValue<?>> values;
+    private final List<Object> values;
 
     public InsertStatementImpl(String databaseName, String tableName,
-                               List<String> columns, List<ColumnValue<?>> values) {
+                               List<String> columns, List<Object> values) {
         super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
     }
 
     public InsertStatementImpl(String databaseName, String tableName,
-                               List<ColumnValue<?>> values) {
+                               List<Object> values) {
         this(databaseName, tableName, null, values);
     }
 
 
     @Override
-    public List<ColumnValue<?>> getValues() {
+    public List<Object> getValues() {
         return values;
     }
 

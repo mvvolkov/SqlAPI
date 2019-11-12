@@ -1,4 +1,4 @@
-package serverLocalFileImpl;
+package serverLocalFileImpl.persistent;
 
 import api.exceptions.NoSuchTableException;
 
@@ -6,19 +6,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class Database implements Serializable {
+public final class PersistentDatabase implements Serializable {
 
     public static final long serialVersionUID = -2259554024372972206L;
 
     private final String name;
 
-    private final Collection<Table> tables = new ArrayList<>();
+    private final Collection<PersistentTable> tables = new ArrayList<>();
 
-    public Database(String name) {
+    public PersistentDatabase(String name) {
         this.name = name;
     }
 
-    public void addTable(Table table) {
+    public void addTable(PersistentTable table) {
         tables.add(table);
     }
 
@@ -28,8 +28,8 @@ public final class Database implements Serializable {
     }
 
 
-    public Table getTableOrNull(String tableName) {
-        for (Table table : tables) {
+    public PersistentTable getTableOrNull(String tableName) {
+        for (PersistentTable table : tables) {
             if (table.getTableName().equals(tableName)) {
                 return table;
             }
@@ -38,8 +38,8 @@ public final class Database implements Serializable {
     }
 
 
-    public Table getTable(String tableName) throws NoSuchTableException {
-        Table table = this.getTableOrNull(tableName);
+    public PersistentTable getTable(String tableName) throws NoSuchTableException {
+        PersistentTable table = this.getTableOrNull(tableName);
         if (table == null) {
             throw new NoSuchTableException(tableName);
         }

@@ -10,6 +10,8 @@ import api.metadata.TableMetadata;
 import api.predicates.*;
 import api.queries.*;
 import org.jetbrains.annotations.NotNull;
+import serverLocalFileImpl.persistent.PersistentDatabase;
+import serverLocalFileImpl.persistent.PersistentTable;
 import serverLoggerImpl.SqlServerLoggerImpl;
 
 import java.util.*;
@@ -19,18 +21,18 @@ public final class SqlServerImpl implements SqlServer {
 
     private final transient SqlServer logger = new SqlServerLoggerImpl();
 
-    private final Collection<Database> databases = new ArrayList<>();
+    private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
 
     @Override
     public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
         logger.createDatabase(dbName);
-        for (Database database : databases) {
+        for (PersistentDatabase database : databases) {
             if (database.getName().equals(dbName)) {
                 throw new DatabaseAlreadyExistsException(dbName);
             }
         }
-        databases.add(new Database(dbName));
+        databases.add(new PersistentDatabase(dbName));
     }
 
     @Override
@@ -65,20 +67,20 @@ public final class SqlServerImpl implements SqlServer {
 
     private void createTable(CreateTableStatement stmt)
             throws TableAlreadyExistsException, NoSuchDatabaseException {
-        Database database = this.getDatabase(stmt.getDatabaseName());
-        Table table = database.getTableOrNull(stmt.getTableName());
+        PersistentDatabase database = this.getDatabase(stmt.getDatabaseName());
+        PersistentTable table = database.getTableOrNull(stmt.getTableName());
         if (table != null) {
             throw new TableAlreadyExistsException(database.getName(),
                     stmt.getTableName());
         }
         database.addTable(
-                new Table(database.getName(), stmt.getTableName(), stmt.getColumns()));
+                new PersistentTable(database.getName(), stmt.getTableName(), stmt.getColumns()));
     }
 
     private void insert(InsertStatement stmt)
             throws NoSuchDatabaseException, NoSuchTableException, ConstraintException,
             WrongValueTypeException {
-        Table table = this.getTableForStatement(stmt);
+        PersistentTable table = this.getTableForStatement(stmt);
         if (stmt.getColumns() == null) {
             table.insert(stmt.getValues());
         } else {
@@ -86,27 +88,27 @@ public final class SqlServerImpl implements SqlServer {
         }
     }
 
-    private Table getTableForStatement(SqlStatement stmt)
+    private PersistentTable getTableForStatement(SqlStatement stmt)
             throws NoSuchDatabaseException, NoSuchTableException {
-        Database database = this.getDatabase(stmt.getDatabaseName());
+        PersistentDatabase database = this.getDatabase(stmt.getDatabaseName());
         return database.getTable(stmt.getTableName());
     }
 
     private void delete(DeleteStatement stmt)
             throws NoSuchDatabaseException, NoSuchTableException {
-        Table table = this.getTableForStatement(stmt);
+        PersistentTable table = this.getTableForStatement(stmt);
         table.delete(stmt);
     }
 
     private void update(UpdateStatement stmt)
             throws NoSuchDatabaseException, NoSuchTableException {
-        Table table = this.getTableForStatement(stmt);
+        PersistentTable table = this.getTableForStatement(stmt);
         table.update(stmt);
     }
 
 
-    private Database getDatabaseOrNull(String dbName) {
-        for (Database database : databases) {
+    private PersistentDatabase getDatabaseOrNull(String dbName) {
+        for (PersistentDatabase database : databases) {
             if (database.getName().equals(dbName)) {
                 return database;
             }
@@ -115,18 +117,18 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    private @NotNull Database getDatabase(String dbName) throws NoSuchDatabaseException {
-        Database database = this.getDatabaseOrNull(dbName);
+    private @NotNull PersistentDatabase getDatabase(String dbName) throws NoSuchDatabaseException {
+        PersistentDatabase database = this.getDatabaseOrNull(dbName);
         if (database == null) {
             throw new NoSuchDatabaseException(dbName);
         }
         return database;
     }
 
-    private static List<Value> getValuesFromResultSets(List<InternalResultSet> resultSets,
-                                                       Deque<Integer> stack) {
+    private static List<Object> getValuesFromResultSets(List<InternalResultSet> resultSets,
+                                                        Deque<Integer> stack) {
         Deque<Integer> rowNumbers = new ArrayDeque<>(stack);
-        List<Value> values = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
         while (!rowNumbers.isEmpty()) {
             int rowNumber = rowNumbers.pop();
             InternalResultSet resultSet = resultSets.get(rowNumbers.size());
@@ -202,7 +204,7 @@ public final class SqlServerImpl implements SqlServer {
         List<InternalResultRow> rows = new ArrayList<>();
         for (InternalResultRow leftRow : left.getRows()) {
             for (InternalResultRow rightRow : right.getRows()) {
-                List<Value> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
                 InternalResultRow row = new InternalResultRow(columns, values);
@@ -225,7 +227,7 @@ public final class SqlServerImpl implements SqlServer {
         for (InternalResultRow leftRow : left.getRows()) {
             boolean matchFound = false;
             for (InternalResultRow rightRow : right.getRows()) {
-                List<Value> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
                 InternalResultRow row = new InternalResultRow(columns, values);
@@ -235,11 +237,9 @@ public final class SqlServerImpl implements SqlServer {
                 }
             }
             if (!matchFound) {
-                List<Value> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
-                for (ColumnRef column : right.getColumns()) {
-                    values.add(new Value(null, null));
-                }
+                values.addAll(Collections.nCopies(right.getColumns().size(), null));
             }
         }
         return new InternalResultSet(columns, rows);
@@ -256,7 +256,7 @@ public final class SqlServerImpl implements SqlServer {
         for (InternalResultRow rightRow : right.getRows()) {
             boolean matchFound = false;
             for (InternalResultRow leftRow : left.getRows()) {
-                List<Value> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 values.addAll(leftRow.getValues());
                 values.addAll(rightRow.getValues());
                 InternalResultRow row = new InternalResultRow(columns, values);
@@ -267,9 +267,7 @@ public final class SqlServerImpl implements SqlServer {
             }
             if (!matchFound) {
                 List<Object> values = new ArrayList<>();
-                for (ColumnRef column : left.getColumns()) {
-                    values.add(new Value(null, null));
-                }
+                values.addAll(Collections.nCopies(left.getColumns().size(), null));
                 values.addAll(rightRow.getValues());
             }
         }
@@ -391,7 +389,7 @@ public final class SqlServerImpl implements SqlServer {
             if (cr1.getDatabaseName().equals(cr.getDatabaseName()) &&
                     cr1.getTableName().equals(cr.getTableName())
                     && cr1.getColumnName().equals(cr.getColumnName())) {
-                return row.getValues().get(i).getValue();
+                return row.getValues().get(i);
             }
         }
         return null;
@@ -407,8 +405,8 @@ public final class SqlServerImpl implements SqlServer {
             throws SqlException {
 
 
-        InternalResultSet left = this.selectAll(tableReference.getLeftTableReference());
-        InternalResultSet right = this.selectAll(tableReference.getRightTableReference());
+        InternalResultSet left = this.getAllDataFromTableRef(tableReference.getLeftTableReference());
+        InternalResultSet right = this.getAllDataFromTableRef(tableReference.getRightTableReference());
         switch (tableReference.getType()) {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getSelectionPredicate());
@@ -424,21 +422,11 @@ public final class SqlServerImpl implements SqlServer {
     public @NotNull ResultSet select(SelectExpression selectExpression) throws
             SqlException {
 
-
         logger.select(selectExpression);
 
         List<InternalResultSet> resultSets = new ArrayList<>();
         for (TableReference tr : selectExpression.getTableReferences()) {
-            if (tr instanceof DatabaseTableReference) {
-                resultSets.add(this.selectFromBaseTable((DatabaseTableReference) tr));
-                continue;
-            } else if (tr instanceof JoinTableReference) {
-                resultSets.add(this.selectFromJoinedTable((JoinTableReference) tr));
-                continue;
-            }
-//            else if (tr instanceof SelectExpression) {
-//                resultSets.add(this.select((SelectExpression) tr));
-//            }
+            resultSets.add(this.getAllDataFromTableRef(tr));
         }
         InternalResultSet internalResultSet =
                 this.joinResultSets(resultSets, selectExpression.getPredicate());
@@ -449,16 +437,13 @@ public final class SqlServerImpl implements SqlServer {
             resultColumns.add(columnRef.getColumnName());
         }
         for (InternalResultRow row : internalResultSet.getRows()) {
-            List<Object> values = new ArrayList<>();
-            for (Value value : row.getValues()) {
-                values.add(value.getValue());
-            }
+            List<Object> values = new ArrayList<>(row.getValues());
             resultRows.add(new ResultRowImpl(resultColumns, values));
         }
         return new ResultSetImpl(resultRows, resultColumns);
     }
 
-    protected @NotNull InternalResultSet selectAll(TableReference tableReference) throws
+    protected @NotNull InternalResultSet getAllDataFromTableRef(TableReference tableReference) throws
             SqlException {
 
         if (tableReference instanceof DatabaseTableReference) {
@@ -472,38 +457,15 @@ public final class SqlServerImpl implements SqlServer {
         throw new IllegalArgumentException("");
     }
 
-    protected Table getTable(DatabaseTableReference tableReference) throws
+    protected PersistentTable getTable(DatabaseTableReference tableReference) throws
             NoSuchTableException, NoSuchDatabaseException {
-        for (Database database : databases) {
+        for (PersistentDatabase database : databases) {
             if (database.getName().equals(tableReference.getDatabaseName())) {
-                return (Table) database.getTable(tableReference.getTableName());
+                return (PersistentTable) database.getTable(tableReference.getTableName());
             }
         }
         throw new NoSuchDatabaseException(tableReference.getDatabaseName());
     }
 
-
-//    public void checkConstraints(Table table, Object value)
-//            throws WrongValueTypeException, ConstraintException {
-//
-//        TableMetadata tableMetadata = table.getMetadata();
-//        Database database = table.getDatabase();
-//        String tableName = tableMetadata.getName();
-//        String dbName = database.getName();
-//
-//        ColumnReferenceImpl columnReference = new ColumnReferenceImpl(this.getName(), tableName, dbName);
-//
-//        if (value != null && !this.getJavaClass().isInstance(value)) {
-//            throw new WrongValueTypeException(this.createColumnReference(this,
-//                    tableMetadata.getName(), database.getName()),
-//                    this.getJavaClass(), value.getClass());
-//        }
-//        if (value == null && this.isNotNull()) {
-//            throw new ConstraintException(columnReference, "NOT NULL");
-//        }
-//        if (this.isPrimaryKey()) {
-//            table.checkPrimaryKey(columnReference, value);
-//        }
-//    }
 
 }

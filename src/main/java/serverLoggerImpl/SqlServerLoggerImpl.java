@@ -124,7 +124,7 @@ public class SqlServerLoggerImpl implements SqlServer {
         }
         sb.append(" VALUES (");
         String valuesString =
-                stmt.getValues().stream().map(o -> getStringFromValue(o.getValue()))
+                stmt.getValues().stream().map(o -> getStringFromValue(o))
                         .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
