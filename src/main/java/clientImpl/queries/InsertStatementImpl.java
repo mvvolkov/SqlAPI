@@ -1,13 +1,17 @@
 package clientImpl.queries;
 
 import api.queries.InsertStatement;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 public class InsertStatementImpl extends AbstractSqlStatement implements InsertStatement {
 
-
+    @NotNull
     private final List<String> columns;
+
+    @NotNull
     private final List<Object> values;
 
     public InsertStatementImpl(String databaseName, String tableName,
@@ -19,7 +23,7 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
 
     public InsertStatementImpl(String databaseName, String tableName,
                                List<Object> values) {
-        this(databaseName, tableName, null, values);
+        this(databaseName, tableName, Collections.emptyList(), values);
     }
 
 

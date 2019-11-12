@@ -21,6 +21,8 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
 
     private final int size;
 
+    private final T defaultValue;
+
 
     protected ColumnMetadataImpl(@NotNull Builder<T> builder) {
         this.columnName = builder.columnName;
@@ -29,6 +31,7 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         this.isPrimaryKey = builder.isPrimaryKey;
         this.javaClass = builder.javaClass;
         this.size = builder.size;
+        this.defaultValue = builder.defaultValue;
     }
 
     @NotNull
@@ -37,7 +40,8 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         return columnName;
     }
 
-    @Override public String getSqlTypeName() {
+    @Override
+    public String getSqlTypeName() {
         return typeName;
     }
 
@@ -82,6 +86,11 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         return size;
     }
 
+    @Override
+    public T getDefaultValue() {
+        return defaultValue;
+    }
+
     public static class Builder<T extends Comparable<T>> {
 
         @NotNull
@@ -98,6 +107,8 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         private boolean isPrimaryKey = false;
 
         private int size = -1;
+
+        private T defaultValue;
 
 
         public Builder(@NotNull String columnName, @NotNull String typeName,
@@ -123,13 +134,19 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
             return this;
         }
 
+        public Builder defaultValue(T defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
 
         public ColumnMetadataImpl<T> build() {
             return new ColumnMetadataImpl<T>(this);
         }
 
-        public void setSize(int size) {
+        public Builder setSize(int size) {
             this.size = size;
+            return this;
         }
     }
 

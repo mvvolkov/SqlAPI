@@ -34,7 +34,7 @@ public class TestSimpleFileImpl {
                             Arrays.<ColumnMetadata<?>>asList(
                                     ColumnMetadataFactory.integerBuilder("column1")
                                             .notNull().primaryKey().build(),
-                                    ColumnMetadataFactory.integerBuilder("column2")
+                                    ColumnMetadataFactory.integerBuilder("column2").defaultValue(15)
                                             .build(),
                                     ColumnMetadataFactory.varcharBuilder("column3", 20)
                                             .notNull()
@@ -53,6 +53,8 @@ public class TestSimpleFileImpl {
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(15, 21, "test1")));
 
+            printTable(sqlServer, "DB1", "table1");
+
 
             sqlServer.executeStatement(
                     SqlQueryFactory.createTable("DB1", "table2",
@@ -69,6 +71,8 @@ public class TestSimpleFileImpl {
                     Arrays.asList(23, "test2")));
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table2",
                     Arrays.asList(25, "test22")));
+
+            printTable(sqlServer, "DB1", "table2");
 
 
             ResultSet resultSet = sqlServer.select(SqlQueryFactory.select(Arrays.asList(
@@ -103,10 +107,30 @@ public class TestSimpleFileImpl {
                             PredicateFactory.empty()));
             printResultSet(resultSet2);
 
+            printTable(sqlServer, "DB1", "table1");
+            printTable(sqlServer, "DB1", "table2");
+
+
+            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+                    Arrays.asList("column1", "column3"),
+                    Arrays.asList(51, "test51")
+            ));
+
+            printTable(sqlServer, "DB1", "table1");
+
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static void printTable(SqlServer sqlServer, String dbName, String tableName) throws SqlException {
+
+        ResultSet resultSet = sqlServer.select(SqlQueryFactory.select(Arrays.asList(
+                TableRefFactory.dbTable(dbName, tableName)),
+                Arrays.asList(SelectedItemFactory.all()), PredicateFactory.empty()
+        ));
+        printResultSet(resultSet);
     }
 
     private static void printResultSet(ResultSet resultSet)
@@ -114,11 +138,11 @@ public class TestSimpleFileImpl {
         StringBuilder sb = new StringBuilder();
 
 
-        String tableString = resultSet.getColumns().stream()
+        String columnsHeaders = resultSet.getColumns().stream()
                 .collect(Collectors.joining(", "));
 
         sb.append("Select result:\n");
-        sb.append(tableString);
+        sb.append(columnsHeaders);
         for (ResultRow row : resultSet.getRows()) {
             List<String> values = new ArrayList<>();
             for (String columnName : resultSet.getColumns()) {

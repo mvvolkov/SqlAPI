@@ -3,6 +3,9 @@ package api.exceptions;
 import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public final class WrongValueTypeException extends SqlException {
 
 
@@ -25,7 +28,9 @@ public final class WrongValueTypeException extends SqlException {
     public String getMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append("Wrong value type for the column ");
-        sb.append(columnRef.toString());
+        String fullName = Stream.of(columnRef.getDatabaseName(), columnRef.getTableName(), columnRef.getColumnName())
+                .collect(Collectors.joining("."));
+        sb.append(fullName);
         sb.append("; Expected: ");
         sb.append(expectedClass.getSimpleName());
         sb.append("; Actual: ");

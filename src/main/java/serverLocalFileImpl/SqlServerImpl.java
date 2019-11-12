@@ -78,14 +78,9 @@ public final class SqlServerImpl implements SqlServer {
     }
 
     private void insert(InsertStatement stmt)
-            throws NoSuchDatabaseException, NoSuchTableException, ConstraintException,
-            WrongValueTypeException {
+            throws SqlException {
         PersistentTable table = this.getTableForStatement(stmt);
-        if (stmt.getColumns() == null) {
-            table.insert(stmt.getValues());
-        } else {
-            table.insert(stmt.getColumns(), stmt.getValues());
-        }
+        table.insert(stmt.getColumns(), stmt.getValues());
     }
 
     private PersistentTable getTableForStatement(SqlStatement stmt)

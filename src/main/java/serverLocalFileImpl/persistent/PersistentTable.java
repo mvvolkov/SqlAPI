@@ -3,6 +3,7 @@ package serverLocalFileImpl.persistent;
 import api.ResultSet;
 import api.columnExpr.ColumnRef;
 import api.exceptions.ConstraintException;
+import api.exceptions.InconsistentInsertStmtException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
 import api.queries.DeleteStatement;
@@ -35,7 +36,7 @@ public final class PersistentTable implements Serializable {
         for (ColumnMetadata c : columns) {
             this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
                     c.getSqlTypeName(), c.getJavaClass(), c.isNotNull(),
-                    c.isPrimaryKey(), c.getSize()));
+                    c.isPrimaryKey(), c.getSize(), c.getDefaultValue()));
         }
     }
 
@@ -61,10 +62,40 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    public void insert(List<String> columns, List<Object> values)
-            throws WrongValueTypeException, ConstraintException {
+    public void insert(List<String> columnNames, List<Object> values)
+            throws WrongValueTypeException, ConstraintException, InconsistentInsertStmtException {
 
 
+        Map<String, Object> resultMap = new HashMap<>();
+        if (columnNames.isEmpty()) {
+            for (int i = 0; i < columns.size(); i++) {
+                PersistentColumnMetadata columnMetadata = columns.get(i);
+                Object value = values.size() > i ? values.get(i) : null;
+                this.checkConstraints(columnMetadata, value);
+                resultMap.put(columnMetadata.getColumnName(), value);
+            }
+        } else {
+            if (columnNames.size() != values.size()) {
+                throw new InconsistentInsertStmtException();
+            }
+            Map<String, Object> insertMap = new HashMap<>();
+            for (int i = 0; i < columnNames.size(); i++) {
+                insertMap.put(columnNames.get(i), values.get(i));
+            }
+
+            for (PersistentColumnMetadata columnMetadata : columns) {
+                String columnName = columnMetadata.getColumnName();
+                Object value;
+                if (insertMap.containsKey(columnName)) {
+                    value = insertMap.get(columnName);
+                } else {
+                    value = columnMetadata.getDefaultValue();
+                }
+                this.checkConstraints(columnMetadata, value);
+                resultMap.put(columnName, value);
+            }
+        }
+        rows.add(new PersistentRow(resultMap));
     }
 
 

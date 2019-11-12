@@ -18,15 +18,18 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final int size;
 
+    private final Object defaultValue;
+
     public PersistentColumnMetadata(String columnName, String sqlTypeName,
                                     Class javaClass, boolean isNotNull,
-                                    boolean isPrimaryKey, int size) {
+                                    boolean isPrimaryKey, int size, Object defaultValue) {
         this.columnName = columnName;
         this.sqlTypeName = sqlTypeName;
         this.javaClass = javaClass;
         this.isNotNull = isNotNull;
         this.isPrimaryKey = isPrimaryKey;
         this.size = size;
+        this.defaultValue = defaultValue;
     }
 
     public String getColumnName() {
@@ -51,5 +54,9 @@ public final class PersistentColumnMetadata implements Serializable {
 
     public String getSqlTypeName() {
         return sqlTypeName;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }

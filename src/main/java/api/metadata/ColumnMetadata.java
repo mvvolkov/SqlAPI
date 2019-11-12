@@ -9,11 +9,13 @@ public interface ColumnMetadata<V extends Comparable<V>> {
     boolean isNotNull();
 
     boolean isPrimaryKey();
-    
+
     Class<V> getJavaClass();
 
     default int getSize() {
         return -1;
     }
+
+    Object getDefaultValue();
 
 }

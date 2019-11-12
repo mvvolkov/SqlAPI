@@ -2,7 +2,7 @@ package clientImpl.metadata;
 
 public class ColumnMetadataFactory {
 
-    public static ColumnMetadataImpl.Builder integerBuilder(
+    public static ColumnMetadataImpl.Builder<Integer> integerBuilder(
             String columnName) {
         return new ColumnMetadataImpl.Builder<Integer>(columnName, "INTEGER",
                 Integer.class);
