@@ -8,6 +8,9 @@ public interface ColumnRef extends ColumnExpression {
 
     String getDatabaseName();
 
+    @Override default String getAlias() {
+        return getColumnName();
+    }
 
     @Override
     default ExprType getExprType() {

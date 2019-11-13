@@ -6,8 +6,9 @@ import api.predicates.ColumnInPredicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ColumnInPredicateImpl extends PredicateImpl
+public final class ColumnInPredicateImpl extends PredicateImpl
         implements ColumnInPredicate {
 
     @NotNull
@@ -31,5 +32,11 @@ public class ColumnInPredicateImpl extends PredicateImpl
     @Override
     public List<ColumnValue> getColumnValues() {
         return values;
+    }
+
+    @Override
+    public String toString() {
+        return columnRef + " IN (" + values.stream().map(ColumnValue::toString).collect(
+                Collectors.joining(", ")) + ")";
     }
 }

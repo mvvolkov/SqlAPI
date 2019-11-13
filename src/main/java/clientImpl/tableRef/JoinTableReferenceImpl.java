@@ -1,18 +1,18 @@
 package clientImpl.tableRef;
 
-import api.JoinTableReference;
-import api.TableReference;
+import api.tables.JoinTableReference;
+import api.tables.TableReference;
 import api.predicates.Predicate;
 
 public class JoinTableReferenceImpl implements JoinTableReference {
 
-    private final Type joinType;
+    private final TableRefType joinType;
     private final TableReference left;
     private final TableReference right;
     private final Predicate selectionPredicate;
 
 
-    JoinTableReferenceImpl(Type joinType, TableReference left, TableReference right,
+    JoinTableReferenceImpl(TableRefType joinType, TableReference left, TableReference right,
                            Predicate selectionPredicate) {
         this.joinType = joinType;
         this.left = left;
@@ -31,13 +31,13 @@ public class JoinTableReferenceImpl implements JoinTableReference {
     }
 
     @Override
-    public Predicate getSelectionPredicate() {
+    public Predicate getPredicate() {
         return selectionPredicate;
     }
 
 
     @Override
-    public Type getType() {
+    public TableRefType getTableRefType() {
         return joinType;
     }
 }

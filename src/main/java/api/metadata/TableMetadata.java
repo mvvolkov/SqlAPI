@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface TableMetadata {
 
-    String getName();
+    String getTableName();
 
     List<ColumnMetadata> getColumnsMetadata();
 }

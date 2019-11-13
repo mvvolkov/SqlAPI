@@ -4,6 +4,7 @@ import api.exceptions.*;
 import api.metadata.TableMetadata;
 import api.queries.SelectExpression;
 import api.queries.SqlStatement;
+import api.selectResult.ResultSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

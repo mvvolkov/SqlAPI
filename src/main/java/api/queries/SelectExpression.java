@@ -1,7 +1,7 @@
 package api.queries;
 
-import api.selectedItems.SelectedItem;
-import api.TableReference;
+import api.SelectedItem;
+import api.tables.TableReference;
 import api.predicates.Predicate;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public interface SelectExpression extends TableReference {
     List<SelectedItem> getSelectedItems();
 
     @Override
-    default Type getType() {
-        return Type.SELECT_EXPRESSION;
+    default TableRefType getTableRefType() {
+        return TableRefType.SELECT_EXPRESSION;
     }
 }

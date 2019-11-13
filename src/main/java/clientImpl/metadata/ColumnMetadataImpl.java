@@ -2,8 +2,9 @@ package clientImpl.metadata;
 
 import api.metadata.ColumnMetadata;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ColumnMetadataImpl<T extends Comparable<T>>
+public final class ColumnMetadataImpl<T extends Comparable<T>>
         implements ColumnMetadata<T> {
 
     @NotNull
@@ -21,6 +22,7 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
 
     private final int size;
 
+    @Nullable
     private final T defaultValue;
 
 
@@ -40,6 +42,7 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         return columnName;
     }
 
+    @NotNull
     @Override
     public String getSqlTypeName() {
         return typeName;
@@ -60,20 +63,24 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         StringBuilder sb = new StringBuilder(columnName);
         sb.append(" ");
         sb.append(this.getSqlTypeName());
-        sb.append(this.getTypeSpecificDescription());
+        if (this.getSize() != -1) {
+            sb.append("(");
+            sb.append(this.getSize());
+            sb.append(")");
+        }
         if (this.isNotNull()) {
             sb.append(" NOT NULL");
         }
         if (this.isPrimaryKey()) {
             sb.append(" PRIMARY KEY");
         }
+        if (defaultValue != null) {
+            sb.append(" DEFAULT ");
+            sb.append(defaultValue);
+        }
         return sb.toString();
     }
 
-    @NotNull
-    protected String getTypeSpecificDescription() {
-        return "";
-    }
 
     @NotNull
     @Override
@@ -108,6 +115,7 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
 
         private int size = -1;
 
+        @NotNull
         private T defaultValue;
 
 
@@ -143,12 +151,5 @@ public class ColumnMetadataImpl<T extends Comparable<T>>
         public ColumnMetadataImpl<T> build() {
             return new ColumnMetadataImpl<T>(this);
         }
-
-        public Builder setSize(int size) {
-            this.size = size;
-            return this;
-        }
     }
-
-
 }

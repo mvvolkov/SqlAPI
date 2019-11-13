@@ -1,4 +1,4 @@
-package api;
+package api.tables;
 
 import api.predicates.Predicate;
 
@@ -8,5 +8,5 @@ public interface JoinTableReference extends TableReference {
 
     TableReference getRightTableReference();
 
-    Predicate getSelectionPredicate();
+    Predicate getPredicate();
 }

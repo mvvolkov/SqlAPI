@@ -1,6 +1,6 @@
 package clientImpl.tableRef;
 
-import api.TableReference;
+import api.tables.TableReference;
 import api.predicates.Predicate;
 
 public class TableRefFactory {
@@ -15,21 +15,21 @@ public class TableRefFactory {
 
     public static TableReference innerJoin(TableReference left, TableReference right,
                                            Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(TableReference.Type.INNER_JOIN, left, right,
+        return new JoinTableReferenceImpl(TableReference.TableRefType.INNER_JOIN, left, right,
                 selectionPredicate);
     }
 
 
     public static TableReference leftOuterJoin(TableReference left, TableReference right,
                                                Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(TableReference.Type.LEFT_OUTER_JOIN, left,
+        return new JoinTableReferenceImpl(TableReference.TableRefType.LEFT_OUTER_JOIN, left,
                 right, selectionPredicate);
     }
 
 
     public static TableReference rightOuterJoin(TableReference left, TableReference right,
                                                 Predicate selectionPredicate) {
-        return new JoinTableReferenceImpl(TableReference.Type.RIGHT_OUTER_JOIN, left,
+        return new JoinTableReferenceImpl(TableReference.TableRefType.RIGHT_OUTER_JOIN, left,
                 right, selectionPredicate);
     }
 }

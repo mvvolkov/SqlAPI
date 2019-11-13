@@ -1,16 +1,29 @@
 package clientImpl.columnExpr;
 
 import api.columnExpr.ColumnExpression;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ColumnExprImpl implements ColumnExpression {
+public abstract class ColumnExprImpl implements ColumnExpression {
 
+    @NotNull
+    protected final ExprType exprType;
 
-    private ExprType exprType;
+    @Nullable
+    protected final String alias;
 
-    protected ColumnExprImpl(ExprType exprType) {
+    protected ColumnExprImpl(@NotNull ExprType exprType, @Nullable String alias) {
         this.exprType = exprType;
+        this.alias = alias;
     }
 
+    @Nullable
+    @Override
+    public String getAlias() {
+        return alias;
+    }
+
+    @NotNull
     @Override
     public ExprType getExprType() {
         return exprType;

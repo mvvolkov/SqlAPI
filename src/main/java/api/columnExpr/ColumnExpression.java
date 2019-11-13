@@ -1,6 +1,8 @@
 package api.columnExpr;
 
-public interface ColumnExpression {
+import api.SelectedItem;
+
+public interface ColumnExpression extends SelectedItem {
 
     enum ExprType {
         COLUMN_VALUE,
@@ -10,6 +12,10 @@ public interface ColumnExpression {
         DIFF,
         PRODUCT,
         DIVIDE
+    }
+
+    default String getAlias() {
+        return "";
     }
 
     ExprType getExprType();

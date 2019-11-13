@@ -1,6 +1,6 @@
 package serverLocalFileImpl.persistent;
 
-import api.ResultSet;
+import api.selectResult.ResultSet;
 import api.columnExpr.ColumnRef;
 import api.exceptions.ConstraintException;
 import api.exceptions.InconsistentInsertStmtException;

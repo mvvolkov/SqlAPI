@@ -1,25 +1,31 @@
 package serverLocalFileImpl;
 
 import api.*;
+import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
 import api.exceptions.*;
 import api.metadata.TableMetadata;
 import api.predicates.Predicate;
 import api.queries.*;
-import api.selectedItems.SelectedColumnExpression;
-import api.selectedItems.SelectedItem;
-import api.selectedItems.SelectedTable;
+import api.SelectedItem;
+import api.selectResult.ResultRow;
+import api.selectResult.ResultSet;
+import api.tables.DatabaseTableReference;
+import api.tables.JoinTableReference;
+import api.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 import serverLocalFileImpl.persistent.PersistentDatabase;
 import serverLocalFileImpl.persistent.PersistentTable;
 import serverLoggerImpl.SqlServerLoggerImpl;
+import sqlFactory.SqlManagerFactory;
 
 import java.util.*;
 
 public final class SqlServerImpl implements SqlServer {
 
 
-    private final transient SqlServer logger = new SqlServerLoggerImpl();
+    private final transient SqlServer logger =
+            SqlManagerFactory.getServerLoggerSqlManager();
 
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
@@ -79,57 +85,64 @@ public final class SqlServerImpl implements SqlServer {
         return createResultSet(internalResultSet, se.getSelectedItems());
     }
 
-    private static ResultSetImpl createResultSet(InternalResultSet internalResultSet, List<SelectedItem> selectedItems) {
+    private static ResultSetImpl createResultSet(InternalResultSet internalResultSet,
+                                                 List<SelectedItem> selectedItems) {
 
         List<ResultRow> resultRows = new ArrayList<>();
         List<String> resultColumns = new ArrayList<>();
 
-
-        for (SelectedItem selectedItem : selectedItems) {
-            switch (selectedItem.getType()) {
-                case SELECT_ALL:
+        if (selectedItems.isEmpty()) {
+            for (ColumnRef cr : internalResultSet.getColumns()) {
+                resultColumns.add(cr.getColumnName());
+            }
+        } else {
+            for (SelectedItem selectedItem : selectedItems) {
+                if (selectedItem instanceof DatabaseTableReference) {
+                    String tableName =
+                            ((DatabaseTableReference) selectedItem).getTableName();
+                    String dbName =
+                            ((DatabaseTableReference) selectedItem).getDatabaseName();
                     for (ColumnRef cr : internalResultSet.getColumns()) {
-                        resultColumns.add(cr.getColumnName());
-                    }
-                    break;
-                case SELECT_ALL_FROM_TABLE:
-                    String tableName = ((SelectedTable) selectedItem).getTableName();
-                    String dbName = ((SelectedTable) selectedItem).getDatabaseName();
-                    for (ColumnRef cr : internalResultSet.getColumns()) {
-                        if (cr.getDatabaseName().equals(dbName) && cr.getTableName().equals(tableName)) {
+                        if (cr.getDatabaseName().equals(dbName) &&
+                                cr.getTableName().equals(tableName)) {
                             resultColumns.add(cr.getColumnName());
                         }
                     }
-                    break;
-                case SELECT_COLUMN_EXPRESSION:
-                    resultColumns.add(((SelectedColumnExpression) selectedItem).getAlias());
-                    break;
+                }
+                if (selectedItem instanceof ColumnExpression) {
+                    resultColumns
+                            .add(((ColumnExpression) selectedItem).getAlias());
+                }
             }
         }
+
 
         for (InternalResultRow row : internalResultSet.getRows()) {
             List<Object> values = new ArrayList<>();
 
-            for (SelectedItem selectedItem : selectedItems) {
-                switch (selectedItem.getType()) {
-                    case SELECT_ALL:
+            if (selectedItems.isEmpty()) {
+                for (ColumnRef cr : internalResultSet.getColumns()) {
+                    values.add(row.getValues().get(cr));
+                }
+            } else {
+                for (SelectedItem selectedItem : selectedItems) {
+                    if (selectedItem instanceof DatabaseTableReference) {
+                        String tableName =
+                                ((DatabaseTableReference) selectedItem).getTableName();
+                        String dbName =
+                                ((DatabaseTableReference) selectedItem).getDatabaseName();
                         for (ColumnRef cr : internalResultSet.getColumns()) {
-                            values.add(row.getValues().get(cr));
-                        }
-                        break;
-                    case SELECT_ALL_FROM_TABLE:
-                        String tableName = ((SelectedTable) selectedItem).getTableName();
-                        String dbName = ((SelectedTable) selectedItem).getDatabaseName();
-                        for (ColumnRef cr : internalResultSet.getColumns()) {
-                            if (cr.getDatabaseName().equals(dbName) && cr.getTableName().equals(tableName)) {
+                            if (cr.getDatabaseName().equals(dbName) &&
+                                    cr.getTableName().equals(tableName)) {
                                 values.add(row.getValues().get(cr));
                             }
                         }
-                        break;
-                    case SELECT_COLUMN_EXPRESSION:
-                        SelectedColumnExpression sce = (SelectedColumnExpression) selectedItem;
-                        values.add(PredicateHelper.evaluateColumnExpr(row, sce.getColumnExpression()));
-                        break;
+                    }
+                    if (selectedItem instanceof ColumnExpression) {
+                        values.add(PredicateHelper
+                                .evaluateColumnExpr(row,
+                                        (ColumnExpression) selectedItem));
+                    }
                 }
             }
             resultRows.add(new ResultRowImpl(resultColumns, values));
@@ -148,7 +161,8 @@ public final class SqlServerImpl implements SqlServer {
                     stmt.getTableName());
         }
         database.addTable(
-                new PersistentTable(database.getName(), stmt.getTableName(), stmt.getColumns()));
+                new PersistentTable(database.getName(), stmt.getTableName(),
+                        stmt.getColumns()));
     }
 
     private void insert(InsertStatement stmt)
@@ -175,7 +189,8 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    private @NotNull PersistentDatabase getDatabase(String dbName) throws NoSuchDatabaseException {
+    private @NotNull PersistentDatabase getDatabase(String dbName)
+            throws NoSuchDatabaseException {
         for (PersistentDatabase database : databases) {
             if (database.getName().equals(dbName)) {
                 return database;
@@ -199,7 +214,9 @@ public final class SqlServerImpl implements SqlServer {
         return resultSet;
     }
 
-    private static InternalResultSet getFilteredResult(InternalResultSet resultSet, Predicate predicate) throws NoSuchColumnException, WrongValueTypeException {
+    private static InternalResultSet getFilteredResult(InternalResultSet resultSet,
+                                                       Predicate predicate)
+            throws NoSuchColumnException, WrongValueTypeException {
         List<ColumnRef> columns = new ArrayList<>(resultSet.getColumns());
         List<InternalResultRow> rows = new ArrayList<>();
         for (InternalResultRow row : resultSet.getRows()) {
@@ -282,21 +299,24 @@ public final class SqlServerImpl implements SqlServer {
             throws SqlException {
 
 
-        InternalResultSet left = this.getDataFromTableRef(tableReference.getLeftTableReference());
-        InternalResultSet right = this.getDataFromTableRef(tableReference.getRightTableReference());
-        switch (tableReference.getType()) {
+        InternalResultSet left =
+                this.getDataFromTableRef(tableReference.getLeftTableReference());
+        InternalResultSet right =
+                this.getDataFromTableRef(tableReference.getRightTableReference());
+        switch (tableReference.getTableRefType()) {
             case INNER_JOIN:
-                return innerJoin(left, right, tableReference.getSelectionPredicate());
+                return innerJoin(left, right, tableReference.getPredicate());
             case LEFT_OUTER_JOIN:
-                return leftOutJoin(left, right, tableReference.getSelectionPredicate());
+                return leftOutJoin(left, right, tableReference.getPredicate());
             case RIGHT_OUTER_JOIN:
-                return rightOutJoin(left, right, tableReference.getSelectionPredicate());
+                return rightOutJoin(left, right, tableReference.getPredicate());
         }
         throw new InvalidQueryException("Invalid type of join table reference");
     }
 
 
-    protected @NotNull InternalResultSet getDataFromTableRef(TableReference tableReference) throws
+    protected @NotNull InternalResultSet getDataFromTableRef(
+            TableReference tableReference) throws
             SqlException {
 
         if (tableReference instanceof DatabaseTableReference) {

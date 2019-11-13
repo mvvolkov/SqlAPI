@@ -3,7 +3,7 @@ package clientImpl.predicates;
 import api.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public class PredicateImpl implements Predicate {
+public abstract class PredicateImpl implements Predicate {
 
     @NotNull
     public final Type type;
@@ -26,11 +26,7 @@ public class PredicateImpl implements Predicate {
     public Predicate or(Predicate predicate) {
         return new CombinedPredicateImpl(Type.OR, this, predicate);
     }
-
-
-    protected static String getSqlString(Object value) {
-        return (value instanceof String) ? "'" + value + "'" : String.valueOf(value);
-    }
+    
 
     protected String getOperatorString() {
         switch (type) {
@@ -56,5 +52,4 @@ public class PredicateImpl implements Predicate {
                 return "";
         }
     }
-
 }

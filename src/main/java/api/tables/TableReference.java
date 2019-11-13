@@ -1,8 +1,8 @@
-package api;
+package api.tables;
 
 public interface TableReference {
 
-    enum Type {
+    enum TableRefType {
         DATABASE_TABLE,
         INNER_JOIN,
         LEFT_OUTER_JOIN,
@@ -10,5 +10,5 @@ public interface TableReference {
         SELECT_EXPRESSION
     }
 
-    Type getType();
+    TableRefType getTableRefType();
 }

@@ -1,7 +1,7 @@
 package serverLocalFileImpl;
 
 import api.exceptions.NoSuchColumnException;
-import api.ResultRow;
+import api.selectResult.ResultRow;
 
 import java.util.List;
 

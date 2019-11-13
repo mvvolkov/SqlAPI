@@ -2,45 +2,42 @@ package clientImpl.columnExpr;
 
 import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
-import api.selectedItems.SelectedColumnExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef, SelectedColumnExpression {
+public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
     @NotNull
     private final String columnName;
-    @Nullable
+
+    @NotNull
     private final String tableName;
-    @Nullable
+
+    @NotNull
     private final String databaseName;
 
-    public ColumnRefImpl(String databaseName, String tableName, String columnName) {
-        super(ExprType.COLUMN_REF);
+    public ColumnRefImpl(@NotNull String databaseName, @NotNull String tableName,
+                         @NotNull String columnName,
+                         @Nullable String alias) {
+        super(ExprType.COLUMN_REF, alias);
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
 
-    public ColumnRefImpl(String tableName, String columnName) {
-        this(null, tableName, columnName);
-    }
-
-    public ColumnRefImpl(String columnName) {
-        this(null, columnName);
-    }
-
-
+    @NotNull
     @Override
     public String getColumnName() {
         return columnName;
     }
 
+    @Nullable
     @Override
     public String getTableName() {
         return tableName;
     }
 
+    @NotNull
     @Override
     public String getDatabaseName() {
         return databaseName;
@@ -58,15 +55,5 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef, Se
             sb.insert(0, databaseName);
         }
         return sb.toString();
-    }
-
-    @Override
-    public ColumnExpression getColumnExpression() {
-        return this;
-    }
-
-    @Override
-    public String getAlias() {
-        return this.getColumnName();
     }
 }

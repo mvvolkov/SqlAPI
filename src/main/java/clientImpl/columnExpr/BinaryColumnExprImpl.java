@@ -3,7 +3,7 @@ package clientImpl.columnExpr;
 import api.columnExpr.BinaryColumnExpression;
 import api.columnExpr.ColumnExpression;
 
-public class BinaryColumnExprImpl extends ColumnExprImpl
+public final class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {
 
     private final ColumnExpression leftOperand;
@@ -11,8 +11,8 @@ public class BinaryColumnExprImpl extends ColumnExprImpl
     private final ColumnExpression rightOperand;
 
     public BinaryColumnExprImpl(ExprType exprType, ColumnExpression leftOperand,
-                                ColumnExpression rightOperand) {
-        super(exprType);
+                                ColumnExpression rightOperand, String alias) {
+        super(exprType, alias);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }
@@ -24,6 +24,25 @@ public class BinaryColumnExprImpl extends ColumnExprImpl
 
     @Override public ColumnExpression getRightOperand() {
         return rightOperand;
+    }
+
+    @Override public String toString() {
+        return "(" + leftOperand + " " + getOperatorString() + " " + rightOperand + ")";
+    }
+
+    private String getOperatorString() {
+        switch (exprType) {
+            case SUM:
+                return "+";
+            case DIFF:
+                return "-";
+            case PRODUCT:
+                return "*";
+            case DIVIDE:
+                return "/";
+            default:
+                return "";
+        }
     }
 }
 

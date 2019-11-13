@@ -6,11 +6,11 @@ import api.SqlServer;
 
 public class SqlManagerFactory {
 
-    public static SqlServer getPrintOutSqlManager() {
+    public static SqlServer getServerLoggerSqlManager() {
         return new SqlServerLoggerImpl();
     }
 
-    public static SqlServer getSimpleFileSqlManager() {
+    public static SqlServer getServerLocalFileSqlManager() {
         return new SqlServerImpl();
     }
 }

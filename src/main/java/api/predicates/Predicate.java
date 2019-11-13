@@ -3,8 +3,7 @@ package api.predicates;
 public interface Predicate {
 
     enum Type {
-        TRUE,
-        FALSE,
+        EMPTY,
         EQUALS,
         NOT_EQUALS,
         GREATER_THAN,
@@ -13,13 +12,15 @@ public interface Predicate {
         LESS_THAN_OR_EQUALS,
         AND,
         OR,
-        IN
+        IN,
+        IS_NULL,
+        IS_NOT_NULL
     }
 
     Type getType();
 
-    default boolean isTrue() {
-        return this.getType() == Type.TRUE;
+    default boolean isEmpty() {
+        return this.getType() == Type.EMPTY;
     }
 
     Predicate and(Predicate predicate);

@@ -10,22 +10,18 @@ import java.util.stream.Collectors;
 public final class TableMetadataImpl implements TableMetadata {
 
     @NotNull
-    private final String name;
+    private final String tableName;
 
     @NotNull
     private final List<ColumnMetadata> columnMetadata;
 
 
-    public TableMetadataImpl(@NotNull String name,
+    public TableMetadataImpl(@NotNull String tableName,
                              @NotNull List<ColumnMetadata> columnMetadata) {
-        this.name = name;
+        this.tableName = tableName;
         this.columnMetadata = columnMetadata;
     }
 
-    public static TableMetadata get(String tableName,
-                                    List<ColumnMetadata> columnsMetadata) {
-        return new TableMetadataImpl(tableName, columnsMetadata);
-    }
 
     @NotNull
     public List<ColumnMetadata> getColumnsMetadata() {
@@ -33,13 +29,13 @@ public final class TableMetadataImpl implements TableMetadata {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getTableName() {
+        return tableName;
     }
 
     @Override
     public String toString() {
-        return name + "(" + this.getColumnsDescriptionString() + ")";
+        return tableName + "(" + this.getColumnsDescriptionString() + ")";
     }
 
     private String getColumnsDescriptionString() {

@@ -1,13 +1,14 @@
 package clientImpl.queries;
 
 import api.AssignmentOperation;
-import api.selectedItems.SelectedItem;
-import api.TableReference;
+import api.SelectedItem;
+import api.tables.TableReference;
 import api.metadata.ColumnMetadata;
 import api.predicates.Predicate;
 import api.queries.*;
-import clientImpl.predicates.PredicateImpl;
+import clientImpl.predicates.PredicateFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SqlQueryFactory {
@@ -37,7 +38,7 @@ public class SqlQueryFactory {
 
     public static DeleteStatement delete(String databaseName, String tableName) {
         return new DeleteStatementImpl(databaseName, tableName,
-                new PredicateImpl(Predicate.Type.TRUE));
+                PredicateFactory.empty());
     }
 
 
@@ -49,7 +50,7 @@ public class SqlQueryFactory {
     public static UpdateStatement update(String databaseName, String tableName,
                                          List<AssignmentOperation> assignmentOperations) {
         return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
-                new PredicateImpl(Predicate.Type.TRUE));
+                PredicateFactory.empty());
     }
 
 
@@ -64,5 +65,54 @@ public class SqlQueryFactory {
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,
             Predicate predicate) {
         return new SelectExpressionImpl(tableReferences, selectedItems, predicate);
+    }
+
+    public static SelectExpression select(TableReference tableReference,
+                                          List<SelectedItem> selectedItems,
+                                          Predicate predicate) {
+        return new SelectExpressionImpl(Collections.singletonList(tableReference),
+                selectedItems,
+                predicate);
+    }
+
+    public static SelectExpression select(
+            List<TableReference> tableReferences,
+            Predicate predicate) {
+        return new SelectExpressionImpl(tableReferences, Collections.EMPTY_LIST,
+                predicate);
+    }
+
+    public static SelectExpression select(
+            TableReference tableReference,
+            Predicate predicate) {
+        return new SelectExpressionImpl(Collections.singletonList(tableReference),
+                Collections.EMPTY_LIST,
+                predicate);
+    }
+
+    public static SelectExpression select(
+            List<TableReference> tableReferences, List<SelectedItem> selectedItems) {
+        return new SelectExpressionImpl(tableReferences, selectedItems,
+                PredicateFactory.empty());
+    }
+
+    public static SelectExpression select(
+            TableReference tableReference, List<SelectedItem> selectedItems) {
+        return new SelectExpressionImpl(Collections.singletonList(tableReference),
+                selectedItems,
+                PredicateFactory.empty());
+    }
+
+    public static SelectExpression select(
+            List<TableReference> tableReferences) {
+        return new SelectExpressionImpl(tableReferences, Collections.emptyList(),
+                PredicateFactory.empty());
+    }
+
+    public static SelectExpression select(
+            TableReference tableReference) {
+        return new SelectExpressionImpl(Collections.singletonList(tableReference),
+                Collections.emptyList(),
+                PredicateFactory.empty());
     }
 }

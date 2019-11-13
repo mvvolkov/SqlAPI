@@ -1,4 +1,4 @@
-package api;
+package api.selectResult;
 
 import api.exceptions.NoSuchColumnException;
 

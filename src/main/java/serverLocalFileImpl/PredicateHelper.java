@@ -6,9 +6,7 @@ import api.columnExpr.ColumnRef;
 import api.columnExpr.ColumnValue;
 import api.exceptions.NoSuchColumnException;
 import api.exceptions.WrongValueTypeException;
-import api.predicates.BinaryPredicate;
-import api.predicates.CombinedPredicate;
-import api.predicates.Predicate;
+import api.predicates.*;
 
 public class PredicateHelper {
 
@@ -18,30 +16,44 @@ public class PredicateHelper {
     public static boolean matchRow(InternalResultRow resultRow, Predicate predicate)
             throws NoSuchColumnException, WrongValueTypeException {
 
-        if (predicate.getType() == Predicate.Type.TRUE) {
-            return true;
-        } else if (predicate.getType() == Predicate.Type.FALSE) {
-            return false;
-        }
-        if (predicate instanceof CombinedPredicate) {
-            switch (predicate.getType()) {
-                case AND:
-                    CombinedPredicate cp1 = (CombinedPredicate) predicate;
-                    return matchRow(resultRow, cp1.getLeftPredicate()) &&
-                            matchRow(resultRow, cp1.getRightPredicate());
-                case OR:
-                    CombinedPredicate cp2 = (CombinedPredicate) predicate;
-                    return matchRow(resultRow, cp2.getLeftPredicate()) ||
-                            matchRow(resultRow, cp2.getRightPredicate());
-            }
-        }
-        if (predicate instanceof BinaryPredicate) {
-            return matchRow(resultRow, (BinaryPredicate) predicate);
+        switch (predicate.getType()) {
+            case EMPTY:
+                return true;
+            case IN:
+                return matchRow(resultRow, (ColumnInPredicate) predicate);
+            case IS_NULL:
+                return matchRow(resultRow, (ColumnIsNullPredicate) predicate);
+            case IS_NOT_NULL:
+                return matchRow(resultRow, (ColumnIsNotNullPredicate) predicate);
+            case AND:
+            case OR:
+                return matchRow(resultRow, (CombinedPredicate) predicate);
+            case EQUALS:
+            case NOT_EQUALS:
+            case GREATER_THAN:
+            case GREATER_THAN_OR_EQUALS:
+            case LESS_THAN:
+            case LESS_THAN_OR_EQUALS:
+                return matchRow(resultRow, (BinaryPredicate) predicate);
         }
         return false;
     }
 
-    private static boolean matchRow(InternalResultRow resultRow, BinaryPredicate predicate)
+    private static boolean matchRow(InternalResultRow resultRow,
+                                    CombinedPredicate predicate)
+            throws NoSuchColumnException, WrongValueTypeException {
+        if (predicate.getType() == Predicate.Type.AND) {
+            return matchRow(resultRow, predicate.getLeftPredicate()) &&
+                    matchRow(resultRow, predicate.getRightPredicate());
+        } else if (predicate.getType() == Predicate.Type.OR) {
+            return matchRow(resultRow, predicate.getLeftPredicate()) ||
+                    matchRow(resultRow, predicate.getRightPredicate());
+        }
+        return false;
+    }
+
+    private static boolean matchRow(InternalResultRow resultRow,
+                                    BinaryPredicate predicate)
             throws WrongValueTypeException, NoSuchColumnException {
 
 
@@ -80,8 +92,37 @@ public class PredicateHelper {
         }
     }
 
+    private static boolean matchRow(InternalResultRow resultRow,
+                                    ColumnInPredicate predicate) {
+
+        Comparable leftValue =
+                (Comparable) evaluateColumnExpr(resultRow, predicate.getColumnRef());
+
+        for (ColumnValue columnValue : predicate.getColumnValues()) {
+            Comparable rightValue = (Comparable) columnValue.getValue();
+            if (leftValue.compareTo(rightValue) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean matchRow(InternalResultRow resultRow,
+                                    ColumnIsNullPredicate predicate) {
+
+        Object leftValue = evaluateColumnExpr(resultRow, predicate.getColumnRef());
+        return leftValue == null;
+    }
+
+    private static boolean matchRow(InternalResultRow resultRow,
+                                    ColumnIsNotNullPredicate predicate) {
+
+        Object leftValue = evaluateColumnExpr(resultRow, predicate.getColumnRef());
+        return leftValue != null;
+    }
+
     public static Object evaluateColumnExpr(InternalResultRow row,
-                                             ColumnExpression ce) {
+                                            ColumnExpression ce) {
 
         if (ce instanceof BinaryColumnExpression) {
             return evaluateBinaryColumnExpr(row, (BinaryColumnExpression) ce);
