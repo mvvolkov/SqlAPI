@@ -1,6 +1,6 @@
 package clientImpl.selectedItems;
 
-import api.SelectedItem;
+import api.selectedItems.SelectedItem;
 
 public abstract class SelectedItemImpl implements SelectedItem {
 

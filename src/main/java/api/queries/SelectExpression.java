@@ -1,6 +1,6 @@
 package api.queries;
 
-import api.SelectedItem;
+import api.selectedItems.SelectedItem;
 import api.TableReference;
 import api.predicates.Predicate;
 

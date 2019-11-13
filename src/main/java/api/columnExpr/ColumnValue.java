@@ -5,7 +5,7 @@ public interface ColumnValue extends ColumnExpression {
     Object getValue();
 
     @Override
-    default Type getType() {
-        return Type.COLUMN_VALUE;
+    default ExprType getExprType() {
+        return ExprType.COLUMN_VALUE;
     }
 }

@@ -2,41 +2,41 @@ package serverLocalFileImpl;
 
 import api.columnExpr.ColumnRef;
 
-import java.util.List;
+import java.util.Map;
 
 public final class InternalResultRow {
 
 
-    private final List<ColumnRef> columns;
-    private final List<Object> values;
+    //    private final List<ColumnRef> columns;
+    private final Map<ColumnRef, Object> values;
 
-    public InternalResultRow(List<ColumnRef> columns, List<Object> values) {
-        this.columns = columns;
+    public InternalResultRow(Map<ColumnRef, Object> values) {
+//        this.columns = columns;
         this.values = values;
     }
 
 
-    public void addValues(List<Object> values) {
-        this.values.addAll(values);
-    }
+//    public void addValues(List<Object> values) {
+//        this.values.addAll(values);
+//    }
+//
+//    public void addValue(Object value) {
+//        this.values.add(value);
+//    }
 
-    public void addValue(Object value) {
-        this.values.add(value);
-    }
-
-    public List<Object> getValues() {
+    public Map<ColumnRef, Object> getValues() {
         return values;
     }
 
-    public void addColumns(List<ColumnRef> values) {
-        this.columns.addAll(values);
-    }
+//    public void addColumns(List<ColumnRef> values) {
+//        this.columns.addAll(values);
+//    }
+//
+//    public void addColumn(ColumnRef value) {
+//        this.columns.add(value);
+//    }
 
-    public void addColumn(ColumnRef value) {
-        this.columns.add(value);
-    }
-
-    public List<ColumnRef> getColumns() {
-        return columns;
-    }
+//    public List<ColumnRef> getColumns() {
+//        return columns;
+//    }
 }

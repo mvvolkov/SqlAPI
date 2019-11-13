@@ -10,9 +10,9 @@ public class BinaryColumnExprImpl extends ColumnExprImpl
 
     private final ColumnExpression rightOperand;
 
-    public BinaryColumnExprImpl(Type type, ColumnExpression leftOperand,
+    public BinaryColumnExprImpl(ExprType exprType, ColumnExpression leftOperand,
                                 ColumnExpression rightOperand) {
-        super(type);
+        super(exprType);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }

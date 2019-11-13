@@ -40,13 +40,13 @@ public class TestSqlServerLoggerImpl {
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1",
                     PredicateFactory
-                            .equals(ColumnExprFactory.columnRef("column1"),
+                            .equals(ColumnExprFactory.columnRef("DB1", "table1", "column1"),
                                     ColumnExprFactory.integer(3)).or(
                             PredicateFactory.greaterThan(
-                                    ColumnExprFactory.columnRef("column2"),
+                                    ColumnExprFactory.columnRef("DB1", "table1", "column2"),
                                     ColumnExprFactory.string("12"))).and(
                             PredicateFactory.equals(
-                                    ColumnExprFactory.columnRef("column3"),
+                                    ColumnExprFactory.columnRef("DB1", "table1", "column3"),
                                     ColumnExprFactory.integer(null)))));
 
 
@@ -56,17 +56,17 @@ public class TestSqlServerLoggerImpl {
                             new AssignmentOperationImpl("column2",
                                     ColumnExprFactory.string("test3"))),
                     PredicateFactory
-                            .lessThan(ColumnExprFactory.columnRef("column3"),
+                            .lessThan(ColumnExprFactory.columnRef("DB1", "table1", "column3"),
                                     ColumnExprFactory.string("abs"))));
 
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
                     Arrays.asList(new AssignmentOperationImpl("column1",
-                                    ColumnExprFactory.sum(ColumnExprFactory.columnRef("column1"), ColumnExprFactory.integer(1))
+                                    ColumnExprFactory.sum(ColumnExprFactory.columnRef("DB1", "table1", "column1"), ColumnExprFactory.integer(1))
                             ),
                             new AssignmentOperationImpl("column2",
                                     ColumnExprFactory.string("test3"))),
-                    PredicateFactory.in(ColumnExprFactory.columnRef("column3"),
+                    PredicateFactory.in(ColumnExprFactory.columnRef("DB1", "table1", "column3"),
                             Arrays.asList(ColumnExprFactory.string("12"), ColumnExprFactory.string("13"),
                                     ColumnExprFactory.string("14")))
             ));

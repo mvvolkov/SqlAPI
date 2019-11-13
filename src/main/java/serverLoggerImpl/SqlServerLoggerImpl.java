@@ -10,6 +10,7 @@ import api.metadata.ColumnMetadata;
 import api.metadata.TableMetadata;
 import api.predicates.*;
 import api.queries.*;
+import api.selectedItems.SelectedItem;
 import clientImpl.predicates.ColumnInPredicateImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -254,7 +255,7 @@ public class SqlServerLoggerImpl implements SqlServer {
         StringBuilder sb = new StringBuilder();
         sb.append(getColumnExpressionString(bce.getLeftOperand()));
         sb.append(" ");
-        sb.append(getOperatorString(bce.getType()));
+        sb.append(getOperatorString(bce.getExprType()));
         sb.append(" ");
         sb.append(getColumnExpressionString(bce.getRightOperand()));
         return sb.toString();
@@ -289,14 +290,14 @@ public class SqlServerLoggerImpl implements SqlServer {
     }
 
 
-    private static String getOperatorString(ColumnExpression.Type type) {
+    private static String getOperatorString(ColumnExpression.ExprType exprType) {
 
-        switch (type) {
-            case ADD:
+        switch (exprType) {
+            case SUM:
                 return "+";
-            case SUBTRACT:
+            case DIFF:
                 return "-";
-            case MULTIPLY:
+            case PRODUCT:
                 return "*";
             case DIVIDE:
                 return "/";

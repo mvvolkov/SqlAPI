@@ -1,10 +1,12 @@
 package clientImpl.columnExpr;
 
+import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
+import api.selectedItems.SelectedColumnExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
+public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef, SelectedColumnExpression {
 
     @NotNull
     private final String columnName;
@@ -14,7 +16,7 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
     private final String databaseName;
 
     public ColumnRefImpl(String databaseName, String tableName, String columnName) {
-        super(Type.COLUMN_REF);
+        super(ExprType.COLUMN_REF);
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
@@ -28,7 +30,7 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
         this(null, columnName);
     }
 
-  
+
     @Override
     public String getColumnName() {
         return columnName;
@@ -56,5 +58,15 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
             sb.insert(0, databaseName);
         }
         return sb.toString();
+    }
+
+    @Override
+    public ColumnExpression getColumnExpression() {
+        return this;
+    }
+
+    @Override
+    public String getAlias() {
+        return this.getColumnName();
     }
 }

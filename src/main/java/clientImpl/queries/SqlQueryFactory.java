@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import api.AssignmentOperation;
-import api.SelectedItem;
+import api.selectedItems.SelectedItem;
 import api.TableReference;
 import api.metadata.ColumnMetadata;
 import api.predicates.Predicate;

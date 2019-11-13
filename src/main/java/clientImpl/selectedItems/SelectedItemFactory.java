@@ -1,6 +1,7 @@
 package clientImpl.selectedItems;
 
-import api.SelectedItem;
+import api.columnExpr.ColumnRef;
+import api.selectedItems.SelectedItem;
 import api.columnExpr.ColumnExpression;
 
 public class SelectedItemFactory {
@@ -12,11 +13,15 @@ public class SelectedItemFactory {
         return new SelectedAllImpl();
     }
 
-    public static SelectedItem allFromTable(String tableName) {
-        return new SelectedTableImpl(tableName);
+    public static SelectedItem allFromTable(String dbName, String tableName) {
+        return new SelectedTableImpl(dbName, tableName);
     }
-    
-    public static SelectedItem getColumnExpression(ColumnExpression columnExpression) {
-        return new SelectedColumnExpressionImpl(columnExpression, null);
+
+    public static SelectedItem columnExpression(ColumnExpression columnExpression, String alias) {
+        return new SelectedColumnExpressionImpl(columnExpression, alias);
+    }
+
+    public static SelectedItem column(ColumnRef columnRef) {
+        return new SelectedColumnExpressionImpl(columnRef, columnRef.getColumnName());
     }
 }

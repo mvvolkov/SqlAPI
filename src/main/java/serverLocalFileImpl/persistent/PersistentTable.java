@@ -6,16 +6,14 @@ import api.exceptions.ConstraintException;
 import api.exceptions.InconsistentInsertStmtException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
-import api.queries.DeleteStatement;
+import api.predicates.Predicate;
 import api.queries.UpdateStatement;
+import serverLocalFileImpl.ColumnRefImpl;
 import serverLocalFileImpl.InternalResultRow;
 import serverLocalFileImpl.InternalResultSet;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class PersistentTable implements Serializable {
 
@@ -46,19 +44,6 @@ public final class PersistentTable implements Serializable {
 
     public List<PersistentColumnMetadata> getColumns() {
         return columns;
-    }
-
-
-    public void insert(List<Object> values)
-            throws WrongValueTypeException, ConstraintException {
-        Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < columns.size(); i++) {
-            PersistentColumnMetadata columnMetadata = columns.get(i);
-            Object value = values.size() > i ? values.get(i) : null;
-            this.checkConstraints(columnMetadata, value);
-            map.put(columnMetadata.getColumnName(), value);
-        }
-        rows.add(new PersistentRow(map));
     }
 
 
@@ -103,7 +88,7 @@ public final class PersistentTable implements Serializable {
 
     }
 
-    public void delete(DeleteStatement stmt) {
+    public void delete(Predicate predicate) {
 
     }
 
@@ -150,32 +135,17 @@ public final class PersistentTable implements Serializable {
         }
         List<InternalResultRow> resultRows = new ArrayList<>();
         for (PersistentRow row : rows) {
-            List<Object> values = new ArrayList<>();
-            for (PersistentColumnMetadata column : columns) {
-                values.add(row.getValue(column.getColumnName()));
+            Map<ColumnRef, Object> values = new HashMap<>();
+            for (String columnName : row.getValues().keySet()) {
+                values.put(this.createColumnRef(columnName), row.getValues().get(columnName));
             }
-            resultRows.add(new InternalResultRow(resultColumns, values));
+            resultRows.add(new InternalResultRow(values));
         }
         return new InternalResultSet(resultColumns, resultRows);
     }
 
     private ColumnRef createColumnRef(String columnName) {
-        return new ColumnRef() {
-
-            @Override
-            public String getColumnName() {
-                return columnName;
-            }
-
-            @Override
-            public String getTableName() {
-                return tableName;
-            }
-
-            @Override
-            public String getDatabaseName() {
-                return dbName;
-            }
-        };
+        return new ColumnRefImpl(dbName, tableName, columnName);
     }
+
 }

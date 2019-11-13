@@ -2,7 +2,10 @@ package serverLocalFileImpl;
 
 import api.columnExpr.ColumnRef;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class InternalResultSet {
 
@@ -15,17 +18,6 @@ public final class InternalResultSet {
         this.rows = rows;
     }
 
-    public void addColumns(List<ColumnRef> columns) {
-        this.columns.addAll(columns);
-    }
-
-    public void addRows(List<InternalResultRow> rows) {
-        this.rows.addAll(rows);
-    }
-
-    public void addRow(InternalResultRow row) {
-        this.rows.add(row);
-    }
 
     public List<ColumnRef> getColumns() {
         return columns;
@@ -33,6 +25,22 @@ public final class InternalResultSet {
 
     public List<InternalResultRow> getRows() {
         return rows;
+    }
+
+    public InternalResultSet joinWith(InternalResultSet otherSet) {
+
+        List<ColumnRef> newColumns = new ArrayList<>(columns);
+        newColumns.addAll(otherSet.getColumns());
+        List<InternalResultRow> newRows = new ArrayList<>();
+
+        for (InternalResultRow row : rows) {
+            for (InternalResultRow otherRow : otherSet.getRows()) {
+                Map<ColumnRef, Object> newValues = new HashMap<>(row.getValues());
+                newValues.putAll(otherRow.getValues());
+                newRows.add(new InternalResultRow(newValues));
+            }
+        }
+        return new InternalResultSet(newColumns, newRows);
     }
 
 }

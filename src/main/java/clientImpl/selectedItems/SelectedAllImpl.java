@@ -1,6 +1,8 @@
 package clientImpl.selectedItems;
 
-public class SelectedAllImpl extends SelectedItemImpl {
+import api.selectedItems.SelectedAll;
+
+public class SelectedAllImpl extends SelectedItemImpl implements SelectedAll {
 
     public SelectedAllImpl() {
         super(Type.SELECT_ALL);

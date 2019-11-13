@@ -8,7 +8,7 @@ public final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue
 
 
     public ColumnValueImpl(Object value) {
-        super(Type.COLUMN_VALUE);
+        super(ExprType.COLUMN_VALUE);
         this.value = value;
     }
 

@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import api.queries.SelectExpression;
-import api.SelectedItem;
+import api.selectedItems.SelectedItem;
 import api.TableReference;
 import api.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;

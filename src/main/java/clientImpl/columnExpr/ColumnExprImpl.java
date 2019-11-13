@@ -5,15 +5,15 @@ import api.columnExpr.ColumnExpression;
 public class ColumnExprImpl implements ColumnExpression {
 
 
-    private Type type;
+    private ExprType exprType;
 
-    protected ColumnExprImpl(Type type) {
-        this.type = type;
+    protected ColumnExprImpl(ExprType exprType) {
+        this.exprType = exprType;
     }
 
     @Override
-    public Type getType() {
-        return type;
+    public ExprType getExprType() {
+        return exprType;
     }
 
 }

@@ -2,15 +2,15 @@ package api.columnExpr;
 
 public interface ColumnExpression {
 
-    enum Type {
+    enum ExprType {
         COLUMN_VALUE,
         COLUMN_REF,
         NULL_VALUE,
-        ADD,
-        SUBTRACT,
-        MULTIPLY,
+        SUM,
+        DIFF,
+        PRODUCT,
         DIVIDE
     }
 
-    Type getType();
+    ExprType getExprType();
 }
