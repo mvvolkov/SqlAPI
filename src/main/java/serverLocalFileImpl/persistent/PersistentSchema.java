@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class PersistentDatabase implements Serializable {
+public final class PersistentSchema implements Serializable {
 
     public static final long serialVersionUID = -2259554024372972206L;
 
@@ -14,7 +14,7 @@ public final class PersistentDatabase implements Serializable {
 
     private final Collection<PersistentTable> tables = new ArrayList<>();
 
-    public PersistentDatabase(String name) {
+    public PersistentSchema(String name) {
         this.name = name;
     }
 

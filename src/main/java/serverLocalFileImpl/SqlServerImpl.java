@@ -1,22 +1,21 @@
 package serverLocalFileImpl;
 
-import api.*;
+import api.SelectedItem;
+import api.SqlServer;
 import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
 import api.exceptions.*;
 import api.metadata.TableMetadata;
 import api.predicates.Predicate;
 import api.queries.*;
-import api.SelectedItem;
 import api.selectResult.ResultRow;
 import api.selectResult.ResultSet;
 import api.tables.DatabaseTableReference;
 import api.tables.JoinTableReference;
 import api.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
-import serverLocalFileImpl.persistent.PersistentDatabase;
+import serverLocalFileImpl.persistent.PersistentSchema;
 import serverLocalFileImpl.persistent.PersistentTable;
-import serverLoggerImpl.SqlServerLoggerImpl;
 import sqlFactory.SqlManagerFactory;
 
 import java.util.*;
@@ -27,18 +26,18 @@ public final class SqlServerImpl implements SqlServer {
     private final transient SqlServer logger =
             SqlManagerFactory.getServerLoggerSqlManager();
 
-    private final Collection<PersistentDatabase> databases = new ArrayList<>();
+    private final Collection<PersistentSchema> schemas = new ArrayList<>();
 
 
     @Override
-    public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
-        logger.createDatabase(dbName);
-        for (PersistentDatabase database : databases) {
-            if (database.getName().equals(dbName)) {
-                throw new DatabaseAlreadyExistsException(dbName);
+    public void createDatabase(String schemaName) throws DatabaseAlreadyExistsException {
+        logger.createDatabase(schemaName);
+        for (PersistentSchema schema : schemas) {
+            if (schema.getName().equals(schemaName)) {
+                throw new DatabaseAlreadyExistsException(schemaName);
             }
         }
-        databases.add(new PersistentDatabase(dbName));
+        schemas.add(new PersistentSchema(schemaName));
     }
 
     @Override
@@ -75,10 +74,15 @@ public final class SqlServerImpl implements SqlServer {
     }
 
     @Override
-    public @NotNull ResultSet select(SelectExpression se) throws
+    public @NotNull ResultSet getQueryResult(SelectExpression se) throws
+            SqlException {
+        logger.getQueryResult(se);
+        return this.select(se);
+    }
+
+    private ResultSet select(SelectExpression se) throws
             SqlException {
 
-        logger.select(se);
         List<InternalResultSet> resultSets = new ArrayList<>();
         for (TableReference tr : se.getTableReferences()) {
             resultSets.add(this.getDataFromTableRef(tr));
@@ -87,6 +91,7 @@ public final class SqlServerImpl implements SqlServer {
         internalResultSet = getFilteredResult(internalResultSet, se.getPredicate());
         return createResultSet(internalResultSet, se.getSelectedItems());
     }
+
 
     private static ResultSetImpl createResultSet(InternalResultSet internalResultSet,
                                                  List<SelectedItem> selectedItems) {
@@ -157,7 +162,7 @@ public final class SqlServerImpl implements SqlServer {
 
     private void createTable(CreateTableStatement stmt)
             throws TableAlreadyExistsException, NoSuchDatabaseException {
-        PersistentDatabase database = this.getDatabase(stmt.getDatabaseName());
+        PersistentSchema database = this.getDatabase(stmt.getDatabaseName());
         PersistentTable table = database.getTableOrNull(stmt.getTableName());
         if (table != null) {
             throw new TableAlreadyExistsException(database.getName(),
@@ -195,14 +200,14 @@ public final class SqlServerImpl implements SqlServer {
 
     private PersistentTable getTable(SqlStatement stmt)
             throws NoSuchDatabaseException, NoSuchTableException {
-        PersistentDatabase database = this.getDatabase(stmt.getDatabaseName());
+        PersistentSchema database = this.getDatabase(stmt.getDatabaseName());
         return database.getTable(stmt.getTableName());
     }
 
 
-    private @NotNull PersistentDatabase getDatabase(String dbName)
+    private @NotNull PersistentSchema getDatabase(String dbName)
             throws NoSuchDatabaseException {
-        for (PersistentDatabase database : databases) {
+        for (PersistentSchema database : schemas) {
             if (database.getName().equals(dbName)) {
                 return database;
             }
@@ -211,8 +216,7 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    private static InternalResultSet getJoinedResult(List<InternalResultSet> resultSets)
-            throws NoSuchColumnException, WrongValueTypeException {
+    private static InternalResultSet getJoinedResult(List<InternalResultSet> resultSets) {
 
         if (resultSets.isEmpty()) {
             return new InternalResultSet(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
@@ -246,8 +250,8 @@ public final class SqlServerImpl implements SqlServer {
         return getFilteredResult(internalResultSet, sc);
     }
 
-    private static InternalResultSet leftOutJoin(InternalResultSet left,
-                                                 InternalResultSet right, Predicate sc)
+    private static InternalResultSet leftOuterJoin(InternalResultSet left,
+                                                   InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnRef> columns = new ArrayList<>();
@@ -273,8 +277,8 @@ public final class SqlServerImpl implements SqlServer {
         return new InternalResultSet(columns, rows);
     }
 
-    private static InternalResultSet rightOutJoin(InternalResultSet left,
-                                                  InternalResultSet right, Predicate sc)
+    private static InternalResultSet rightOuterJoin(InternalResultSet left,
+                                                    InternalResultSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException {
 
         List<ColumnRef> columns = new ArrayList<>();
@@ -318,9 +322,9 @@ public final class SqlServerImpl implements SqlServer {
             case INNER_JOIN:
                 return innerJoin(left, right, tableReference.getPredicate());
             case LEFT_OUTER_JOIN:
-                return leftOutJoin(left, right, tableReference.getPredicate());
+                return leftOuterJoin(left, right, tableReference.getPredicate());
             case RIGHT_OUTER_JOIN:
-                return rightOutJoin(left, right, tableReference.getPredicate());
+                return rightOuterJoin(left, right, tableReference.getPredicate());
         }
         throw new InvalidQueryException("Invalid type of join table reference");
     }
@@ -330,20 +334,22 @@ public final class SqlServerImpl implements SqlServer {
             TableReference tableReference) throws
             SqlException {
 
-        if (tableReference instanceof DatabaseTableReference) {
-            return this.getDataFromDatabaseTable((DatabaseTableReference) tableReference);
-        } else if (tableReference instanceof JoinTableReference) {
-            return this.getDataFromJoinedTable((JoinTableReference) tableReference);
+        switch (tableReference.getTableRefType()) {
+            case DATABASE_TABLE:
+                return this.getDataFromDatabaseTable((DatabaseTableReference) tableReference);
+            case INNER_JOIN:
+            case LEFT_OUTER_JOIN:
+            case RIGHT_OUTER_JOIN:
+                return this.getDataFromJoinedTable((JoinTableReference) tableReference);
+            case SELECT_EXPRESSION:
+
         }
-//        else if (tableReference instanceof SelectExpression) {
-//            return this.select((SelectExpression) tableReference);
-//        }
         throw new IllegalArgumentException("");
     }
 
     protected PersistentTable getTable(DatabaseTableReference tableReference) throws
             NoSuchTableException, NoSuchDatabaseException {
-        for (PersistentDatabase database : databases) {
+        for (PersistentSchema database : schemas) {
             if (database.getName().equals(tableReference.getDatabaseName())) {
                 return (PersistentTable) database.getTable(tableReference.getTableName());
             }

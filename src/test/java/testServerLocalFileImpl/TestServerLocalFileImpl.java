@@ -1,11 +1,11 @@
 package testServerLocalFileImpl;
 
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
 import api.SqlServer;
 import api.exceptions.NoSuchColumnException;
 import api.exceptions.SqlException;
 import api.metadata.ColumnMetadata;
+import api.selectResult.ResultRow;
+import api.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.predicates.PredicateFactory;
@@ -15,7 +15,6 @@ import sqlFactory.SqlManagerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,16 +41,16 @@ public class TestServerLocalFileImpl {
                             )));
 
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
-                    Arrays.asList(10, 20, "test1")
+                    Arrays.asList(10, 30, "test1")
             ));
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
-                    Arrays.asList(11, 20, "test1")));
+                    Arrays.asList(11, 31, "test1")));
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
-                    Arrays.asList(12, 20, "test1")));
+                    Arrays.asList(12, 32, "test1")));
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
-                    Arrays.asList(13, 20, "test2")));
+                    Arrays.asList(13, 33, "test2")));
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
-                    Arrays.asList(15, 21, "test1")));
+                    Arrays.asList(15, 34, "test1")));
             printTable(sqlServer, "DB1", "table1");
 
             sqlServer.executeStatement(
@@ -72,7 +71,7 @@ public class TestServerLocalFileImpl {
             printTable(sqlServer, "DB1", "table2");
 
 
-            ResultSet resultSet = sqlServer.select(SqlQueryFactory.select(Arrays.asList(
+            printResultSet(sqlServer.getQueryResult(SqlQueryFactory.select(Arrays.asList(
                     TableRefFactory.dbTable("DB1", "table2"),
                     TableRefFactory.dbTable("DB1", "table1")),
                     Arrays.asList(
@@ -94,33 +93,26 @@ public class TestServerLocalFileImpl {
                             ColumnExprFactory.columnRef("DB1", "table1", "column3"))
                             .and(PredicateFactory.equals(ColumnExprFactory
                                             .columnRef("DB1", "table2", "column4"),
-                                    ColumnExprFactory.integer(23)))));
+                                    ColumnExprFactory.integer(23))))));
 
-            ResultSet resultSet2 = sqlServer.select(SqlQueryFactory
-                    .select(Collections.singletonList(TableRefFactory
-                                    .innerJoin(TableRefFactory.dbTable("DB1", "table2"),
-                                            TableRefFactory.dbTable("DB1", "table1"),
-                                            PredicateFactory.equals(ColumnExprFactory
-                                                            .columnRef("DB1", "table2", "column5"),
-                                                    ColumnExprFactory.columnRef("DB1", "table1",
-                                                            "column3"))
-                                                    .and(PredicateFactory.equals(ColumnExprFactory
-                                                                    .columnRef("DB1", "table2",
-                                                                            "column4"),
-                                                            ColumnExprFactory
-                                                                    .sum(ColumnExprFactory
-                                                                                    .columnRef("DB1",
-                                                                                            "table1",
-                                                                                            "column2"),
-                                                                            ColumnExprFactory
-                                                                                    .integer(
-                                                                                            3)))))),
-                            Collections.EMPTY_LIST,
-                            PredicateFactory.empty()));
-            printResultSet(resultSet2);
+
+            printResultSet(sqlServer.getQueryResult(SqlQueryFactory.select(TableRefFactory
+                    .innerJoin(TableRefFactory.dbTable("DB1", "table2"),
+                            TableRefFactory.dbTable("DB1", "table1"),
+                            PredicateFactory.equals(
+                                    ColumnExprFactory
+                                            .columnRef("DB1", "table2", "column5"),
+                                    ColumnExprFactory
+                                            .columnRef("DB1", "table1", "column3"))
+                                    .and(PredicateFactory.equals(ColumnExprFactory
+                                                    .columnRef("DB1", "table2", "column4"),
+                                            ColumnExprFactory.sum(ColumnExprFactory
+                                                            .columnRef("DB1", "table1", "column2"),
+                                                    ColumnExprFactory.integer(3))))))));
+
 
             printResultSet(
-                    sqlServer.select(SqlQueryFactory.select(TableRefFactory.dbTable(
+                    sqlServer.getQueryResult(SqlQueryFactory.select(TableRefFactory.dbTable(
                             "DB1", "table1"),
                             PredicateFactory.in(ColumnExprFactory.columnRef("DB1",
                                     "table1", "column1"),
@@ -135,14 +127,13 @@ public class TestServerLocalFileImpl {
             printTable(sqlServer, "DB1", "table1");
 
             printResultSet(
-                    sqlServer.select(SqlQueryFactory.select(TableRefFactory.dbTable(
+                    sqlServer.getQueryResult(SqlQueryFactory.select(TableRefFactory.dbTable(
                             "DB1", "table1"),
                             PredicateFactory.isNull(ColumnExprFactory.columnRef("DB1",
-                                    "table1", "column2"
-                            )))));
+                                    "table1", "column2")))));
 
             printResultSet(
-                    sqlServer.select(SqlQueryFactory.select(TableRefFactory.dbTable(
+                    sqlServer.getQueryResult(SqlQueryFactory.select(TableRefFactory.dbTable(
                             "DB1", "table1"),
                             PredicateFactory.isNotNull(ColumnExprFactory.columnRef("DB1",
                                     "table1", "column2"
@@ -172,7 +163,7 @@ public class TestServerLocalFileImpl {
             throws SqlException {
 
         System.out.println("");
-        ResultSet resultSet = sqlServer.select(SqlQueryFactory
+        ResultSet resultSet = sqlServer.getQueryResult(SqlQueryFactory
                 .select(TableRefFactory.dbTable(dbName, tableName)));
         printResultSet(resultSet);
     }

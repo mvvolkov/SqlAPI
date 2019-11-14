@@ -56,7 +56,7 @@ public class SqlServerLoggerImpl implements SqlServer {
 
 
     @Override
-    public @NotNull ResultSet select(SelectExpression selectExpression) {
+    public @NotNull ResultSet getQueryResult(SelectExpression selectExpression) {
         System.out.println(getSelectString(selectExpression) + ";");
         return getEmptyResultSet();
     }

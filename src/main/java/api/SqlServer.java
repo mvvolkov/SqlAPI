@@ -20,5 +20,5 @@ public interface SqlServer {
     void executeStatement(SqlStatement statement) throws SqlException;
 
     @NotNull
-    ResultSet select(SelectExpression selectExpression) throws SqlException;
+    ResultSet getQueryResult(SelectExpression selectExpression) throws SqlException;
 }
