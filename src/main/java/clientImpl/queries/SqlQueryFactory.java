@@ -22,19 +22,31 @@ public class SqlQueryFactory {
         return new CreateTableStatementImpl(databaseName, tableName, columns);
     }
 
-
-    public static InsertStatement insert(String databaseName, String tableName,
-                                         List<Object> values) {
-        return new InsertStatementImpl(databaseName, tableName, values);
-    }
-
-
     public static InsertStatement insert(String databaseName, String tableName,
                                          List<String> columns,
                                          List<Object> values) {
         return new InsertStatementImpl(databaseName, tableName, columns, values);
     }
 
+    public static InsertStatement insert(String databaseName, String tableName,
+                                         List<Object> values) {
+        return insert(databaseName, tableName, Collections.EMPTY_LIST, values);
+    }
+
+    public static InsertFromSelectStatementImpl insert(String databaseName,
+                                                       String tableName,
+                                                       List<String> columns,
+                                                       SelectExpression selectExpression) {
+        return new InsertFromSelectStatementImpl(databaseName, tableName, columns,
+                selectExpression);
+    }
+
+    public static InsertFromSelectStatementImpl insert(String databaseName,
+                                                       String tableName,
+                                                       SelectExpression selectExpression) {
+        return insert(databaseName, tableName, Collections.EMPTY_LIST,
+                selectExpression);
+    }
 
     public static DeleteStatement delete(String databaseName, String tableName) {
         return new DeleteStatementImpl(databaseName, tableName,

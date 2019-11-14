@@ -61,6 +61,9 @@ public final class SqlServerImpl implements SqlServer {
             case INSERT:
                 this.insert((InsertStatement) stmt);
                 return;
+            case INSERT_FROM_SELECT:
+                this.insert((InsertFromSelectStatement) stmt);
+                return;
             case DELETE:
                 this.delete((DeleteStatement) stmt);
                 return;
@@ -168,6 +171,14 @@ public final class SqlServerImpl implements SqlServer {
     private void insert(InsertStatement stmt)
             throws SqlException {
         this.getTable(stmt).insert(stmt.getColumns(), stmt.getValues());
+    }
+
+    private void insert(InsertFromSelectStatement stmt)
+            throws SqlException {
+        ResultSet resultSet = this.select(stmt.getSelectExpression());
+        for (ResultRow row : resultSet.getRows()) {
+            this.getTable(stmt).insert(stmt.getColumns(), row.getValues());
+        }
     }
 
 

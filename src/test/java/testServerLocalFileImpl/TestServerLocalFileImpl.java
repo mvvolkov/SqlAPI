@@ -150,6 +150,18 @@ public class TestServerLocalFileImpl {
                                     "DB1", "table1", "column2"),
                                     ColumnExprFactory.integer(20))))));
 
+            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table2",
+                    SqlQueryFactory.select(TableRefFactory.dbTable("DB1", "table1"),
+                            Arrays.asList(ColumnExprFactory.columnRef("DB1", "table1",
+                                    "column2"),
+                                    ColumnExprFactory.columnRef("DB1", "table1",
+                                            "column3")),
+                            PredicateFactory.isNotNull(ColumnExprFactory.columnRef("DB1",
+                                    "table1", "column2"
+                            )))));
+
+            printTable(sqlServer, "DB1", "table2");
+
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());

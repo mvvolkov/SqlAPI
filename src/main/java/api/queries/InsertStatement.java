@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface InsertStatement extends SqlStatement {
 
-    List<Object> getValues();
-
     List<String> getColumns();
+
+    List<Object> getValues();
 
     @Override
     default Type getType() {

@@ -29,6 +29,9 @@ public class SqlServerLoggerImpl implements SqlServer {
             case INSERT:
                 insert((InsertStatement) stmt);
                 return;
+            case INSERT_FROM_SELECT:
+                insert((InsertFromSelectStatement) stmt);
+                return;
             case DELETE:
                 delete((DeleteStatement) stmt);
                 return;
@@ -54,6 +57,11 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     @Override
     public @NotNull ResultSet select(SelectExpression selectExpression) {
+        System.out.println(getSelectString(selectExpression) + ";");
+        return getEmptyResultSet();
+    }
+
+    private static String getSelectString(SelectExpression selectExpression) {
         StringBuilder sb = new StringBuilder("SELECT ");
         if (selectExpression.getSelectedItems().isEmpty()) {
             sb.append("*");
@@ -72,9 +80,7 @@ public class SqlServerLoggerImpl implements SqlServer {
             sb.append(" WHERE ");
             sb.append(selectExpression.getPredicate());
         }
-        sb.append(";");
-        System.out.println(sb);
-        return getEmptyResultSet();
+        return sb.toString();
     }
 
 
@@ -105,7 +111,7 @@ public class SqlServerLoggerImpl implements SqlServer {
         sb.append(stmt.getDatabaseName());
         sb.append(".");
         sb.append(stmt.getTableName());
-        if (stmt.getColumns() != null) {
+        if (!stmt.getColumns().isEmpty()) {
             String columns = stmt.getColumns().stream()
                     .collect(Collectors.joining(", ", "(", ")"));
             sb.append(columns);
@@ -116,6 +122,23 @@ public class SqlServerLoggerImpl implements SqlServer {
                         .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
+        System.out.println(sb);
+    }
+
+    private static void insert(InsertFromSelectStatement stmt) {
+
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(stmt.getDatabaseName());
+        sb.append(".");
+        sb.append(stmt.getTableName());
+        if (!stmt.getColumns().isEmpty()) {
+            String columns = stmt.getColumns().stream()
+                    .collect(Collectors.joining(", ", "(", ")"));
+            sb.append(columns);
+        }
+        sb.append(" ");
+        sb.append(getSelectString(stmt.getSelectExpression()));
+        sb.append(";");
         System.out.println(sb);
     }
 

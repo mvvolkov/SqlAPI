@@ -21,11 +21,6 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
         this.values = values;
     }
 
-    public InsertStatementImpl(String databaseName, String tableName,
-                               List<Object> values) {
-        this(databaseName, tableName, Collections.emptyList(), values);
-    }
-
 
     @Override
     public List<Object> getValues() {
