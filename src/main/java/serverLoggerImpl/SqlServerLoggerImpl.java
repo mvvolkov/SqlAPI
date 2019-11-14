@@ -86,8 +86,6 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void createTable(CreateTableStatement stmt) {
         StringBuilder sb = new StringBuilder("CREATE TABLE ");
-        sb.append(stmt.getDatabaseName());
-        sb.append(".");
         sb.append(stmt.getTableName());
         sb.append("(");
         sb.append(stmt.getColumns().stream().map(ColumnMetadata::toString)
@@ -108,8 +106,6 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static void insert(InsertStatement stmt) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(stmt.getDatabaseName());
-        sb.append(".");
         sb.append(stmt.getTableName());
         if (!stmt.getColumns().isEmpty()) {
             String columns = stmt.getColumns().stream()
@@ -128,8 +124,6 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static void insert(InsertFromSelectStatement stmt) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(stmt.getDatabaseName());
-        sb.append(".");
         sb.append(stmt.getTableName());
         if (!stmt.getColumns().isEmpty()) {
             String columns = stmt.getColumns().stream()
@@ -144,8 +138,6 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void delete(DeleteStatement stmt) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(stmt.getDatabaseName());
-        sb.append(".");
         sb.append(stmt.getTableName());
         if (!stmt.getPredicate().isEmpty()) {
             sb.append(" WHERE ");
@@ -163,8 +155,6 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void update(UpdateStatement stmt) {
         StringBuilder sb = new StringBuilder("UPDATE ");
-        sb.append(stmt.getDatabaseName());
-        sb.append(".");
         sb.append(stmt.getTableName());
         sb.append(" SET ");
         String assignmetns = stmt.getAssignmentOperations().stream()

@@ -6,7 +6,7 @@ public interface ColumnRef extends ColumnExpression {
 
     String getTableName();
 
-    String getDatabaseName();
+    String getSchemaName();
 
     @Override default String getAlias() {
         return getColumnName();

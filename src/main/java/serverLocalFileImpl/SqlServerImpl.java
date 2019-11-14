@@ -28,6 +28,17 @@ public final class SqlServerImpl implements SqlServer {
 
     private final Collection<PersistentSchema> schemas = new ArrayList<>();
 
+    private final PersistentSchema defaultSchema;
+
+    public SqlServerImpl() {
+        defaultSchema = new PersistentSchema("DB1");
+        schemas.add(defaultSchema);
+    }
+
+    private PersistentSchema getCurrentSchema() {
+        return defaultSchema;
+    }
+
 
     @Override
     public void createDatabase(String schemaName) throws DatabaseAlreadyExistsException {
@@ -94,7 +105,8 @@ public final class SqlServerImpl implements SqlServer {
 
 
     private static ResultSetImpl createResultSet(InternalResultSet internalResultSet,
-                                                 List<SelectedItem> selectedItems) {
+                                                 List<SelectedItem> selectedItems)
+            throws NoSuchColumnException {
 
         List<ResultRow> resultRows = new ArrayList<>();
         List<String> resultColumns = new ArrayList<>();
@@ -111,7 +123,7 @@ public final class SqlServerImpl implements SqlServer {
                     String dbName =
                             ((DatabaseTableReference) selectedItem).getDatabaseName();
                     for (ColumnRef cr : internalResultSet.getColumns()) {
-                        if (cr.getDatabaseName().equals(dbName) &&
+                        if (cr.getSchemaName().equals(dbName) &&
                                 cr.getTableName().equals(tableName)) {
                             resultColumns.add(cr.getColumnName());
                         }
@@ -140,7 +152,7 @@ public final class SqlServerImpl implements SqlServer {
                         String dbName =
                                 ((DatabaseTableReference) selectedItem).getDatabaseName();
                         for (ColumnRef cr : internalResultSet.getColumns()) {
-                            if (cr.getDatabaseName().equals(dbName) &&
+                            if (cr.getSchemaName().equals(dbName) &&
                                     cr.getTableName().equals(tableName)) {
                                 values.add(row.getValues().get(cr));
                             }
@@ -161,15 +173,15 @@ public final class SqlServerImpl implements SqlServer {
 
 
     private void createTable(CreateTableStatement stmt)
-            throws TableAlreadyExistsException, NoSuchDatabaseException {
-        PersistentSchema database = this.getDatabase(stmt.getDatabaseName());
-        PersistentTable table = database.getTableOrNull(stmt.getTableName());
+            throws TableAlreadyExistsException, NoSuchSchemaException {
+        PersistentSchema schema = this.getCurrentSchema();
+        PersistentTable table = schema.getTableOrNull(stmt.getTableName());
         if (table != null) {
-            throw new TableAlreadyExistsException(database.getName(),
+            throw new TableAlreadyExistsException(schema.getName(),
                     stmt.getTableName());
         }
-        database.addTable(
-                new PersistentTable(database.getName(), stmt.getTableName(),
+        schema.addTable(
+                new PersistentTable(schema.getName(), stmt.getTableName(),
                         stmt.getColumns()));
     }
 
@@ -188,38 +200,38 @@ public final class SqlServerImpl implements SqlServer {
 
 
     private void delete(DeleteStatement stmt)
-            throws NoSuchDatabaseException, NoSuchTableException {
+            throws NoSuchSchemaException, NoSuchTableException {
         this.getTable(stmt).delete(stmt.getPredicate());
     }
 
     private void update(UpdateStatement stmt)
-            throws NoSuchDatabaseException, NoSuchTableException {
+            throws NoSuchSchemaException, NoSuchTableException {
         PersistentTable table = this.getTable(stmt);
         table.update(stmt);
     }
 
     private PersistentTable getTable(SqlStatement stmt)
-            throws NoSuchDatabaseException, NoSuchTableException {
-        PersistentSchema database = this.getDatabase(stmt.getDatabaseName());
-        return database.getTable(stmt.getTableName());
+            throws NoSuchSchemaException, NoSuchTableException {
+        return this.getCurrentSchema().getTable(stmt.getTableName());
     }
 
 
-    private @NotNull PersistentSchema getDatabase(String dbName)
-            throws NoSuchDatabaseException {
-        for (PersistentSchema database : schemas) {
-            if (database.getName().equals(dbName)) {
-                return database;
+    private @NotNull PersistentSchema getSchema(String schemaName)
+            throws NoSuchSchemaException {
+        for (PersistentSchema schema : schemas) {
+            if (schema.getName().equals(schemaName)) {
+                return schema;
             }
         }
-        throw new NoSuchDatabaseException(dbName);
+        throw new NoSuchSchemaException(schemaName);
     }
 
 
     private static InternalResultSet getJoinedResult(List<InternalResultSet> resultSets) {
 
         if (resultSets.isEmpty()) {
-            return new InternalResultSet(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+            return new InternalResultSet(Collections.emptyList(),
+                    Collections.emptyList());
         }
         Iterator<InternalResultSet> it = resultSets.iterator();
         InternalResultSet resultSet = it.next();
@@ -305,12 +317,12 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    protected InternalResultSet getDataFromDatabaseTable(DatabaseTableReference dtr)
+    private InternalResultSet getDataFromDatabaseTable(DatabaseTableReference dtr)
             throws SqlException {
         return this.getTable(dtr).getData();
     }
 
-    protected InternalResultSet getDataFromJoinedTable(JoinTableReference tableReference)
+    private InternalResultSet getDataFromJoinedTable(JoinTableReference tableReference)
             throws SqlException {
 
 
@@ -330,13 +342,14 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    protected @NotNull InternalResultSet getDataFromTableRef(
+    private @NotNull InternalResultSet getDataFromTableRef(
             TableReference tableReference) throws
             SqlException {
 
         switch (tableReference.getTableRefType()) {
             case DATABASE_TABLE:
-                return this.getDataFromDatabaseTable((DatabaseTableReference) tableReference);
+                return this.getDataFromDatabaseTable(
+                        (DatabaseTableReference) tableReference);
             case INNER_JOIN:
             case LEFT_OUTER_JOIN:
             case RIGHT_OUTER_JOIN:
@@ -347,14 +360,14 @@ public final class SqlServerImpl implements SqlServer {
         throw new IllegalArgumentException("");
     }
 
-    protected PersistentTable getTable(DatabaseTableReference tableReference) throws
-            NoSuchTableException, NoSuchDatabaseException {
+    private PersistentTable getTable(DatabaseTableReference tableReference) throws
+            NoSuchTableException, NoSuchSchemaException {
         for (PersistentSchema database : schemas) {
             if (database.getName().equals(tableReference.getDatabaseName())) {
                 return (PersistentTable) database.getTable(tableReference.getTableName());
             }
         }
-        throw new NoSuchDatabaseException(tableReference.getDatabaseName());
+        throw new NoSuchSchemaException(tableReference.getDatabaseName());
     }
 
 

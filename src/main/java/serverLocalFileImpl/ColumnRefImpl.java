@@ -1,23 +1,41 @@
 package serverLocalFileImpl;
 
 import api.columnExpr.ColumnRef;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class ColumnRefImpl implements ColumnRef {
+public final class ColumnRefImpl implements ColumnRef {
 
-    private final String dbName;
+    @Nullable
+    private final String schemaName;
+
+    @Nullable
     private final String tableName;
+
+    @NotNull
     private final String columnName;
 
-    public ColumnRefImpl(String dbName, String tableName, String columnName) {
-        this.dbName = dbName;
+    public ColumnRefImpl(@Nullable String schemaName, @Nullable String tableName,
+                         @NotNull String columnName) {
+        this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
 
-    public ColumnRefImpl(ColumnRef columnRef) {
-        this.dbName = columnRef.getDatabaseName();
+    public ColumnRefImpl(@Nullable String tableName,
+                         @NotNull String columnName) {
+        this(null, tableName, columnName);
+    }
+
+    public ColumnRefImpl(@NotNull String columnName) {
+        this(null, null, columnName);
+    }
+
+
+    public ColumnRefImpl(@NotNull ColumnRef columnRef) {
+        this.schemaName = columnRef.getSchemaName();
         this.tableName = columnRef.getTableName();
         this.columnName = columnRef.getColumnName();
     }
@@ -33,8 +51,8 @@ public class ColumnRefImpl implements ColumnRef {
     }
 
     @Override
-    public String getDatabaseName() {
-        return dbName;
+    public String getSchemaName() {
+        return schemaName;
     }
 
     @Override
@@ -43,12 +61,27 @@ public class ColumnRefImpl implements ColumnRef {
             return false;
         }
         ColumnRefImpl o = (ColumnRefImpl) obj;
-        return Objects.equals(dbName, o.dbName) && Objects.equals(tableName, o.tableName)
+        return Objects.equals(schemaName, o.schemaName) &&
+                Objects.equals(tableName, o.tableName)
                 && Objects.equals(columnName, o.columnName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dbName, tableName, columnName);
+        return Objects.hash(schemaName, tableName, columnName);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(columnName);
+        if (tableName != null) {
+            sb.insert(0, ".");
+            sb.insert(0, tableName);
+        }
+        if (schemaName != null) {
+            sb.insert(0, ".");
+            sb.insert(0, schemaName);
+        }
+        return sb.toString();
     }
 }

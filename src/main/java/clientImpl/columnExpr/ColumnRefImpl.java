@@ -1,29 +1,41 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
-    @NotNull
-    private final String columnName;
+    @Nullable
+    private final String schemaName;
 
-    @NotNull
+    @Nullable
     private final String tableName;
 
     @NotNull
-    private final String databaseName;
+    private final String columnName;
 
-    public ColumnRefImpl(@NotNull String databaseName, @NotNull String tableName,
+
+    public ColumnRefImpl(@Nullable String schemaName, @Nullable String tableName,
                          @NotNull String columnName,
                          @Nullable String alias) {
         super(ExprType.COLUMN_REF, alias);
-        this.databaseName = databaseName;
+        this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
+
+    public ColumnRefImpl(@Nullable String tableName,
+                         @NotNull String columnName,
+                         @Nullable String alias) {
+        this(null, tableName, columnName, alias);
+    }
+
+    public ColumnRefImpl(@NotNull String columnName,
+                         @Nullable String alias) {
+        this(null, columnName, alias);
+    }
+
 
     @NotNull
     @Override
@@ -37,10 +49,14 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
         return tableName;
     }
 
-    @NotNull
+    @Nullable
     @Override
-    public String getDatabaseName() {
-        return databaseName;
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    @Override public @Nullable String getAlias() {
+        return alias != null ? alias : columnName;
     }
 
     @Override
@@ -50,9 +66,9 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
             sb.insert(0, ".");
             sb.insert(0, tableName);
         }
-        if (databaseName != null) {
+        if (schemaName != null) {
             sb.insert(0, ".");
-            sb.insert(0, databaseName);
+            sb.insert(0, schemaName);
         }
         return sb.toString();
     }

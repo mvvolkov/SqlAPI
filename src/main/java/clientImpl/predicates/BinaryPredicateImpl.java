@@ -33,8 +33,7 @@ public final class BinaryPredicateImpl extends PredicateImpl implements BinaryPr
 
     @Override
     public String toString() {
-        return "(" + leftOperand + " " + this.getOperatorString() + " " + rightOperand +
-                ")";
+        return leftOperand + " " + this.getOperatorString() + " " + rightOperand;
     }
 
 

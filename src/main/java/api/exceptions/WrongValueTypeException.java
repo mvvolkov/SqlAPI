@@ -28,7 +28,7 @@ public final class WrongValueTypeException extends SqlException {
     public String getMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append("Wrong value type for the column ");
-        String fullName = Stream.of(columnRef.getDatabaseName(), columnRef.getTableName(), columnRef.getColumnName())
+        String fullName = Stream.of(columnRef.getSchemaName(), columnRef.getTableName(), columnRef.getColumnName())
                 .collect(Collectors.joining("."));
         sb.append(fullName);
         sb.append("; Expected: ");

@@ -16,10 +16,10 @@ public class InsertFromSelectStatementImpl extends AbstractSqlStatement implemen
 
     private final SelectExpression selectExpression;
 
-    public InsertFromSelectStatementImpl(String databaseName, String tableName,
+    public InsertFromSelectStatementImpl(String tableName,
                                          List<String> columns,
                                          SelectExpression selectExpression) {
-        super(databaseName, tableName);
+        super(tableName);
         this.columns = columns;
         this.selectExpression = selectExpression;
     }

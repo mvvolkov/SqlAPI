@@ -17,24 +17,33 @@ public class ColumnExprFactory {
         return new ColumnValueImpl(value, null);
     }
 
-    public static ColumnValue nullValue(String alias) {
-        return value(null, alias);
+    public static ColumnRefImpl columnRefWithAlias(String schemaName, String tableName,
+                                                   String columnName, String alias) {
+        return new ColumnRefImpl(schemaName, tableName, columnName, alias);
     }
 
-    public static ColumnValue nullValue() {
-        return value(null, null);
+    public static ColumnRefImpl columnRefWithAlias(String tableName,
+                                                   String columnName, String alias) {
+        return new ColumnRefImpl(tableName, columnName, alias);
     }
 
-
-    public static ColumnRefImpl columnRef(String databaseName, String tableName,
-                                          String columnName, String alias) {
-        return new ColumnRefImpl(databaseName, tableName, columnName, alias);
+    public static ColumnRefImpl columnRefWithAlias(String columnName, String alias) {
+        return new ColumnRefImpl(columnName, alias);
     }
 
-    public static ColumnRefImpl columnRef(String databaseName, String tableName,
+    public static ColumnRefImpl columnRef(String schemaName, String tableName,
                                           String columnName) {
-        return new ColumnRefImpl(databaseName, tableName, columnName, columnName);
+        return new ColumnRefImpl(schemaName, tableName, columnName, null);
     }
+
+    public static ColumnRefImpl columnRef(String tableName, String columnName) {
+        return new ColumnRefImpl(tableName, columnName, null);
+    }
+
+    public static ColumnRefImpl columnRef(String columnName) {
+        return new ColumnRefImpl(columnName, null);
+    }
+
 
     public static ColumnValue integer(Integer value, String alias) {
         return new ColumnValueImpl(value, alias);

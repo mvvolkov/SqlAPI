@@ -14,9 +14,9 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
     @NotNull
     private final List<Object> values;
 
-    public InsertStatementImpl(String databaseName, String tableName,
+    public InsertStatementImpl(String tableName,
                                List<String> columns, List<Object> values) {
-        super(databaseName, tableName);
+        super(tableName);
         this.columns = columns;
         this.values = values;
     }

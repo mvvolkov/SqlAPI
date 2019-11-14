@@ -16,35 +16,32 @@ public class SqlQueryFactory {
     private SqlQueryFactory() {
     }
 
-    public static CreateTableStatement createTable(String databaseName,
-                                                   String tableName,
+    public static CreateTableStatement createTable(String tableName,
                                                    List<ColumnMetadata<?>> columns) {
-        return new CreateTableStatementImpl(databaseName, tableName, columns);
+        return new CreateTableStatementImpl(tableName, columns);
     }
 
-    public static InsertStatement insert(String databaseName, String tableName,
+    public static InsertStatement insert(String tableName,
                                          List<String> columns,
                                          List<Object> values) {
-        return new InsertStatementImpl(databaseName, tableName, columns, values);
+        return new InsertStatementImpl(tableName, columns, values);
     }
 
-    public static InsertStatement insert(String databaseName, String tableName,
+    public static InsertStatement insert(String tableName,
                                          List<Object> values) {
-        return insert(databaseName, tableName, Collections.EMPTY_LIST, values);
+        return insert(tableName, Collections.EMPTY_LIST, values);
     }
 
-    public static InsertFromSelectStatementImpl insert(String databaseName,
-                                                       String tableName,
+    public static InsertFromSelectStatementImpl insert(String tableName,
                                                        List<String> columns,
                                                        SelectExpression selectExpression) {
-        return new InsertFromSelectStatementImpl(databaseName, tableName, columns,
+        return new InsertFromSelectStatementImpl(tableName, columns,
                 selectExpression);
     }
 
-    public static InsertFromSelectStatementImpl insert(String databaseName,
-                                                       String tableName,
+    public static InsertFromSelectStatementImpl insert(String tableName,
                                                        SelectExpression selectExpression) {
-        return insert(databaseName, tableName, Collections.EMPTY_LIST,
+        return insert(tableName, Collections.EMPTY_LIST,
                 selectExpression);
     }
 
@@ -59,17 +56,17 @@ public class SqlQueryFactory {
         return new DeleteStatementImpl(databaseName, tableName, predicate);
     }
 
-    public static UpdateStatement update(String databaseName, String tableName,
+    public static UpdateStatement update(String tableName,
                                          List<AssignmentOperation> assignmentOperations) {
-        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
+        return new UpdateStatementImpl(tableName, assignmentOperations,
                 PredicateFactory.empty());
     }
 
 
-    public static UpdateStatement update(String databaseName, String tableName,
+    public static UpdateStatement update(String tableName,
                                          List<AssignmentOperation> assignmentOperations,
                                          Predicate predicate) {
-        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
+        return new UpdateStatementImpl(tableName, assignmentOperations,
                 predicate);
     }
 

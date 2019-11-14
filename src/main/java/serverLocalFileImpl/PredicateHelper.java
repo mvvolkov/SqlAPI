@@ -8,6 +8,9 @@ import api.exceptions.NoSuchColumnException;
 import api.exceptions.WrongValueTypeException;
 import api.predicates.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PredicateHelper {
 
     private PredicateHelper() {
@@ -93,7 +96,8 @@ public class PredicateHelper {
     }
 
     private static boolean matchRow(InternalResultRow resultRow,
-                                    ColumnInPredicate predicate) {
+                                    ColumnInPredicate predicate)
+            throws NoSuchColumnException {
 
         Comparable leftValue =
                 (Comparable) evaluateColumnExpr(resultRow, predicate.getColumnRef());
@@ -108,21 +112,24 @@ public class PredicateHelper {
     }
 
     private static boolean matchRow(InternalResultRow resultRow,
-                                    ColumnIsNullPredicate predicate) {
+                                    ColumnIsNullPredicate predicate)
+            throws NoSuchColumnException {
 
         Object leftValue = evaluateColumnExpr(resultRow, predicate.getColumnRef());
         return leftValue == null;
     }
 
     private static boolean matchRow(InternalResultRow resultRow,
-                                    ColumnIsNotNullPredicate predicate) {
+                                    ColumnIsNotNullPredicate predicate)
+            throws NoSuchColumnException {
 
         Object leftValue = evaluateColumnExpr(resultRow, predicate.getColumnRef());
         return leftValue != null;
     }
 
     public static Object evaluateColumnExpr(InternalResultRow row,
-                                            ColumnExpression ce) {
+                                            ColumnExpression ce)
+            throws NoSuchColumnException {
 
         if (ce instanceof BinaryColumnExpression) {
             return evaluateBinaryColumnExpr(row, (BinaryColumnExpression) ce);
@@ -137,7 +144,8 @@ public class PredicateHelper {
     }
 
     private static Object evaluateBinaryColumnExpr(InternalResultRow row,
-                                                   BinaryColumnExpression bce) {
+                                                   BinaryColumnExpression bce)
+            throws NoSuchColumnException {
         Object leftValue = evaluateColumnExpr(row, bce.getLeftOperand());
         Object rightValue = evaluateColumnExpr(row, bce.getRightOperand());
         switch (bce.getExprType()) {
@@ -164,7 +172,31 @@ public class PredicateHelper {
         return null;
     }
 
-    private static Object evaluateColumnRef(InternalResultRow row, ColumnRef cr) {
-        return row.getValues().get(new ColumnRefImpl(cr));
+    private static Object evaluateColumnRef(InternalResultRow row, ColumnRef cr)
+            throws NoSuchColumnException {
+
+        List<ColumnRef> matchingColumns = new ArrayList<>();
+
+        for (ColumnRef key : row.getValues().keySet()) {
+            if (cr.getSchemaName() != null &&
+                    !cr.getSchemaName().equals(key.getSchemaName())) {
+                continue;
+            }
+            if (cr.getTableName() != null &&
+                    !cr.getTableName().equals(key.getTableName())) {
+                continue;
+            }
+            if (cr.getColumnName().equals(key.getColumnName())) {
+                matchingColumns.add(key);
+            }
+        }
+        if (matchingColumns.isEmpty()) {
+            throw new NoSuchColumnException(cr.getColumnName());
+        }
+        if (matchingColumns.size() > 1) {
+            throw new NoSuchColumnException(cr.getColumnName());
+        }
+
+        return row.getValues().get(matchingColumns.get(0));
     }
 }
