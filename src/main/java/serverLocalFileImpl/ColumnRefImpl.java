@@ -2,35 +2,34 @@ package serverLocalFileImpl;
 
 import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public final class ColumnRefImpl implements ColumnRef {
 
-    @Nullable
+    @NotNull
     private final String schemaName;
 
-    @Nullable
+    @NotNull
     private final String tableName;
 
     @NotNull
     private final String columnName;
 
-    public ColumnRefImpl(@Nullable String schemaName, @Nullable String tableName,
+    public ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
                          @NotNull String columnName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
 
-    public ColumnRefImpl(@Nullable String tableName,
+    public ColumnRefImpl(@NotNull String tableName,
                          @NotNull String columnName) {
-        this(null, tableName, columnName);
+        this("", tableName, columnName);
     }
 
     public ColumnRefImpl(@NotNull String columnName) {
-        this(null, null, columnName);
+        this("", "", columnName);
     }
 
 
@@ -40,30 +39,35 @@ public final class ColumnRefImpl implements ColumnRef {
         this.columnName = columnRef.getColumnName();
     }
 
+    @NotNull
     @Override
     public String getColumnName() {
         return columnName;
     }
 
+    @NotNull
     @Override
     public String getTableName() {
         return tableName;
     }
 
+    @NotNull
     @Override
     public String getSchemaName() {
         return schemaName;
     }
 
+
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) return true;
         if (!(obj instanceof ColumnRefImpl)) {
             return false;
         }
-        ColumnRefImpl o = (ColumnRefImpl) obj;
-        return Objects.equals(schemaName, o.schemaName) &&
-                Objects.equals(tableName, o.tableName)
-                && Objects.equals(columnName, o.columnName);
+        ColumnRefImpl cr = (ColumnRefImpl) obj;
+        return Objects.equals(schemaName, cr.schemaName) &&
+                Objects.equals(tableName, cr.tableName)
+                && Objects.equals(columnName, cr.columnName);
     }
 
     @Override
@@ -74,11 +78,11 @@ public final class ColumnRefImpl implements ColumnRef {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(columnName);
-        if (tableName != null) {
+        if (!tableName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, tableName);
         }
-        if (schemaName != null) {
+        if (!schemaName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, schemaName);
         }

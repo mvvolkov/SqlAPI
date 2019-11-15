@@ -1,20 +1,20 @@
 package clientImpl.tableRef;
 
-import org.jetbrains.annotations.NotNull;
 import api.tables.DatabaseTableReference;
+import org.jetbrains.annotations.NotNull;
 
 public final class DatabaseTableReferenceImpl implements DatabaseTableReference {
 
     @NotNull
-    private final String databaseName;
+    private final String schemaName;
 
     @NotNull
     private final String tableName;
 
 
-    DatabaseTableReferenceImpl(@NotNull String dbName, @NotNull String tableName) {
+    DatabaseTableReferenceImpl(@NotNull String schemaName, @NotNull String tableName) {
         this.tableName = tableName;
-        this.databaseName = dbName;
+        this.schemaName = schemaName;
     }
 
 
@@ -26,8 +26,8 @@ public final class DatabaseTableReferenceImpl implements DatabaseTableReference 
 
     @NotNull
     @Override
-    public String getDatabaseName() {
-        return databaseName;
+    public String getSchemaName() {
+        return schemaName;
     }
 
 }

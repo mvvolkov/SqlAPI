@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import api.queries.SelectExpression;
-import api.SelectedItem;
+import api.misc.SelectedItem;
 import api.tables.TableReference;
 import api.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
@@ -18,12 +18,15 @@ public final class SelectExpressionImpl implements SelectExpression {
     @NotNull
     private final Predicate predicate;
 
+    private final List<String> groupByColumns;
+
 
     public SelectExpressionImpl(List<TableReference> tableReferences,
-                                List<SelectedItem> selectedItems, Predicate predicate) {
+                                List<SelectedItem> selectedItems, Predicate predicate, List<String> groupByColumns) {
         this.tableReferences = tableReferences;
         this.selectedItems = selectedItems;
         this.predicate = predicate;
+        this.groupByColumns = groupByColumns;
     }
 
     @NotNull
@@ -36,6 +39,11 @@ public final class SelectExpressionImpl implements SelectExpression {
     @Override
     public List<SelectedItem> getSelectedItems() {
         return selectedItems;
+    }
+
+    @Override
+    public List<String> getGroupByColumns() {
+        return groupByColumns;
     }
 
     @NotNull

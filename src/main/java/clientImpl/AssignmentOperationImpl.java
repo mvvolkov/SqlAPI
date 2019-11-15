@@ -1,6 +1,6 @@
 package clientImpl;
 
-import api.AssignmentOperation;
+import api.misc.AssignmentOperation;
 import api.columnExpr.ColumnExpression;
 
 public final class AssignmentOperationImpl implements AssignmentOperation {

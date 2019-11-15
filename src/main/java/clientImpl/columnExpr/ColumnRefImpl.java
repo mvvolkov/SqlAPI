@@ -6,34 +6,30 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
-    @Nullable
+    @NotNull
     private final String schemaName;
 
-    @Nullable
+    @NotNull
     private final String tableName;
 
     @NotNull
     private final String columnName;
 
-
-    public ColumnRefImpl(@Nullable String schemaName, @Nullable String tableName,
-                         @NotNull String columnName,
-                         @Nullable String alias) {
+    public ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
+                         @NotNull String columnName, String alias) {
         super(ExprType.COLUMN_REF, alias);
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
 
-    public ColumnRefImpl(@Nullable String tableName,
-                         @NotNull String columnName,
-                         @Nullable String alias) {
-        this(null, tableName, columnName, alias);
+    public ColumnRefImpl(@NotNull String tableName,
+                         @NotNull String columnName, String alias) {
+        this("", tableName, columnName, alias);
     }
 
-    public ColumnRefImpl(@NotNull String columnName,
-                         @Nullable String alias) {
-        this(null, columnName, alias);
+    public ColumnRefImpl(@NotNull String columnName, String alias) {
+        this("", "", columnName, alias);
     }
 
 
@@ -43,30 +39,31 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
         return columnName;
     }
 
-    @Nullable
+    @NotNull
     @Override
     public String getTableName() {
         return tableName;
     }
 
-    @Nullable
+    @NotNull
     @Override
     public String getSchemaName() {
         return schemaName;
     }
 
-    @Override public @Nullable String getAlias() {
-        return alias != null ? alias : columnName;
+    @Override
+    public @Nullable String getAlias() {
+        return alias.isEmpty() ? columnName : alias;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(columnName);
-        if (tableName != null) {
+        if (!tableName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, tableName);
         }
-        if (schemaName != null) {
+        if (!schemaName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, schemaName);
         }

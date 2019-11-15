@@ -1,6 +1,6 @@
 package api.columnExpr;
 
-import api.SelectedItem;
+import api.misc.SelectedItem;
 
 public interface ColumnExpression extends SelectedItem {
 

@@ -1,12 +1,12 @@
 package api.queries;
 
-import api.SelectedItem;
+import api.misc.SelectedItem;
 import api.tables.TableReference;
 import api.predicates.Predicate;
 
 import java.util.List;
 
-public interface SelectExpression extends TableReference {
+public interface SelectExpression {
 
     List<TableReference> getTableReferences();
 
@@ -14,8 +14,6 @@ public interface SelectExpression extends TableReference {
 
     List<SelectedItem> getSelectedItems();
 
-    @Override
-    default TableRefType getTableRefType() {
-        return TableRefType.SELECT_EXPRESSION;
-    }
+    List<String> getGroupByColumns();
+
 }

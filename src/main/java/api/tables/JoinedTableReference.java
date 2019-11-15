@@ -2,7 +2,7 @@ package api.tables;
 
 import api.predicates.Predicate;
 
-public interface JoinTableReference extends TableReference {
+public interface JoinedTableReference extends TableReference {
 
     TableReference getLeftTableReference();
 

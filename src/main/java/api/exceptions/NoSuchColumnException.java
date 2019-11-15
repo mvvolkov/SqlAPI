@@ -13,7 +13,7 @@ public final class NoSuchColumnException extends SqlException {
 
     @Override
     public String getMessage() {
-        return "The column with the name " + columnName + " not found.";
+        return "Column not found: " + columnName;
     }
 
     @NotNull

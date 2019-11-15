@@ -1,25 +1,28 @@
 package serverLocalFileImpl.persistent;
 
-import api.selectResult.ResultSet;
 import api.columnExpr.ColumnRef;
 import api.exceptions.ConstraintException;
-import api.exceptions.InconsistentInsertStmtException;
+import api.exceptions.InvalidQueryException;
 import api.exceptions.WrongValueTypeException;
 import api.metadata.ColumnMetadata;
 import api.predicates.Predicate;
 import api.queries.UpdateStatement;
+import api.selectResult.ResultSet;
 import serverLocalFileImpl.ColumnRefImpl;
 import serverLocalFileImpl.InternalResultRow;
 import serverLocalFileImpl.InternalResultSet;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class PersistentTable implements Serializable {
 
     public static final long serialVersionUID = 9082226890498779849L;
 
-    private final String dbName;
+    private final String schemaName;
 
     private final String tableName;
 
@@ -28,8 +31,8 @@ public final class PersistentTable implements Serializable {
     private final List<PersistentRow> rows = new ArrayList<>();
 
 
-    public PersistentTable(String dbName, String tableName, List<ColumnMetadata<?>> columns) {
-        this.dbName = dbName;
+    public PersistentTable(String schemaName, String tableName, List<ColumnMetadata<?>> columns) {
+        this.schemaName = schemaName;
         this.tableName = tableName;
         for (ColumnMetadata c : columns) {
             this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
@@ -48,7 +51,7 @@ public final class PersistentTable implements Serializable {
 
 
     public void insert(List<String> columnNames, List<Object> values)
-            throws WrongValueTypeException, ConstraintException, InconsistentInsertStmtException {
+            throws WrongValueTypeException, ConstraintException, InvalidQueryException {
 
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -61,7 +64,7 @@ public final class PersistentTable implements Serializable {
             }
         } else {
             if (columnNames.size() != values.size()) {
-                throw new InconsistentInsertStmtException();
+                throw new InvalidQueryException("Invalid insert query. Number of values differs from number of columns");
             }
             Map<String, Object> insertMap = new HashMap<>();
             for (int i = 0; i < columnNames.size(); i++) {
@@ -102,7 +105,7 @@ public final class PersistentTable implements Serializable {
             throws WrongValueTypeException, ConstraintException {
 
         if (newValue == null && cm.isNotNull()) {
-            throw new ConstraintException(dbName, tableName,
+            throw new ConstraintException(schemaName, tableName,
                     cm.getColumnName(), "NOT NULL");
         }
         if (newValue != null && !cm.getJavaClass().isInstance(newValue)) {
@@ -113,7 +116,7 @@ public final class PersistentTable implements Serializable {
         if (cm.isPrimaryKey()) {
             for (PersistentRow row : rows) {
                 if (row.getValue(cm.getColumnName()).equals(newValue)) {
-                    throw new ConstraintException(dbName, tableName,
+                    throw new ConstraintException(schemaName, tableName,
                             cm.getColumnName(), "PRIMARY KEY");
                 }
             }
@@ -121,7 +124,7 @@ public final class PersistentTable implements Serializable {
         if (cm.getSize() != -1) {
             String strValue = (String) newValue;
             if (strValue.length() > cm.getSize()) {
-                throw new ConstraintException(dbName, tableName,
+                throw new ConstraintException(schemaName, tableName,
                         cm.getColumnName(), "SIZE EXCEEDED");
             }
         }
@@ -145,7 +148,7 @@ public final class PersistentTable implements Serializable {
     }
 
     private ColumnRef createColumnRef(String columnName) {
-        return new ColumnRefImpl(dbName, tableName, columnName);
+        return new ColumnRefImpl(schemaName, tableName, columnName);
     }
 
 }

@@ -1,15 +1,17 @@
 package serverLoggerImpl;
 
-import api.*;
+import api.connect.SqlServer;
 import api.exceptions.*;
 import api.metadata.ColumnMetadata;
 import api.metadata.TableMetadata;
+import api.misc.AssignmentOperation;
 import api.queries.*;
-import api.SelectedItem;
+import api.misc.SelectedItem;
 import api.selectResult.ResultRow;
 import api.selectResult.ResultSet;
 import api.tables.DatabaseTableReference;
-import api.tables.JoinTableReference;
+import api.tables.JoinedTableReference;
+import api.tables.TableFromSelectReference;
 import api.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 
@@ -189,17 +191,35 @@ public class SqlServerLoggerImpl implements SqlServer {
         if (tableReference instanceof DatabaseTableReference) {
             return getBaseTableRefString((DatabaseTableReference) tableReference);
         }
-        if (tableReference instanceof JoinTableReference) {
-            return getJoinTableRefString((JoinTableReference) tableReference);
+        if (tableReference instanceof JoinedTableReference) {
+            return getJoinTableRefString((JoinedTableReference) tableReference);
+        }
+        if (tableReference instanceof TableFromSelectReference) {
+            return getTableFromSelectString((TableFromSelectReference) tableReference);
         }
         return "";
     }
 
     private static String getBaseTableRefString(DatabaseTableReference btr) {
-        return btr.getDatabaseName() + "." + btr.getTableName();
+        if (btr.getSchemaName().isEmpty()) {
+            return btr.getTableName();
+        }
+        return btr.getSchemaName() + "." + btr.getTableName();
     }
 
-    private static String getJoinTableRefString(JoinTableReference jtr) {
+    private static String getTableFromSelectString(TableFromSelectReference tsr) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        sb.append(getSelectString(tsr.getSelectExpression()));
+        sb.append(")");
+        if (!tsr.getAlias().isEmpty()) {
+            sb.append(" ");
+            sb.append(tsr.getAlias());
+        }
+        return sb.toString();
+    }
+
+    private static String getJoinTableRefString(JoinedTableReference jtr) {
         String operator;
         switch (jtr.getTableRefType()) {
             case INNER_JOIN:

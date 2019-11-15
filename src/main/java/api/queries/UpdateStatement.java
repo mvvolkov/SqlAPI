@@ -1,6 +1,6 @@
 package api.queries;
 
-import api.AssignmentOperation;
+import api.misc.AssignmentOperation;
 import api.predicates.Predicate;
 
 import java.util.List;

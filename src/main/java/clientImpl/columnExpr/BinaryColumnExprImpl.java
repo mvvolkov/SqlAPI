@@ -2,31 +2,39 @@ package clientImpl.columnExpr;
 
 import api.columnExpr.BinaryColumnExpression;
 import api.columnExpr.ColumnExpression;
+import org.jetbrains.annotations.NotNull;
 
 public final class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {
 
+    @NotNull
     private final ColumnExpression leftOperand;
 
+    @NotNull
     private final ColumnExpression rightOperand;
 
-    public BinaryColumnExprImpl(ExprType exprType, ColumnExpression leftOperand,
-                                ColumnExpression rightOperand, String alias) {
+    public BinaryColumnExprImpl(@NotNull ExprType exprType, @NotNull ColumnExpression leftOperand,
+                                @NotNull ColumnExpression rightOperand, @NotNull String alias) {
         super(exprType, alias);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }
 
 
-    @Override public ColumnExpression getLeftOperand() {
+    @NotNull
+    @Override
+    public ColumnExpression getLeftOperand() {
         return leftOperand;
     }
 
-    @Override public ColumnExpression getRightOperand() {
+    @NotNull
+    @Override
+    public ColumnExpression getRightOperand() {
         return rightOperand;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "(" + leftOperand + " " + getOperatorString() + " " + rightOperand + ")";
     }
 

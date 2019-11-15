@@ -1,6 +1,6 @@
 package clientImpl.queries;
 
-import api.AssignmentOperation;
+import api.misc.AssignmentOperation;
 import api.queries.UpdateStatement;
 import api.predicates.Predicate;
 

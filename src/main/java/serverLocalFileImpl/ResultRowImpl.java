@@ -3,42 +3,21 @@ package serverLocalFileImpl;
 import api.exceptions.NoSuchColumnException;
 import api.selectResult.ResultRow;
 
-import java.util.List;
+import java.util.Map;
 
 public final class ResultRowImpl implements ResultRow {
 
 
-    private final List<String> columns;
-    private final List<Object> values;
+    private final Map<String, Object> values;
 
-    public ResultRowImpl(List<String> columns, List<Object> values) {
-        this.columns = columns;
+    public ResultRowImpl(Map<String, Object> values) {
         this.values = values;
     }
 
-    private int getColumnIndex(String columnName) throws NoSuchColumnException {
-        int index = columns.indexOf(columnName);
-        if (index == -1) {
-            throw new NoSuchColumnException(columnName);
-        }
-        return index;
-    }
-
-
-    @Override
-    public List<Object> getValues() {
-        return values;
-    }
 
     @Override
     public Integer getInteger(String columnName) throws NoSuchColumnException {
         Object value = this.getObject(columnName);
-        return (Integer) value;
-    }
-
-    @Override
-    public Integer getInteger(int index) {
-        Object value = this.getObject(index);
         return (Integer) value;
     }
 
@@ -49,19 +28,11 @@ public final class ResultRowImpl implements ResultRow {
     }
 
     @Override
-    public String getString(int index) {
-        Object value = this.getObject(index);
-        return (String) value;
-    }
-
-    @Override
     public Object getObject(String columnName) throws NoSuchColumnException {
-        return values.get(this.getColumnIndex(columnName));
-    }
-
-    @Override
-    public Object getObject(int index) {
-        return values.get(index);
+        if (!values.containsKey(columnName)) {
+            throw new NoSuchColumnException(columnName);
+        }
+        return values.get(columnName);
     }
 
     @Override
@@ -69,8 +40,4 @@ public final class ResultRowImpl implements ResultRow {
         return this.getObject(columnName) == null;
     }
 
-    @Override
-    public boolean isNull(int index) {
-        return this.getObject(index) == null;
-    }
 }

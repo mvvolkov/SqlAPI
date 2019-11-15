@@ -1,10 +1,10 @@
 package clientImpl.tableRef;
 
-import api.tables.JoinTableReference;
+import api.tables.JoinedTableReference;
 import api.tables.TableReference;
 import api.predicates.Predicate;
 
-public class JoinTableReferenceImpl implements JoinTableReference {
+public class JoinedTableReferenceImpl implements JoinedTableReference {
 
     private final TableRefType joinType;
     private final TableReference left;
@@ -12,8 +12,8 @@ public class JoinTableReferenceImpl implements JoinTableReference {
     private final Predicate selectionPredicate;
 
 
-    JoinTableReferenceImpl(TableRefType joinType, TableReference left, TableReference right,
-                           Predicate selectionPredicate) {
+    JoinedTableReferenceImpl(TableRefType joinType, TableReference left, TableReference right,
+                             Predicate selectionPredicate) {
         this.joinType = joinType;
         this.left = left;
         this.right = right;

@@ -1,4 +1,4 @@
-package api;
+package api.connect;
 
 import api.exceptions.*;
 import api.metadata.TableMetadata;

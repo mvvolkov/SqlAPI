@@ -2,7 +2,7 @@ package sqlFactory;
 
 import serverLocalFileImpl.SqlServerImpl;
 import serverLoggerImpl.SqlServerLoggerImpl;
-import api.SqlServer;
+import api.connect.SqlServer;
 
 public class SqlManagerFactory {
 

@@ -7,7 +7,7 @@ public interface TableReference {
         INNER_JOIN,
         LEFT_OUTER_JOIN,
         RIGHT_OUTER_JOIN,
-        SELECT_EXPRESSION
+        TABLE_FROM_SELECT
     }
 
     TableRefType getTableRefType();
