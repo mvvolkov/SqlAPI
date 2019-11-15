@@ -73,18 +73,21 @@ public class SqlQueryFactory {
     public static SelectExpression selectGrouped(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,
             Predicate predicate, List<String> groupByColumns) {
-        return new SelectExpressionImpl(tableReferences, selectedItems, predicate, groupByColumns);
+        return new SelectExpressionImpl(tableReferences, selectedItems, predicate,
+                groupByColumns);
     }
 
     public static SelectExpression select(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,
             Predicate predicate) {
-        return new SelectExpressionImpl(tableReferences, selectedItems, predicate, Collections.emptyList());
+        return new SelectExpressionImpl(tableReferences, selectedItems, predicate,
+                Collections.emptyList());
     }
 
     public static SelectExpression selectGrouped(TableReference tableReference,
                                                  List<SelectedItem> selectedItems,
-                                                 Predicate predicate, List<String> groupByColumns) {
+                                                 Predicate predicate,
+                                                 List<String> groupByColumns) {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 selectedItems,
                 predicate, groupByColumns);
@@ -98,12 +101,6 @@ public class SqlQueryFactory {
                 predicate, Collections.emptyList());
     }
 
-    public static SelectExpression selectGrouped(
-            List<TableReference> tableReferences,
-            Predicate predicate, List<String> groupByColumns) {
-        return new SelectExpressionImpl(tableReferences, Collections.emptyList(),
-                predicate, groupByColumns);
-    }
 
     public static SelectExpression select(
             List<TableReference> tableReferences,
@@ -112,13 +109,6 @@ public class SqlQueryFactory {
                 predicate, Collections.emptyList());
     }
 
-    public static SelectExpression selectGrouped(
-            TableReference tableReference,
-            Predicate predicate, List<String> groupByColumns) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                Collections.emptyList(),
-                predicate, groupByColumns);
-    }
 
     public static SelectExpression select(
             TableReference tableReference,
@@ -126,11 +116,26 @@ public class SqlQueryFactory {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 Collections.emptyList(),
                 predicate, Collections.emptyList());
+    }
+
+    public static SelectExpression selectGrouped(
+            List<TableReference> tableReferences, List<SelectedItem> selectedItems,
+            List<String> groupByColumns) {
+        return new SelectExpressionImpl(tableReferences, selectedItems,
+                PredicateFactory.empty(), groupByColumns);
     }
 
     public static SelectExpression select(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems) {
         return new SelectExpressionImpl(tableReferences, selectedItems,
+                PredicateFactory.empty(), Collections.emptyList());
+    }
+
+    public static SelectExpression selectGrouped(
+            TableReference tableReference, List<SelectedItem> selectedItems,
+            List<String> groupByColumns) {
+        return new SelectExpressionImpl(Collections.singletonList(tableReference),
+                selectedItems,
                 PredicateFactory.empty(), groupByColumns);
     }
 
@@ -138,19 +143,19 @@ public class SqlQueryFactory {
             TableReference tableReference, List<SelectedItem> selectedItems) {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 selectedItems,
-                PredicateFactory.empty(), groupByColumns);
+                PredicateFactory.empty(), Collections.emptyList());
     }
 
     public static SelectExpression select(
             List<TableReference> tableReferences) {
         return new SelectExpressionImpl(tableReferences, Collections.emptyList(),
-                PredicateFactory.empty(), groupByColumns);
+                PredicateFactory.empty(), Collections.emptyList());
     }
 
     public static SelectExpression select(
             TableReference tableReference) {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 Collections.emptyList(),
-                PredicateFactory.empty(), groupByColumns);
+                PredicateFactory.empty(), Collections.emptyList());
     }
 }

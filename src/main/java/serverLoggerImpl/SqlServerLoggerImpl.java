@@ -82,6 +82,11 @@ public class SqlServerLoggerImpl implements SqlServer {
             sb.append(" WHERE ");
             sb.append(selectExpression.getPredicate());
         }
+        if (!selectExpression.getGroupByColumns().isEmpty()) {
+            sb.append(" GROUP BY ");
+            sb.append(selectExpression.getGroupByColumns().stream()
+                    .collect(Collectors.joining(", ")));
+        }
         return sb.toString();
     }
 
