@@ -8,7 +8,6 @@ import api.selectResult.ResultRow;
 import api.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
-import clientImpl.misc.AggregateFunctionFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
@@ -191,8 +190,8 @@ public class TestServerLocalFileImpl {
             printResultSet(sqlServer.getQueryResult(SqlQueryFactory.selectGrouped(
                     TableRefFactory.dbTable("table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
-                            AggregateFunctionFactory.sum("column2", "SUM")),
-                    Collections.singletonList("column3"))));
+                            ColumnExprFactory.count("column2", "COUNT")),
+                    Collections.singletonList(ColumnExprFactory.columnRef("column3")))));
 
 
         } catch (SqlException e) {

@@ -1,10 +1,8 @@
 package serverLocalFileImpl;
 
-import api.columnExpr.BinaryColumnExpression;
-import api.columnExpr.ColumnExpression;
-import api.columnExpr.ColumnRef;
-import api.columnExpr.ColumnValue;
+import api.columnExpr.*;
 import api.exceptions.AmbiguousColumnNameException;
+import api.exceptions.InvalidQueryException;
 import api.exceptions.NoSuchColumnException;
 import api.exceptions.WrongValueTypeException;
 import api.predicates.*;
@@ -18,7 +16,8 @@ public class PredicateHelper {
     }
 
     public static boolean matchRow(InternalResultRow resultRow, Predicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
 
         switch (predicate.getType()) {
             case EMPTY:
@@ -45,7 +44,8 @@ public class PredicateHelper {
 
     private static boolean matchRow(InternalResultRow resultRow,
                                     CombinedPredicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
         if (predicate.getType() == Predicate.Type.AND) {
             return matchRow(resultRow, predicate.getLeftPredicate()) &&
                     matchRow(resultRow, predicate.getRightPredicate());
@@ -58,7 +58,8 @@ public class PredicateHelper {
 
     private static boolean matchRow(InternalResultRow resultRow,
                                     BinaryPredicate predicate)
-            throws WrongValueTypeException, NoSuchColumnException, AmbiguousColumnNameException {
+            throws WrongValueTypeException, NoSuchColumnException,
+            AmbiguousColumnNameException {
 
 
         Comparable leftValue =
@@ -144,11 +145,65 @@ public class PredicateHelper {
         return null;
     }
 
+    public static Object evaluateColumnExpr(List<InternalResultRow> rows,
+                                            ColumnExpression ce,
+                                            List<ColumnRef> groupByColumns)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+
+        if (ce instanceof BinaryColumnExpression) {
+            return evaluateBinaryColumnExpr(rows, (BinaryColumnExpression) ce,
+                    groupByColumns);
+        }
+        if (ce instanceof ColumnRef) {
+            return evaluateColumnRef(rows, (ColumnRef) ce, groupByColumns);
+        }
+        if (ce instanceof ColumnValue) {
+            return ((ColumnValue) ce).getValue();
+        }
+        if (ce instanceof AggregateFunction) {
+            return evaluateAggregateFunction(rows, (AggregateFunction) ce);
+        }
+        return null;
+    }
+
     private static Object evaluateBinaryColumnExpr(InternalResultRow row,
                                                    BinaryColumnExpression bce)
             throws NoSuchColumnException, AmbiguousColumnNameException {
         Object leftValue = evaluateColumnExpr(row, bce.getLeftOperand());
         Object rightValue = evaluateColumnExpr(row, bce.getRightOperand());
+        switch (bce.getExprType()) {
+            case SUM:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) + ((Integer) rightValue));
+                }
+                if (leftValue instanceof String && rightValue instanceof String) {
+                    return (String) (((String) leftValue) + ((String) rightValue));
+                }
+            case DIFF:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) - ((Integer) rightValue));
+                }
+            case PRODUCT:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) * ((Integer) rightValue));
+                }
+            case DIVIDE:
+                if (leftValue instanceof Integer && rightValue instanceof Integer) {
+                    return (Integer) (((Integer) leftValue) / ((Integer) rightValue));
+                }
+        }
+        return null;
+    }
+
+    private static Object evaluateBinaryColumnExpr(List<InternalResultRow> rows,
+                                                   BinaryColumnExpression bce,
+                                                   List<ColumnRef> groupByColumns)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+        Object leftValue = evaluateColumnExpr(rows, bce.getLeftOperand(), groupByColumns);
+        Object rightValue =
+                evaluateColumnExpr(rows, bce.getRightOperand(), groupByColumns);
         switch (bce.getExprType()) {
             case SUM:
                 if (leftValue instanceof Integer && rightValue instanceof Integer) {
@@ -199,5 +254,43 @@ public class PredicateHelper {
         }
 
         return row.getValues().get(matchingColumns.get(0));
+    }
+
+    private static Object evaluateColumnRef(List<InternalResultRow> rows, ColumnRef cr,
+                                            List<ColumnRef> groupByColumns)
+            throws InvalidQueryException, NoSuchColumnException,
+            AmbiguousColumnNameException {
+
+        List<Object> values = new ArrayList<>();
+        if (!groupByColumns.contains(new ColumnRefImpl(cr))) {
+            throw new InvalidQueryException("");
+        }
+        return evaluateColumnExpr(rows.get(0), cr);
+
+
+    }
+
+    private static Object evaluateAggregateFunction(List<InternalResultRow> rows,
+                                                    AggregateFunction af)
+            throws InvalidQueryException, NoSuchColumnException,
+            AmbiguousColumnNameException {
+
+        switch (af.getType()) {
+            case COUNT:
+                return getCount(rows, af.getColumn());
+        }
+        throw new InvalidQueryException("");
+
+    }
+
+    private static Integer getCount(List<InternalResultRow> rows, ColumnRef cr)
+            throws NoSuchColumnException, AmbiguousColumnNameException {
+        int count = 0;
+        for (InternalResultRow row : rows) {
+            if (cr.getColumnName().isEmpty() || evaluateColumnRef(row, cr) != null) {
+                count++;
+            }
+        }
+        return count;
     }
 }

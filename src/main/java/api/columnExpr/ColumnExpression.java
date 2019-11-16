@@ -8,6 +8,7 @@ public interface ColumnExpression extends SelectedItem {
         COLUMN_VALUE,
         COLUMN_REF,
         NULL_VALUE,
+        AGGR_FUNC,
         SUM,
         DIFF,
         PRODUCT,

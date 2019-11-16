@@ -1,5 +1,6 @@
 package api.queries;
 
+import api.columnExpr.ColumnRef;
 import api.misc.SelectedItem;
 import api.tables.TableReference;
 import api.predicates.Predicate;
@@ -14,6 +15,6 @@ public interface SelectExpression {
 
     List<SelectedItem> getSelectedItems();
 
-    List<String> getGroupByColumns();
+    List<ColumnRef> getGroupByColumns();
 
 }

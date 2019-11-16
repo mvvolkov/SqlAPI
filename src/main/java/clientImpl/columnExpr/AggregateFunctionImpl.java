@@ -1,24 +1,27 @@
-package clientImpl.misc;
+package clientImpl.columnExpr;
 
-import api.misc.AggregateFunction;
+import api.columnExpr.AggregateFunction;
+import api.columnExpr.ColumnRef;
 
-public class AggregateFunctionImpl implements AggregateFunction {
+public final class AggregateFunctionImpl extends ColumnExprImpl
+        implements AggregateFunction {
 
-    private final String columnName;
+    private final ColumnRef column;
 
     private final Type type;
 
     private final String alias;
 
-    public AggregateFunctionImpl(String columnName,
+    public AggregateFunctionImpl(ColumnRef column,
                                  Type type, String alias) {
-        this.columnName = columnName;
+        super(ExprType.AGGR_FUNC, alias);
+        this.column = column;
         this.type = type;
         this.alias = alias;
     }
 
-    @Override public String getColumnName() {
-        return columnName;
+    @Override public ColumnRef getColumn() {
+        return column;
     }
 
     @Override public String getAlias() {
@@ -49,10 +52,10 @@ public class AggregateFunctionImpl implements AggregateFunction {
                 break;
         }
         sb.append("(");
-        if (columnName.isEmpty()) {
+        if (column.getColumnName().isEmpty()) {
             sb.append("*");
         } else {
-            sb.append(columnName);
+            sb.append(column);
         }
         sb.append(")");
         if (!alias.isEmpty()) {

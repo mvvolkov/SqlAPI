@@ -1,5 +1,6 @@
 package clientImpl.queries;
 
+import api.columnExpr.ColumnRef;
 import api.misc.AssignmentOperation;
 import api.misc.SelectedItem;
 import api.tables.TableReference;
@@ -72,7 +73,7 @@ public class SqlQueryFactory {
 
     public static SelectExpression selectGrouped(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,
-            Predicate predicate, List<String> groupByColumns) {
+            Predicate predicate, List<ColumnRef> groupByColumns) {
         return new SelectExpressionImpl(tableReferences, selectedItems, predicate,
                 groupByColumns);
     }
@@ -87,7 +88,7 @@ public class SqlQueryFactory {
     public static SelectExpression selectGrouped(TableReference tableReference,
                                                  List<SelectedItem> selectedItems,
                                                  Predicate predicate,
-                                                 List<String> groupByColumns) {
+                                                 List<ColumnRef> groupByColumns) {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 selectedItems,
                 predicate, groupByColumns);
@@ -120,7 +121,7 @@ public class SqlQueryFactory {
 
     public static SelectExpression selectGrouped(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,
-            List<String> groupByColumns) {
+            List<ColumnRef> groupByColumns) {
         return new SelectExpressionImpl(tableReferences, selectedItems,
                 PredicateFactory.empty(), groupByColumns);
     }
@@ -133,7 +134,7 @@ public class SqlQueryFactory {
 
     public static SelectExpression selectGrouped(
             TableReference tableReference, List<SelectedItem> selectedItems,
-            List<String> groupByColumns) {
+            List<ColumnRef> groupByColumns) {
         return new SelectExpressionImpl(Collections.singletonList(tableReference),
                 selectedItems,
                 PredicateFactory.empty(), groupByColumns);

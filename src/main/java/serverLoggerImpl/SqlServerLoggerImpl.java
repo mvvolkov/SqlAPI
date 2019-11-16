@@ -1,5 +1,6 @@
 package serverLoggerImpl;
 
+import api.columnExpr.ColumnRef;
 import api.connect.SqlServer;
 import api.exceptions.*;
 import api.metadata.ColumnMetadata;
@@ -84,8 +85,9 @@ public class SqlServerLoggerImpl implements SqlServer {
         }
         if (!selectExpression.getGroupByColumns().isEmpty()) {
             sb.append(" GROUP BY ");
-            sb.append(selectExpression.getGroupByColumns().stream()
-                    .collect(Collectors.joining(", ")));
+            sb.append(
+                    selectExpression.getGroupByColumns().stream().map(ColumnRef::toString)
+                            .collect(Collectors.joining(", ")));
         }
         return sb.toString();
     }

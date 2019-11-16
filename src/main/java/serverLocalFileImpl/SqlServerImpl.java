@@ -105,30 +105,87 @@ public final class SqlServerImpl implements SqlServer {
      * 7.The union is taken after each sub-select is evaluated.
      * 8.Finally, the resulting rows are sorted according to the columns specified in the order by clause.
      */
-
-
     private InternalResultSet getInternalQueryResult(SelectExpression se) throws
             SqlException {
 
-        List<InternalResultSet> resultSets = new ArrayList<>();
-        for (TableReference tr : se.getTableReferences()) {
-            resultSets.add(this.getDataFromTableRef(tr));
+        InternalResultSet result = this.getProductOfTables(se.getTableReferences());
+        result = getFilteredResult(result, se.getPredicate());
+
+        if (se.getSelectedItems().isEmpty()) {
+            return result;
         }
-        InternalResultSet internalResultSet = getProductOfResults(resultSets);
-        internalResultSet = getFilteredResult(internalResultSet, se.getPredicate());
-        internalResultSet = getSelectedColumns(internalResultSet, se.getSelectedItems());
-        return internalResultSet;
+
+        List<ColumnRef> resultColumns = getSelectedColumns(result, se.getSelectedItems());
+        List<InternalResultRow> resultRows;
+        if (!se.getGroupByColumns().isEmpty()) {
+            Map<List<Object>, List<InternalResultRow>> groups = new HashMap<>();
+            for (InternalResultRow row : result.getRows()) {
+                List<Object> values = new ArrayList<>();
+                for (ColumnRef cr : se.getGroupByColumns()) {
+                    values.add(PredicateHelper.evaluateColumnRef(row, cr));
+                }
+                List key = Collections.unmodifiableList(values);
+                if (!groups.containsKey(key)) {
+                    groups.put(key, new ArrayList<>());
+                }
+                groups.get(key).add(row);
+            }
+
+            List<ColumnRef> groupByColumns = new ArrayList<>();
+            for (ColumnRef cr : se.getGroupByColumns()) {
+                groupByColumns.add(new ColumnRefImpl(cr));
+            }
+
+            resultRows = new ArrayList<>();
+            for (Map.Entry<List<Object>, List<InternalResultRow>> entry : groups
+                    .entrySet()) {
+
+                Map<ColumnRef, Object> values = new HashMap<>();
+                for (SelectedItem selectedItem : se.getSelectedItems()) {
+//                    if (selectedItem instanceof DatabaseTableReference) {
+//                        String tableName =
+//                                ((DatabaseTableReference) selectedItem).getTableName();
+//                        String schemaName =
+//                                ((DatabaseTableReference) selectedItem).getSchemaName();
+//                        for (ColumnRef cr : result.getColumns()) {
+//                            if (cr.getSchemaName().equals(schemaName) &&
+//                                    cr.getTableName().equals(tableName)) {
+//                                values.put(cr, row.getValues().get(cr));
+//                            }
+//                        }
+//                    }
+                    if (selectedItem instanceof ColumnExpression) {
+                        values.put(new ColumnRefImpl(
+                                        ((ColumnExpression) selectedItem).getAlias()),
+                                PredicateHelper
+                                        .evaluateColumnExpr(entry.getValue(),
+                                                (ColumnExpression) selectedItem,
+                                                groupByColumns));
+                    }
+                }
+                resultRows.add(new InternalResultRow(values));
+            }
+        } else {
+            resultRows = getSelectedValues(result,
+                    se.getSelectedItems());
+        }
+
+
+        return new InternalResultSet(resultColumns, resultRows);
     }
 
-    private static InternalResultSet getSelectedColumns(InternalResultSet internalResultSet,
-                                                        List<SelectedItem> selectedItems) throws NoSuchColumnException, AmbiguousColumnNameException {
+    private static List<ColumnRef> getSelectedColumns(
+            InternalResultSet internalResultSet,
+            List<SelectedItem> selectedItems) {
+
         List<InternalResultRow> resultRows = new ArrayList<>();
         List<ColumnRef> resultColumns = new ArrayList<>();
 
         if (selectedItems.isEmpty()) {
-            return internalResultSet;
+            return resultColumns;
         }
 
+        // make list of columns
         for (SelectedItem selectedItem : selectedItems) {
             if (selectedItem instanceof DatabaseTableReference) {
                 String tableName =
@@ -143,9 +200,23 @@ public final class SqlServerImpl implements SqlServer {
                 }
             }
             if (selectedItem instanceof ColumnExpression) {
-                resultColumns.add(new ColumnRefImpl(((ColumnExpression) selectedItem).getAlias()));
+                resultColumns.add(new ColumnRefImpl(
+                        ((ColumnExpression) selectedItem).getAlias()));
             }
         }
+        return resultColumns;
+    }
+
+    private static List<InternalResultRow> getSelectedValues(
+            InternalResultSet internalResultSet,
+            List<SelectedItem> selectedItems)
+            throws NoSuchColumnException, AmbiguousColumnNameException {
+
+        List<InternalResultRow> resultRows = new ArrayList<>();
+        if (selectedItems.isEmpty()) {
+            return resultRows;
+        }
+
         for (InternalResultRow row : internalResultSet.getRows()) {
             Map<ColumnRef, Object> values = new HashMap<>();
             for (SelectedItem selectedItem : selectedItems) {
@@ -162,7 +233,8 @@ public final class SqlServerImpl implements SqlServer {
                     }
                 }
                 if (selectedItem instanceof ColumnExpression) {
-                    values.put(new ColumnRefImpl(((ColumnExpression) selectedItem).getAlias()),
+                    values.put(new ColumnRefImpl(
+                                    ((ColumnExpression) selectedItem).getAlias()),
                             PredicateHelper
                                     .evaluateColumnExpr(row,
                                             (ColumnExpression) selectedItem));
@@ -170,7 +242,7 @@ public final class SqlServerImpl implements SqlServer {
             }
             resultRows.add(new InternalResultRow(values));
         }
-        return new InternalResultSet(resultColumns, resultRows);
+        return resultRows;
     }
 
 
@@ -211,7 +283,8 @@ public final class SqlServerImpl implements SqlServer {
 
     private void insert(InsertFromSelectStatement stmt)
             throws SqlException {
-        ResultSet resultSet = createResultSet(this.getInternalQueryResult(stmt.getSelectExpression()));
+        ResultSet resultSet =
+                createResultSet(this.getInternalQueryResult(stmt.getSelectExpression()));
         for (ResultRow row : resultSet.getRows()) {
             List<Object> values = new ArrayList<>();
             for (String column : resultSet.getColumns()) {
@@ -250,8 +323,13 @@ public final class SqlServerImpl implements SqlServer {
     }
 
 
-    private static InternalResultSet getProductOfResults(List<InternalResultSet> resultSets) {
+    private InternalResultSet getProductOfTables(List<TableReference> tableReferences)
+            throws SqlException {
 
+        List<InternalResultSet> resultSets = new ArrayList<>();
+        for (TableReference tr : tableReferences) {
+            resultSets.add(this.getDataFromTableRef(tr));
+        }
         if (resultSets.isEmpty()) {
             return new InternalResultSet(Collections.emptyList(),
                     Collections.emptyList());
@@ -266,7 +344,8 @@ public final class SqlServerImpl implements SqlServer {
 
     private static InternalResultSet getFilteredResult(InternalResultSet resultSet,
                                                        Predicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
         List<ColumnRef> columns = new ArrayList<>(resultSet.getColumns());
         List<InternalResultRow> rows = new ArrayList<>();
         for (InternalResultRow row : resultSet.getRows()) {
@@ -279,7 +358,8 @@ public final class SqlServerImpl implements SqlServer {
 
     private static InternalResultSet innerJoin(InternalResultSet left,
                                                InternalResultSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
 
         InternalResultSet internalResultSet = left.joinWith(right);
         return getFilteredResult(internalResultSet, sc);
@@ -287,7 +367,8 @@ public final class SqlServerImpl implements SqlServer {
 
     private static InternalResultSet leftOuterJoin(InternalResultSet left,
                                                    InternalResultSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
 
         List<ColumnRef> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -314,7 +395,8 @@ public final class SqlServerImpl implements SqlServer {
 
     private static InternalResultSet rightOuterJoin(InternalResultSet left,
                                                     InternalResultSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, WrongValueTypeException,
+            AmbiguousColumnNameException {
 
         List<ColumnRef> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -364,8 +446,10 @@ public final class SqlServerImpl implements SqlServer {
         throw new InvalidQueryException("Invalid type of join table reference");
     }
 
-    private InternalResultSet getDataFromTableFromSelect(TableFromSelectReference tr) throws SqlException {
-        InternalResultSet internalResultSet = getInternalQueryResult(tr.getSelectExpression());
+    private InternalResultSet getDataFromTableFromSelect(TableFromSelectReference tr)
+            throws SqlException {
+        InternalResultSet internalResultSet =
+                getInternalQueryResult(tr.getSelectExpression());
         if (tr.getAlias().isEmpty()) {
             return internalResultSet;
         }
@@ -378,7 +462,8 @@ public final class SqlServerImpl implements SqlServer {
         for (InternalResultRow row : internalResultSet.getRows()) {
             Map<ColumnRef, Object> values = new HashMap<>();
             for (Map.Entry<ColumnRef, Object> entry : row.getValues().entrySet()) {
-                values.put(new ColumnRefImpl("", alias, entry.getKey().getColumnName()), entry.getValue());
+                values.put(new ColumnRefImpl("", alias, entry.getKey().getColumnName()),
+                        entry.getValue());
             }
             newRows.add(new InternalResultRow(values));
         }
@@ -399,7 +484,8 @@ public final class SqlServerImpl implements SqlServer {
             case RIGHT_OUTER_JOIN:
                 return this.getDataFromJoinedTable((JoinedTableReference) tableReference);
             case TABLE_FROM_SELECT:
-                return this.getDataFromTableFromSelect((TableFromSelectReference) tableReference);
+                return this.getDataFromTableFromSelect(
+                        (TableFromSelectReference) tableReference);
 
         }
         throw new IllegalArgumentException("");

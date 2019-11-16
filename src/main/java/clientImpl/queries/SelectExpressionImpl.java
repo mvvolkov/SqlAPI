@@ -1,5 +1,6 @@
 package clientImpl.queries;
 
+import api.columnExpr.ColumnRef;
 import api.queries.SelectExpression;
 import api.misc.SelectedItem;
 import api.tables.TableReference;
@@ -17,12 +18,14 @@ public final class SelectExpressionImpl implements SelectExpression {
     private final List<SelectedItem> selectedItems;
     @NotNull
     private final Predicate predicate;
+    @NotNull
+    private final List<ColumnRef> groupByColumns;
 
-    private final List<String> groupByColumns;
 
-
-    public SelectExpressionImpl(List<TableReference> tableReferences,
-                                List<SelectedItem> selectedItems, Predicate predicate, List<String> groupByColumns) {
+    public SelectExpressionImpl(@NotNull List<TableReference> tableReferences,
+                                @NotNull List<SelectedItem> selectedItems,
+                                @NotNull Predicate predicate,
+                                @NotNull List<ColumnRef> groupByColumns) {
         this.tableReferences = tableReferences;
         this.selectedItems = selectedItems;
         this.predicate = predicate;
@@ -41,8 +44,9 @@ public final class SelectExpressionImpl implements SelectExpression {
         return selectedItems;
     }
 
+    @NotNull
     @Override
-    public List<String> getGroupByColumns() {
+    public List<ColumnRef> getGroupByColumns() {
         return groupByColumns;
     }
 
