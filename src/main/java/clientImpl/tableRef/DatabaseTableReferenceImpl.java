@@ -6,15 +6,16 @@ import org.jetbrains.annotations.NotNull;
 public final class DatabaseTableReferenceImpl implements DatabaseTableReference {
 
     @NotNull
-    private final String schemaName;
+    private final String databaseName;
+
 
     @NotNull
     private final String tableName;
 
 
-    DatabaseTableReferenceImpl(@NotNull String schemaName, @NotNull String tableName) {
+    DatabaseTableReferenceImpl(@NotNull String databaseName, @NotNull String tableName) {
+        this.databaseName = databaseName;
         this.tableName = tableName;
-        this.schemaName = schemaName;
     }
 
 
@@ -27,7 +28,13 @@ public final class DatabaseTableReferenceImpl implements DatabaseTableReference 
     @NotNull
     @Override
     public String getSchemaName() {
-        return schemaName;
+        return "";
+    }
+
+    @NotNull
+    @Override
+    public String getDatabaseName() {
+        return databaseName;
     }
 
 }

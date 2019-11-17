@@ -17,59 +17,60 @@ public class SqlQueryFactory {
     private SqlQueryFactory() {
     }
 
-    public static CreateTableStatement createTable(String tableName,
+    public static CreateTableStatement createTable(String databaseName, String tableName,
                                                    List<ColumnMetadata<?>> columns) {
-        return new CreateTableStatementImpl(tableName, columns);
+        return new CreateTableStatementImpl(databaseName, tableName, columns);
     }
 
-    public static InsertStatement insert(String tableName,
+    public static InsertStatement insert(String databaseName, String tableName,
                                          List<String> columns,
                                          List<Object> values) {
-        return new InsertStatementImpl(tableName, columns, values);
+        return new InsertStatementImpl(databaseName, tableName, columns, values);
     }
 
-    public static InsertStatement insert(String tableName,
+    public static InsertStatement insert(String databaseName, String tableName,
                                          List<Object> values) {
-        return insert(tableName, Collections.EMPTY_LIST, values);
+        return insert(databaseName, tableName, Collections.emptyList(), values);
     }
 
-    public static InsertFromSelectStatementImpl insert(String tableName,
+    public static InsertFromSelectStatementImpl insert(String databaseName,
+                                                       String tableName,
                                                        List<String> columns,
                                                        SelectExpression selectExpression) {
-        return new InsertFromSelectStatementImpl(tableName, columns,
+        return new InsertFromSelectStatementImpl(databaseName, tableName, columns,
                 selectExpression);
     }
 
-    public static InsertFromSelectStatementImpl insert(String tableName,
+    public static InsertFromSelectStatementImpl insert(String databaseName,
+                                                       String tableName,
                                                        SelectExpression selectExpression) {
-        return insert(tableName, Collections.EMPTY_LIST,
+        return insert(databaseName, tableName, Collections.emptyList(),
                 selectExpression);
     }
-
-    public static DeleteStatement delete(String databaseName, String tableName) {
-        return new DeleteStatementImpl(databaseName, tableName,
-                PredicateFactory.empty());
-    }
-
 
     public static DeleteStatement delete(String databaseName, String tableName,
                                          Predicate predicate) {
         return new DeleteStatementImpl(databaseName, tableName, predicate);
     }
 
-    public static UpdateStatement update(String tableName,
+    public static DeleteStatement delete(String databaseName, String tableName) {
+        return delete(databaseName, tableName, PredicateFactory.empty());
+    }
+
+
+    public static UpdateStatement update(String databaseName, String tableName,
+                                         List<AssignmentOperation> assignmentOperations,
+                                         Predicate predicate) {
+        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
+                predicate);
+    }
+
+    public static UpdateStatement update(String databaseName, String tableName,
                                          List<AssignmentOperation> assignmentOperations) {
-        return new UpdateStatementImpl(tableName, assignmentOperations,
+        return update(databaseName, tableName, assignmentOperations,
                 PredicateFactory.empty());
     }
 
-
-    public static UpdateStatement update(String tableName,
-                                         List<AssignmentOperation> assignmentOperations,
-                                         Predicate predicate) {
-        return new UpdateStatementImpl(tableName, assignmentOperations,
-                predicate);
-    }
 
     public static SelectExpression selectGrouped(
             List<TableReference> tableReferences, List<SelectedItem> selectedItems,

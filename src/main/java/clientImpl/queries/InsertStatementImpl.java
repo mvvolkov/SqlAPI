@@ -3,7 +3,6 @@ package clientImpl.queries;
 import api.queries.InsertStatement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 public class InsertStatementImpl extends AbstractSqlStatement implements InsertStatement {
@@ -14,9 +13,9 @@ public class InsertStatementImpl extends AbstractSqlStatement implements InsertS
     @NotNull
     private final List<Object> values;
 
-    public InsertStatementImpl(String tableName,
+    public InsertStatementImpl(String databaseName, String tableName,
                                List<String> columns, List<Object> values) {
-        super(tableName);
+        super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
     }

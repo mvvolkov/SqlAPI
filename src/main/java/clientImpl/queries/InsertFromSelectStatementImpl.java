@@ -1,11 +1,9 @@
 package clientImpl.queries;
 
 import api.queries.InsertFromSelectStatement;
-import api.queries.InsertStatement;
 import api.queries.SelectExpression;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 public class InsertFromSelectStatementImpl extends AbstractSqlStatement implements
@@ -16,10 +14,10 @@ public class InsertFromSelectStatementImpl extends AbstractSqlStatement implemen
 
     private final SelectExpression selectExpression;
 
-    public InsertFromSelectStatementImpl(String tableName,
+    public InsertFromSelectStatementImpl(String databaseName, String tableName,
                                          List<String> columns,
                                          SelectExpression selectExpression) {
-        super(tableName);
+        super(databaseName, tableName);
         this.columns = columns;
         this.selectExpression = selectExpression;
     }

@@ -5,7 +5,6 @@ import api.metadata.TableMetadata;
 import api.queries.SelectExpression;
 import api.queries.SqlStatement;
 import api.selectResult.ResultSet;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -19,6 +18,6 @@ public interface SqlServer {
 
     void executeStatement(SqlStatement statement) throws SqlException;
 
-    @NotNull
     ResultSet getQueryResult(SelectExpression selectExpression) throws SqlException;
+
 }

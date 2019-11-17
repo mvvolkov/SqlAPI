@@ -4,6 +4,8 @@ import api.misc.SelectedItem;
 
 public interface DatabaseTableReference extends TableReference, SelectedItem {
 
+    String getDatabaseName();
+
     String getSchemaName();
 
     String getTableName();

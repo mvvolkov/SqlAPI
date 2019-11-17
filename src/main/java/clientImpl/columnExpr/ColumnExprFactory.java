@@ -116,6 +116,14 @@ public class ColumnExprFactory {
         return divide(leftOperand, rightOperand, "");
     }
 
+    public static AggregateFunction countAll(String alias) {
+        return aggregateFunction(AggregateFunction.Type.COUNT, "", alias);
+    }
+
+    public static AggregateFunction countAll() {
+        return aggregateFunction(AggregateFunction.Type.COUNT, "");
+    }
+
     public static AggregateFunction count(String columnName, String alias) {
         return aggregateFunction(AggregateFunction.Type.COUNT, columnName, alias);
     }

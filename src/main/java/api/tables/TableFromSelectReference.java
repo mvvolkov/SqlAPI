@@ -10,6 +10,6 @@ public interface TableFromSelectReference extends TableReference {
 
     @Override
     default TableRefType getTableRefType() {
-        return TableRefType.TABLE_FROM_SELECT;
+        return TableRefType.SELECT_SUBQUERY;
     }
 }

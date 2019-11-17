@@ -11,9 +11,9 @@ public class CreateTableStatementImpl extends AbstractSqlStatement
 
     private final List<ColumnMetadata<?>> columns;
 
-    public CreateTableStatementImpl(String tableName,
+    public CreateTableStatementImpl(String databaseName, String tableName,
                                     List<ColumnMetadata<?>> columns) {
-        super(tableName);
+        super(databaseName, tableName);
         this.columns = columns;
     }
 

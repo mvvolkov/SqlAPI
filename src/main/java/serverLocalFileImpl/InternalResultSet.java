@@ -29,7 +29,6 @@ public final class InternalResultSet {
         List<ColumnRef> newColumns = new ArrayList<>(columns);
         newColumns.addAll(otherSet.getColumns());
         List<InternalResultRow> newRows = new ArrayList<>();
-
         for (InternalResultRow row : rows) {
             for (InternalResultRow otherRow : otherSet.getRows()) {
                 Map<ColumnRef, Object> newValues = new HashMap<>(row.getValues());

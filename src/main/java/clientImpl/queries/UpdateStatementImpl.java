@@ -11,10 +11,10 @@ public class UpdateStatementImpl extends AbstractSqlStatement implements UpdateS
     private final List<AssignmentOperation> assignmentOperations;
     private final Predicate predicate;
 
-    public UpdateStatementImpl(String tableName,
+    public UpdateStatementImpl(String databaseName, String tableName,
                                List<AssignmentOperation> assignmentOperations,
                                Predicate predicate) {
-        super(tableName);
+        super(databaseName, tableName);
         this.assignmentOperations = assignmentOperations;
         this.predicate = predicate;
     }

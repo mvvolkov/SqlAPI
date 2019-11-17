@@ -31,7 +31,8 @@ public final class PersistentTable implements Serializable {
     private final List<PersistentRow> rows = new ArrayList<>();
 
 
-    public PersistentTable(String schemaName, String tableName, List<ColumnMetadata<?>> columns) {
+    public PersistentTable(String schemaName, String tableName,
+                           List<ColumnMetadata<?>> columns) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         for (ColumnMetadata c : columns) {
@@ -64,7 +65,8 @@ public final class PersistentTable implements Serializable {
             }
         } else {
             if (columnNames.size() != values.size()) {
-                throw new InvalidQueryException("Invalid insert query. Number of values differs from number of columns");
+                throw new InvalidQueryException(
+                        "Invalid insert query. Number of values differs from number of columns");
             }
             Map<String, Object> insertMap = new HashMap<>();
             for (int i = 0; i < columnNames.size(); i++) {
@@ -140,7 +142,8 @@ public final class PersistentTable implements Serializable {
         for (PersistentRow row : rows) {
             Map<ColumnRef, Object> values = new HashMap<>();
             for (String columnName : row.getValues().keySet()) {
-                values.put(this.createColumnRef(columnName), row.getValues().get(columnName));
+                values.put(this.createColumnRef(columnName),
+                        row.getValues().get(columnName));
             }
             resultRows.add(new InternalResultRow(values));
         }

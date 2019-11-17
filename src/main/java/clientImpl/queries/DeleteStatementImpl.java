@@ -8,9 +8,9 @@ public class DeleteStatementImpl extends AbstractSqlStatement implements DeleteS
 
     private final Predicate predicate;
 
-    public DeleteStatementImpl(String schemaName, String tableName,
+    public DeleteStatementImpl(String databaseName, String tableName,
                                Predicate predicate) {
-        super(tableName);
+        super(databaseName, tableName);
         this.predicate = predicate;
     }
 
