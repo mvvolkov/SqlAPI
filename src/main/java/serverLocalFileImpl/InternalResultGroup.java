@@ -95,7 +95,13 @@ public class InternalResultGroup {
 
         switch (af.getType()) {
             case COUNT:
-                return this.getCount(af.getColumn());
+                return this.getCount(af.getColumnRef());
+            case SUM:
+                return this.getSum(af.getColumnRef());
+            case MAX:
+                return this.getMax(af.getColumnRef());
+            case MIN:
+                return this.getMin(af.getColumnRef());
         }
         throw new InvalidQueryException("");
 
@@ -110,5 +116,61 @@ public class InternalResultGroup {
             }
         }
         return count;
+    }
+
+    private Integer getSum(ColumnRef cr)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+        Integer sum = 0;
+        for (InternalResultRow row : rows) {
+            Object value = row.evaluateColumnRef(cr);
+            if (!(value instanceof Integer)) {
+                throw new InvalidQueryException("");
+            }
+            sum += (Integer) value;
+        }
+        return sum;
+    }
+
+    private Object getMax(ColumnRef cr)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+        Comparable max = null;
+        for (InternalResultRow row : rows) {
+            Object value = row.evaluateColumnRef(cr);
+            if (!(value instanceof Comparable)) {
+                throw new InvalidQueryException("");
+            }
+            Comparable cmpValue = (Comparable) value;
+            if (max == null) {
+                max = cmpValue;
+                continue;
+            }
+            if (cmpValue.compareTo(max) > 0) {
+                max = cmpValue;
+            }
+        }
+        return max;
+    }
+
+    private Object getMin(ColumnRef cr)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+        Comparable min = null;
+        for (InternalResultRow row : rows) {
+            Object value = row.evaluateColumnRef(cr);
+            if (!(value instanceof Comparable)) {
+                throw new InvalidQueryException("");
+            }
+            Comparable cmpValue = (Comparable) value;
+            if (min == null) {
+                min = cmpValue;
+                continue;
+            }
+            if (cmpValue.compareTo(min) < 0) {
+                min = cmpValue;
+            }
+        }
+        return min;
     }
 }

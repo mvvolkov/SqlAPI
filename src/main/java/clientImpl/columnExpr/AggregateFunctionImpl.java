@@ -20,7 +20,7 @@ public final class AggregateFunctionImpl extends ColumnExprImpl
         this.alias = alias;
     }
 
-    @Override public ColumnRef getColumn() {
+    @Override public ColumnRef getColumnRef() {
         return column;
     }
 

@@ -117,7 +117,9 @@ public final class SqlServerImpl implements SqlServer {
             for (InternalResultGroup group : groups) {
                 Map<ColumnRef, Object> values = new HashMap<>();
                 for (ColumnExpression ce : columnExpressions) {
-                    values.put(new ColumnRefImpl(ce.getAlias()),
+                    String columnName = ce.getAlias().isEmpty() ? ce.toString() :
+                            ce.getAlias();
+                    values.put(new ColumnRefImpl(columnName),
                             group.evaluateColumnExpr(ce));
                 }
                 resultRows.add(new InternalResultRow(values));

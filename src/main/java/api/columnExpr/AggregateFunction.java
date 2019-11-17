@@ -14,7 +14,7 @@ public interface AggregateFunction extends ColumnExpression {
         return ExprType.AGGR_FUNC;
     }
 
-    ColumnRef getColumn();
+    ColumnRef getColumnRef();
 
     String getAlias();
 
