@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 public final class ConstraintException extends SqlException {
 
+
     @NotNull
     private final String databaseName;
 
@@ -16,18 +17,17 @@ public final class ConstraintException extends SqlException {
     @NotNull
     private final String columnName;
 
-
     @NotNull
-    private final String errorMessage;
+    private final String reason;
 
 
     public ConstraintException(
             String databaseName, String tableName, String columnName,
-            @NotNull String errorMessage) {
+            @NotNull String reason) {
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
-        this.errorMessage = errorMessage;
+        this.reason = reason;
     }
 
     @Override
@@ -35,12 +35,24 @@ public final class ConstraintException extends SqlException {
         return "Constraint violation for the column "
                 + Stream.of(databaseName, tableName, columnName)
                 .collect(Collectors.joining(".")) +
-                ": " + errorMessage;
+                ": " + reason;
     }
 
 
     @NotNull
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getReason() {
+        return reason;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public String getColumnName() {
+        return columnName;
     }
 }

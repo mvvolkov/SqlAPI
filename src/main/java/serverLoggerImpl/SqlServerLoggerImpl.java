@@ -1,5 +1,6 @@
 package serverLoggerImpl;
 
+import api.columnExpr.ColumnExpression;
 import api.columnExpr.ColumnRef;
 import api.connect.SqlServer;
 import api.exceptions.*;
@@ -16,6 +17,7 @@ import api.tables.TableFromSelectReference;
 import api.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,9 +71,16 @@ public class SqlServerLoggerImpl implements SqlServer {
         if (selectExpression.getSelectedItems().isEmpty()) {
             sb.append("*");
         } else {
-            String from = selectExpression.getSelectedItems()
-                    .stream().map(SelectedItem::toString)
-                    .collect(Collectors.joining(", "));
+            List<String> columns = new ArrayList<>();
+            for (SelectedItem se : selectExpression.getSelectedItems()) {
+                if (se instanceof ColumnExpression) {
+                    columns.add(se.toString());
+                }
+                if (se instanceof DatabaseTableReference) {
+                    columns.add(se.toString() + ".*");
+                }
+            }
+            String from = columns.stream().collect(Collectors.joining(", "));
             sb.append(from);
         }
         sb.append(" FROM ");
@@ -208,10 +217,11 @@ public class SqlServerLoggerImpl implements SqlServer {
     }
 
     private static String getBaseTableRefString(DatabaseTableReference btr) {
+
         if (btr.getSchemaName().isEmpty()) {
-            return btr.getTableName();
+            return btr.getDatabaseName() + "." + btr.getTableName();
         }
-        return btr.getSchemaName() + "." + btr.getTableName();
+        return btr.getDatabaseName() + "." + btr.getSchemaName() + "." + btr.getTableName();
     }
 
     private static String getTableFromSelectString(TableFromSelectReference tsr) {

@@ -37,4 +37,16 @@ public final class DatabaseTableReferenceImpl implements DatabaseTableReference 
         return databaseName;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(databaseName);
+        if (!this.getSchemaName().isEmpty()) {
+            sb.append(".");
+            sb.append(this.getSchemaName());
+        }
+        sb.append(".");
+        sb.append(tableName);
+        return sb.toString();
+    }
 }

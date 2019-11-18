@@ -104,12 +104,12 @@ public class PersistentDatabase implements Serializable {
 
 
     private void delete(DeleteStatement stmt)
-            throws NoSuchSchemaException, NoSuchTableException {
+            throws SqlException {
         this.getTable(stmt).delete(stmt.getPredicate());
     }
 
     private void update(UpdateStatement stmt)
-            throws NoSuchSchemaException, NoSuchTableException {
+            throws SqlException {
         PersistentTable table = this.getTable(stmt);
         table.update(stmt);
     }

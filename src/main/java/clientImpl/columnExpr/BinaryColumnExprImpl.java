@@ -35,7 +35,19 @@ public final class BinaryColumnExprImpl extends ColumnExprImpl
 
     @Override
     public String toString() {
-        return "(" + leftOperand + " " + getOperatorString() + " " + rightOperand + ")";
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        sb.append(leftOperand);
+        sb.append(" ");
+        sb.append(getOperatorString());
+        sb.append(" ");
+        sb.append(rightOperand);
+        sb.append(")");
+        if (!alias.isEmpty()) {
+            sb.append(" AS ");
+            sb.append(alias);
+        }
+        return sb.toString();
     }
 
     private String getOperatorString() {

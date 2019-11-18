@@ -1,13 +1,11 @@
 package serverLocalFileImpl.persistent;
 
 import api.columnExpr.ColumnRef;
-import api.exceptions.ConstraintException;
-import api.exceptions.InvalidQueryException;
-import api.exceptions.WrongValueTypeException;
+import api.exceptions.*;
 import api.metadata.ColumnMetadata;
+import api.misc.AssignmentOperation;
 import api.predicates.Predicate;
 import api.queries.UpdateStatement;
-import api.selectResult.ResultSet;
 import serverLocalFileImpl.ColumnRefImpl;
 import serverLocalFileImpl.InternalResultRow;
 import serverLocalFileImpl.InternalResultSet;
@@ -50,6 +48,15 @@ public final class PersistentTable implements Serializable {
         return columns;
     }
 
+    private PersistentColumnMetadata getColumnMetadate(String columnName) throws NoSuchColumnException {
+        for (PersistentColumnMetadata cm : columns) {
+            if (cm.getColumnName().equals(columnName)) {
+                return cm;
+            }
+        }
+        throw new NoSuchColumnException(columnName);
+    }
+
 
     public void insert(List<String> columnNames, List<Object> values)
             throws WrongValueTypeException, ConstraintException, InvalidQueryException {
@@ -89,16 +96,44 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    public void insert(ResultSet resultSet) {
-
+    void delete(Predicate predicate)
+            throws SqlException {
+        if (predicate.isEmpty()) {
+            rows.clear();
+        }
+        List<PersistentRow> rowsToDelete = new ArrayList<>();
+        for (PersistentRow row : rows) {
+            if (this.getInternalResultRow(row).matchPredicate(predicate)) {
+                rowsToDelete.add(row);
+            }
+        }
+        rows.removeAll(rowsToDelete);
     }
 
-    public void delete(Predicate predicate) {
+    void update(UpdateStatement stmt)
+            throws SqlException {
 
+        for (PersistentRow row : rows) {
+            InternalResultRow irr = this.getInternalResultRow(row);
+            if (irr.matchPredicate(stmt.getPredicate())) {
+                for (AssignmentOperation ao : stmt.getAssignmentOperations()) {
+                    String columnName = ao.getColumnName();
+                    Object newValue = irr.evaluateColumnExpr(ao.getValue());
+                    this.checkConstraints(this.getColumnMetadate(columnName), newValue);
+                    row.getValues().put(columnName, newValue);
+                }
+            }
+        }
     }
 
-    public void update(UpdateStatement stmt) {
 
+    private InternalResultRow getInternalResultRow(PersistentRow row) {
+        Map<ColumnRef, Object> values = new HashMap<>();
+        for (String columnName : row.getValues().keySet()) {
+            values.put(this.createColumnRef(columnName),
+                    row.getValues().get(columnName));
+        }
+        return new InternalResultRow(values);
     }
 
 
@@ -123,7 +158,7 @@ public final class PersistentTable implements Serializable {
                 }
             }
         }
-        if (cm.getSize() != -1) {
+        if (cm.getSize() != -1 && newValue != null) {
             String strValue = (String) newValue;
             if (strValue.length() > cm.getSize()) {
                 throw new ConstraintException(schemaName, tableName,
@@ -140,12 +175,7 @@ public final class PersistentTable implements Serializable {
         }
         List<InternalResultRow> resultRows = new ArrayList<>();
         for (PersistentRow row : rows) {
-            Map<ColumnRef, Object> values = new HashMap<>();
-            for (String columnName : row.getValues().keySet()) {
-                values.put(this.createColumnRef(columnName),
-                        row.getValues().get(columnName));
-            }
-            resultRows.add(new InternalResultRow(values));
+            resultRows.add(this.getInternalResultRow(row));
         }
         return new InternalResultSet(resultColumns, resultRows);
     }
