@@ -1,5 +1,4 @@
 import api.connect.SqlServer;
-import api.exceptions.NoSuchColumnException;
 import api.exceptions.SqlException;
 import api.metadata.ColumnMetadata;
 import api.selectResult.ResultRow;
@@ -11,10 +10,8 @@ import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
 import sqlFactory.SqlManagerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestServerLocalFileImpl {
@@ -81,7 +78,6 @@ public class TestServerLocalFileImpl {
             printResultSet(sqlServer.getQueryResult(
                     SqlQueryFactory
                             .select(TableRefFactory.dbTable("DB1", "table2"))));
-
 
 
             System.out.println("");
@@ -225,22 +221,19 @@ public class TestServerLocalFileImpl {
     }
 
 
-    private static void printResultSet(ResultSet resultSet)
-            throws NoSuchColumnException {
+    private static void printResultSet(ResultSet resultSet) {
 
         StringBuilder sb = new StringBuilder();
 
-        String columnsHeaders = resultSet.getColumns().stream()
+        String columnsHeaders = resultSet.getHeaders().stream()
                 .collect(Collectors.joining(", "));
 
         sb.append(columnsHeaders);
         for (ResultRow row : resultSet.getRows()) {
-            List<String> values = new ArrayList<>();
-            for (String columnName : resultSet.getColumns()) {
-                values.add(String.valueOf(row.getObject(columnName)));
-            }
             String rowString =
-                    values.stream().collect(Collectors.joining(", "));
+                    row.getValues().stream().map(o -> String.valueOf(o))
+                            .collect(Collectors.joining(
+                                    ", "));
             sb.append("\n" + rowString);
         }
         System.out.println(sb);

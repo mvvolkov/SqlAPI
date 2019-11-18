@@ -7,9 +7,6 @@ import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -21,13 +18,13 @@ public class DeleteTest extends AbstractServerLocalFileTest {
         System.out.println("testDeleteAll:");
         try {
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1"));
 
             resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(0, resultSet.getRows().size());
 
         } catch (SqlException se) {
@@ -42,36 +39,18 @@ public class DeleteTest extends AbstractServerLocalFileTest {
         System.out.println("testDeletePredicateIsNull:");
         try {
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1",
                     PredicateFactory.isNull(ColumnExprFactory.columnRef("column4"))));
 
             resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(3, resultSet.getRows().size());
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 10);
-            values.put("column2", 30);
-            values.put("column3", "test1");
-            values.put("column4", "t21");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 12);
-            values.put("column2", 32);
-            values.put("column3", "test3");
-            values.put("column4", "t43");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 13);
-            values.put("column2", 33);
-            values.put("column3", "test2");
-            values.put("column4", "t653");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 10, 30, "test1", "t21");
+            checkRowExists(resultSet, 12, 32, "test3", "t43");
+            checkRowExists(resultSet, 13, 33, "test2", "t653");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -85,37 +64,18 @@ public class DeleteTest extends AbstractServerLocalFileTest {
         System.out.println("testDeletePredicateIsNotNull:");
         try {
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
 
             sqlServer.executeStatement(SqlQueryFactory.delete("DB1", "table1",
                     PredicateFactory.isNotNull(ColumnExprFactory.columnRef("column4"))));
 
             resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(3, resultSet.getRows().size());
-
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 11);
-            values.put("column2", 31);
-            values.put("column3", "test2");
-            values.put("column4", null);
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 15);
-            values.put("column2", 34);
-            values.put("column3", "test1");
-            values.put("column4", null);
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 16);
-            values.put("column2", null);
-            values.put("column3", "test1");
-            values.put("column4", null);
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 11, 31, "test2", null);
+            checkRowExists(resultSet, 15, 34, "test1", null);
+            checkRowExists(resultSet, 16, null, "test1", null);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

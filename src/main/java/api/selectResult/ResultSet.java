@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface ResultSet {
 
-    List<String> getColumns();
+    List<String> getHeaders();
 
     List<ResultRow> getRows();
 

@@ -17,7 +17,7 @@ public final class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public List<String> getColumns() {
+    public List<String> getHeaders() {
         return columns;
     }
 

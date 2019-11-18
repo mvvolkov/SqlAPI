@@ -94,11 +94,7 @@ public class PersistentDatabase implements Serializable {
                 SqlServerImpl.createResultSet(
                         sqlServer.getInternalQueryResult(stmt.getSelectExpression()));
         for (ResultRow row : resultSet.getRows()) {
-            List<Object> values = new ArrayList<>();
-            for (String column : resultSet.getColumns()) {
-                values.add(row.getObject(column));
-            }
-            this.getTable(stmt).insert(stmt.getColumns(), values);
+            this.getTable(stmt).insert(stmt.getColumns(), row.getValues());
         }
     }
 

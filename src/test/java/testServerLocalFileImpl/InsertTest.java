@@ -12,8 +12,6 @@ import clientImpl.tableRef.TableRefFactory;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -61,14 +59,8 @@ public class InsertTest extends AbstractServerLocalFileTest {
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList("column2", "column3", "column1"),
                     Arrays.asList(35, "test15", 17)));
-
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 17);
-            values.put("column2", 35);
-            values.put("column3", "test15");
-            checkRowExists(resultSet, values);
-
+            checkRowExists(resultSet, 17, 35, "test15", null);
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();
@@ -129,12 +121,7 @@ public class InsertTest extends AbstractServerLocalFileTest {
                     Arrays.asList("test15", 17)));
 
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 17);
-            values.put("column2", 15);
-            values.put("column3", "test15");
-            values.put("column4", null);
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 17, 15, "test15", null);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -173,41 +160,18 @@ public class InsertTest extends AbstractServerLocalFileTest {
                                     )))));
 
             ResultSet resultSet = this.getTableData("DB1", "table2");
-            assertEquals(2, resultSet.getColumns().size());
+            assertEquals(2, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
 
-
             // old values
-            Map<String, Object> values = new HashMap<>();
-            values.put("column5", 22);
-            values.put("column3", "test3");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column5", 23);
-            values.put("column3", "test2");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column5", 25);
-            values.put("column3", "test4");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 22, "test3");
+            checkRowExists(resultSet, 23, "test2");
+            checkRowExists(resultSet, 25, "test4");
 
             // inserted values
-            values = new HashMap<>();
-            values.put("column5", 30);
-            values.put("column3", "test1");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column5", 32);
-            values.put("column3", "test3");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column5", 33);
-            values.put("column3", "test2");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 30, "test1");
+            checkRowExists(resultSet, 32, "test3");
+            checkRowExists(resultSet, 33, "test2");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

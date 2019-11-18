@@ -185,10 +185,10 @@ public final class SqlServerImpl implements SqlServer {
 
         List<ColumnRef> resultColumns = new ArrayList<>();
         for (ColumnExpression columnExpression : columnExpressions) {
-            if (!columnExpression.getAlias().isEmpty()) {
-                resultColumns.add(new ColumnRefImpl((columnExpression).getAlias()));
-            } else if (columnExpression instanceof ColumnRef) {
+            if (columnExpression instanceof ColumnRef) {
                 resultColumns.add(new ColumnRefImpl((ColumnRef) columnExpression));
+            } else if (!columnExpression.getAlias().isEmpty()) {
+                resultColumns.add(new ColumnRefImpl((columnExpression).getAlias()));
             } else {
                 resultColumns.add(new ColumnRefImpl(columnExpression.toString()));
             }
@@ -221,9 +221,9 @@ public final class SqlServerImpl implements SqlServer {
                 .map(ColumnRef::getColumnName).collect(Collectors.toList());
 
         for (InternalResultRow row : internalResultSet.getRows()) {
-            Map<String, Object> values = new HashMap<>();
-            for (Map.Entry<ColumnRef, Object> entry : row.getValues().entrySet()) {
-                values.put(entry.getKey().getColumnName(), entry.getValue());
+            List<Object> values = new ArrayList<>();
+            for (ColumnRef cr : internalResultSet.getColumns()) {
+                values.add(row.getValues().get(cr));
             }
             resultRows.add(new ResultRowImpl(values));
         }

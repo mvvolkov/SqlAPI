@@ -12,7 +12,8 @@ import org.junit.Before;
 import sqlFactory.SqlManagerFactory;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -80,44 +81,48 @@ public abstract class AbstractServerLocalFileTest {
         }
     }
 
-    protected ResultSet getTableData(String dbName, String tableName) throws SqlException {
+    protected ResultSet getTableData(String dbName, String tableName)
+            throws SqlException {
         return sqlServer.getQueryResult(
                 SqlQueryFactory.select(TableRefFactory.dbTable(dbName, tableName)));
     }
 
-    static void checkRowExists(ResultSet
-                                 resultSet, Map<String, Object> values) {
-        ResultRow resultRow = null;
-        try {
-            for (ResultRow row : resultSet.getRows()) {
-                boolean rowMatch = true;
-                for (Map.Entry<String, Object> entry : values.entrySet()) {
-                    Object value = row.getObject(entry.getKey());
+    static void checkHeaders(List<String> headers1, String... headers2) {
+        assertEquals(headers1.size(), headers2.length);
+        for (int i = 0; i < headers1.size(); i++) {
+            assertEquals(headers1.get(i), headers2[i]);
+        }
+    }
 
-                    if (entry.getValue() == null) {
-                        if (value != null) {
-                            rowMatch = false;
-                            break;
-                        } else {
-                            continue;
-                        }
-                    }
+    static void checkRowExists(ResultSet resultSet, Object... values) {
+        assertEquals(resultSet.getHeaders().size(), values.length);
 
-                    if (!entry.getValue().equals(value)) {
+        for (ResultRow row : resultSet.getRows()) {
+            boolean rowMatch = true;
+            for (int i = 0; i < resultSet.getHeaders().size(); i++) {
+                Object value = values[i];
+                Object resultValue = row.getObject(i);
+
+                if (value == null) {
+                    if (resultValue != null) {
                         rowMatch = false;
                         break;
+                    } else {
+                        continue;
                     }
                 }
-                if (rowMatch) {
-                    resultRow = row;
+                if (!value.equals(resultValue)) {
+                    rowMatch = false;
                     break;
                 }
             }
-            assertNotNull("Row not found!", resultRow);
-
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-            fail();
+            if (rowMatch) {
+                return;
+            }
         }
+        fail("Row not found: " +
+                Arrays.stream(values).map(obj -> String.valueOf(obj)).collect(
+                        Collectors.joining(", ", "{", "}")));
+
     }
 }

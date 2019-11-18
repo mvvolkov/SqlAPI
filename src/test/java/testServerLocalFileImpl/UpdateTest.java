@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -24,53 +22,18 @@ public class UpdateTest extends AbstractServerLocalFileTest {
         try {
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
-                    Collections.singletonList(AssignmentOperationFactory.assign("column4", ColumnExprFactory.value("updtd")))));
+                    Collections.singletonList(AssignmentOperationFactory
+                            .assign("column4", ColumnExprFactory.value("updtd")))));
 
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 10);
-            values.put("column2", 30);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 11);
-            values.put("column2", 31);
-            values.put("column3", "test2");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 12);
-            values.put("column2", 32);
-            values.put("column3", "test3");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 13);
-            values.put("column2", 33);
-            values.put("column3", "test2");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 15);
-            values.put("column2", 34);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 16);
-            values.put("column2", null);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 10, 30, "test1", "updtd");
+            checkRowExists(resultSet, 11, 31, "test2", "updtd");
+            checkRowExists(resultSet, 12, 32, "test3", "updtd");
+            checkRowExists(resultSet, 13, 33, "test2", "updtd");
+            checkRowExists(resultSet, 15, 34, "test1", "updtd");
+            checkRowExists(resultSet, 16, null, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -84,54 +47,20 @@ public class UpdateTest extends AbstractServerLocalFileTest {
         try {
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
-                    Arrays.asList(AssignmentOperationFactory.assign("column4", ColumnExprFactory.value("updtd")),
-                            AssignmentOperationFactory.assign("column2", ColumnExprFactory.value(37)))));
+                    Arrays.asList(AssignmentOperationFactory
+                                    .assign("column4", ColumnExprFactory.value("updtd")),
+                            AssignmentOperationFactory
+                                    .assign("column2", ColumnExprFactory.value(37)))));
 
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 10);
-            values.put("column2", 37);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 11);
-            values.put("column2", 37);
-            values.put("column3", "test2");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 12);
-            values.put("column2", 37);
-            values.put("column3", "test3");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 13);
-            values.put("column2", 37);
-            values.put("column3", "test2");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 15);
-            values.put("column2", 37);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 16);
-            values.put("column2", 37);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 10, 37, "test1", "updtd");
+            checkRowExists(resultSet, 11, 37, "test2", "updtd");
+            checkRowExists(resultSet, 12, 37, "test3", "updtd");
+            checkRowExists(resultSet, 13, 37, "test2", "updtd");
+            checkRowExists(resultSet, 15, 37, "test1", "updtd");
+            checkRowExists(resultSet, 16, 37, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -146,55 +75,21 @@ public class UpdateTest extends AbstractServerLocalFileTest {
         try {
 
             sqlServer.executeStatement(SqlQueryFactory.update("DB1", "table1",
-                    Arrays.asList(AssignmentOperationFactory.assign("column4", ColumnExprFactory.value("updtd")),
-                            AssignmentOperationFactory.assign("column2", ColumnExprFactory.value(37))),
+                    Arrays.asList(AssignmentOperationFactory
+                                    .assign("column4", ColumnExprFactory.value("updtd")),
+                            AssignmentOperationFactory
+                                    .assign("column2", ColumnExprFactory.value(37))),
                     PredicateFactory.isNull(ColumnExprFactory.columnRef("column4"))));
 
             ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getColumns().size());
+            assertEquals(4, resultSet.getHeaders().size());
             assertEquals(6, resultSet.getRows().size());
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("column1", 10);
-            values.put("column2", 30);
-            values.put("column3", "test1");
-            values.put("column4", "t21");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 11);
-            values.put("column2", 37);
-            values.put("column3", "test2");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 12);
-            values.put("column2", 32);
-            values.put("column3", "test3");
-            values.put("column4", "t43");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 13);
-            values.put("column2", 33);
-            values.put("column3", "test2");
-            values.put("column4", "t653");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 15);
-            values.put("column2", 37);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
-
-            values = new HashMap<>();
-            values.put("column1", 16);
-            values.put("column2", 37);
-            values.put("column3", "test1");
-            values.put("column4", "updtd");
-            checkRowExists(resultSet, values);
+            checkRowExists(resultSet, 10, 30, "test1", "t21");
+            checkRowExists(resultSet, 11, 37, "test2", "updtd");
+            checkRowExists(resultSet, 12, 32, "test3", "t43");
+            checkRowExists(resultSet, 13, 33, "test2", "t653");
+            checkRowExists(resultSet, 15, 37, "test1", "updtd");
+            checkRowExists(resultSet, 16, 37, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

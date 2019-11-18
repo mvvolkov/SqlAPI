@@ -191,7 +191,7 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static ResultSet getEmptyResultSet() {
         return new ResultSet() {
             @Override
-            public List<String> getColumns() {
+            public List<String> getHeaders() {
                 return Collections.EMPTY_LIST;
             }
 
