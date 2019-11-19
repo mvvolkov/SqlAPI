@@ -1,6 +1,7 @@
 package api.columnExpr;
 
 import api.misc.SelectedItem;
+import org.jetbrains.annotations.NotNull;
 
 public interface ColumnExpression extends SelectedItem {
 
@@ -15,9 +16,11 @@ public interface ColumnExpression extends SelectedItem {
         DIVIDE
     }
 
+    @NotNull
     default String getAlias() {
         return "";
     }
 
     ExprType getExprType();
+
 }

@@ -4,17 +4,13 @@ import api.metadata.ColumnMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ColumnMetadataImpl<T extends Comparable<T>>
-        implements ColumnMetadata<T> {
+public final class ColumnMetadataImpl implements ColumnMetadata {
 
     @NotNull
     private final String columnName;
 
     @NotNull
-    public final String typeName;
-
-    @NotNull
-    private final Class<T> javaClass;
+    public final SqlType sqlType;
 
     private final boolean isNotNull;
 
@@ -23,15 +19,14 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
     private final int size;
 
     @Nullable
-    private final T defaultValue;
+    private final Object defaultValue;
 
 
-    protected ColumnMetadataImpl(@NotNull Builder<T> builder) {
+    protected ColumnMetadataImpl(@NotNull Builder builder) {
         this.columnName = builder.columnName;
-        this.typeName = builder.typeName;
+        this.sqlType = builder.sqlType;
         this.isNotNull = builder.isNotNull;
         this.isPrimaryKey = builder.isPrimaryKey;
-        this.javaClass = builder.javaClass;
         this.size = builder.size;
         this.defaultValue = builder.defaultValue;
     }
@@ -44,8 +39,8 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
 
     @NotNull
     @Override
-    public String getSqlTypeName() {
-        return typeName;
+    public SqlType getSqlType() {
+        return sqlType;
     }
 
     @Override
@@ -62,7 +57,7 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
     public String toString() {
         StringBuilder sb = new StringBuilder(columnName);
         sb.append(" ");
-        sb.append(this.getSqlTypeName());
+        sb.append(this.getSqlType());
         if (this.getSize() != -1) {
             sb.append("(");
             sb.append(this.getSize());
@@ -82,32 +77,23 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
     }
 
 
-    @NotNull
-    @Override
-    public Class<T> getJavaClass() {
-        return javaClass;
-    }
-
     @Override
     public int getSize() {
         return size;
     }
 
     @Override
-    public T getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 
-    public static class Builder<T extends Comparable<T>> {
+    public static class Builder {
 
         @NotNull
         private final String columnName;
 
         @NotNull
-        private final String typeName;
-
-        @NotNull
-        private Class<T> javaClass;
+        private final SqlType sqlType;
 
         private boolean isNotNull = false;
 
@@ -116,19 +102,16 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
         private int size = -1;
 
         @NotNull
-        private T defaultValue;
+        private Object defaultValue;
 
 
-        public Builder(@NotNull String columnName, @NotNull String typeName,
-                       @NotNull Class javaClass) {
+        public Builder(@NotNull String columnName, @NotNull SqlType sqlType) {
             this.columnName = columnName;
-            this.typeName = typeName;
-            this.javaClass = javaClass;
+            this.sqlType = sqlType;
         }
 
-        public Builder(@NotNull String columnName, @NotNull String typeName,
-                       @NotNull Class javaClass, int size) {
-            this(columnName, typeName, javaClass);
+        public Builder(@NotNull String columnName, @NotNull SqlType sqlType, int size) {
+            this(columnName, sqlType);
             this.size = size;
         }
 
@@ -142,14 +125,14 @@ public final class ColumnMetadataImpl<T extends Comparable<T>>
             return this;
         }
 
-        public Builder defaultValue(T defaultValue) {
+        public Builder defaultValue(Object defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
 
-        public ColumnMetadataImpl<T> build() {
-            return new ColumnMetadataImpl<T>(this);
+        public ColumnMetadataImpl build() {
+            return new ColumnMetadataImpl(this);
         }
     }
 }

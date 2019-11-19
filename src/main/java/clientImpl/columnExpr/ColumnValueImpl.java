@@ -1,21 +1,20 @@
 package clientImpl.columnExpr;
 
 import api.columnExpr.ColumnValue;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {
 
-    @NotNull
+    @Nullable
     private final Object value;
 
 
-    public ColumnValueImpl(@NotNull Object value, @Nullable String alias) {
+    public ColumnValueImpl(@Nullable Object value, @Nullable String alias) {
         super(ExprType.COLUMN_VALUE, alias);
         this.value = value;
     }
 
-    @NotNull
+    @Nullable
     @Override
     public Object getValue() {
         return value;

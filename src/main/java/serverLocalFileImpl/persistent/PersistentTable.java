@@ -28,15 +28,14 @@ public final class PersistentTable implements Serializable {
 
     private final List<PersistentRow> rows = new ArrayList<>();
 
-
     public PersistentTable(String schemaName, String tableName,
-                           List<ColumnMetadata<?>> columns) {
+                           List<ColumnMetadata> columns) throws WrongValueTypeException {
         this.schemaName = schemaName;
         this.tableName = tableName;
         for (ColumnMetadata c : columns) {
             this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
-                    c.getSqlTypeName(), c.getJavaClass(), c.isNotNull(),
-                    c.isPrimaryKey(), c.getSize(), c.getDefaultValue()));
+                    c.getSqlType(), c.isNotNull(),
+                    c.isPrimaryKey(), c.getSize(), c.getDefaultValue(), this));
         }
     }
 
@@ -141,15 +140,13 @@ public final class PersistentTable implements Serializable {
                                   Object newValue)
             throws WrongValueTypeException, ConstraintException {
 
+        cm.checkValueType(newValue);
+
         if (newValue == null && cm.isNotNull()) {
             throw new ConstraintException(schemaName, tableName,
                     cm.getColumnName(), "NOT NULL");
         }
-        if (newValue != null && !cm.getJavaClass().isInstance(newValue)) {
-            throw new WrongValueTypeException(
-                    this.createColumnRef(cm.getColumnName()),
-                    cm.getJavaClass(), newValue.getClass());
-        }
+
         if (cm.isPrimaryKey()) {
             for (PersistentRow row : rows) {
                 if (row.getValue(cm.getColumnName()).equals(newValue)) {

@@ -2,7 +2,6 @@ package testServerLocalFileImpl;
 
 import api.connect.SqlServer;
 import api.exceptions.SqlException;
-import api.metadata.ColumnMetadata;
 import api.selectResult.ResultRow;
 import api.selectResult.ResultSet;
 import clientImpl.metadata.MetadataFactory;
@@ -15,7 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public abstract class AbstractServerLocalFileTest {
 
@@ -31,7 +31,7 @@ public abstract class AbstractServerLocalFileTest {
 
             // Create a table
             sqlServer.executeStatement(SqlQueryFactory
-                    .createTable("DB1", "table1", Arrays.<ColumnMetadata<?>>asList(
+                    .createTable("DB1", "table1", Arrays.asList(
                             MetadataFactory.integerBuilder("column1").notNull()
                                     .primaryKey().build(),
                             MetadataFactory.integerBuilder("column2").defaultValue(15)
@@ -59,7 +59,7 @@ public abstract class AbstractServerLocalFileTest {
             // Create a table
             sqlServer.executeStatement(
                     SqlQueryFactory.createTable("DB1", "table2",
-                            Arrays.<ColumnMetadata<?>>asList(
+                            Arrays.asList(
                                     MetadataFactory.integerBuilder("column5")
                                             .notNull().primaryKey().build(),
                                     MetadataFactory.varcharBuilder("column3", 15)

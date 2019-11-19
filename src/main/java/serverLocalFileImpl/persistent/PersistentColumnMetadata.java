@@ -1,6 +1,12 @@
 package serverLocalFileImpl.persistent;
 
+import api.exceptions.WrongValueTypeException;
+import api.metadata.ColumnMetadata;
+import serverLocalFileImpl.ColumnRefImpl;
+
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 
 public final class PersistentColumnMetadata implements Serializable {
 
@@ -8,9 +14,7 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final String columnName;
 
-    private final String sqlTypeName;
-
-    private final Class javaClass;
+    private final ColumnMetadata.SqlType sqlType;
 
     private final boolean isNotNull;
 
@@ -20,25 +24,50 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final Object defaultValue;
 
-    public PersistentColumnMetadata(String columnName, String sqlTypeName,
-                                    Class javaClass, boolean isNotNull,
-                                    boolean isPrimaryKey, int size, Object defaultValue) {
+    private final PersistentTable table;
+
+    public PersistentColumnMetadata(String columnName, ColumnMetadata.SqlType sqlType, boolean isNotNull,
+                                    boolean isPrimaryKey, int size, Object defaultValue, PersistentTable table)
+            throws WrongValueTypeException {
         this.columnName = columnName;
-        this.sqlTypeName = sqlTypeName;
-        this.javaClass = javaClass;
+        this.sqlType = sqlType;
         this.isNotNull = isNotNull;
         this.isPrimaryKey = isPrimaryKey;
         this.size = size;
+        this.table = table;
+        this.checkValueType(defaultValue);
         this.defaultValue = defaultValue;
+
+    }
+
+    public Collection<Class<?>> getAllowedJavaTypes() {
+        switch (sqlType) {
+            case INTEGER:
+                return Collections.singletonList(Integer.class);
+            case VARCHAR:
+                return Collections.singletonList(String.class);
+            default:
+                return Collections.emptyList();
+        }
+    }
+
+    public void checkValueType(Object value) throws WrongValueTypeException {
+        if (value == null) {
+            return;
+        }
+        for (Class cl : this.getAllowedJavaTypes()) {
+            if (cl.isInstance(value)) {
+                return;
+            }
+        }
+        throw new WrongValueTypeException(new ColumnRefImpl("dbo", table.getTableName(), columnName),
+                this.getAllowedJavaTypes(), value.getClass());
     }
 
     public String getColumnName() {
         return columnName;
     }
 
-    public Class getJavaClass() {
-        return javaClass;
-    }
 
     public boolean isNotNull() {
         return isNotNull;
@@ -52,11 +81,13 @@ public final class PersistentColumnMetadata implements Serializable {
         return size;
     }
 
-    public String getSqlTypeName() {
-        return sqlTypeName;
+    public ColumnMetadata.SqlType getSqlType() {
+        return sqlType;
     }
 
     public Object getDefaultValue() {
         return defaultValue;
     }
+
+
 }

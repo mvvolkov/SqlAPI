@@ -16,12 +16,14 @@ public final class ColumnRefImpl implements ColumnRef {
     @NotNull
     private final String columnName;
 
+
     public ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
                          @NotNull String columnName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
+
 
     public ColumnRefImpl(@NotNull String tableName,
                          @NotNull String columnName) {

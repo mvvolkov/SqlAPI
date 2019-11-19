@@ -10,7 +10,8 @@ public interface AggregateFunction extends ColumnExpression {
         MIN
     }
 
-    @Override default ExprType getExprType() {
+    @Override
+    default ExprType getExprType() {
         return ExprType.AGGR_FUNC;
     }
 

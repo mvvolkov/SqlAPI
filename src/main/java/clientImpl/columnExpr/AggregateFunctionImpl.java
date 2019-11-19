@@ -2,6 +2,7 @@ package clientImpl.columnExpr;
 
 import api.columnExpr.AggregateFunction;
 import api.columnExpr.ColumnRef;
+import org.jetbrains.annotations.NotNull;
 
 public final class AggregateFunctionImpl extends ColumnExprImpl
         implements AggregateFunction {
@@ -20,19 +21,24 @@ public final class AggregateFunctionImpl extends ColumnExprImpl
         this.alias = alias;
     }
 
-    @Override public ColumnRef getColumnRef() {
+    @Override
+    public ColumnRef getColumnRef() {
         return column;
     }
 
-    @Override public String getAlias() {
+    @NotNull
+    @Override
+    public String getAlias() {
         return alias;
     }
 
-    @Override public Type getType() {
+    @Override
+    public Type getType() {
         return type;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         switch (type) {
             case COUNT:

@@ -1,16 +1,19 @@
 package api.metadata;
 
-public interface ColumnMetadata<V extends Comparable<V>> {
+public interface ColumnMetadata {
+
+    enum SqlType {
+        INTEGER,
+        VARCHAR
+    }
 
     String getColumnName();
 
-    String getSqlTypeName();
+    SqlType getSqlType();
 
     boolean isNotNull();
 
     boolean isPrimaryKey();
-
-    Class<V> getJavaClass();
 
     default int getSize() {
         return -1;

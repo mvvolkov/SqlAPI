@@ -7,7 +7,7 @@ import java.util.List;
 public interface CreateTableStatement extends SqlStatement {
 
 
-    List<ColumnMetadata<?>> getColumns();
+    List<ColumnMetadata> getColumns();
 
     @Override
     default Type getType() {

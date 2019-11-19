@@ -2,7 +2,6 @@ package clientImpl.columnExpr;
 
 import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
@@ -51,8 +50,9 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
         return schemaName;
     }
 
+    @NotNull
     @Override
-    public @Nullable String getAlias() {
+    public String getAlias() {
         return alias.isEmpty() ? columnName : alias;
     }
 

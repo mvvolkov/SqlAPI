@@ -35,13 +35,13 @@ public class ColumnExprFactory {
     }
 
     public static ColumnRefImpl columnRef(@NotNull String schemaName,
-                                          @NotNull String tableName,
-                                          @NotNull String columnName) {
+                                                                    @NotNull String tableName,
+                                                                    @NotNull String columnName) {
         return new ColumnRefImpl(schemaName, tableName, columnName, "");
     }
 
     public static ColumnRefImpl columnRef(@NotNull String tableName,
-                                          @NotNull String columnName) {
+                                                                    @NotNull String columnName) {
         return new ColumnRefImpl(tableName, columnName, "");
     }
 
@@ -50,24 +50,7 @@ public class ColumnExprFactory {
     }
 
 
-    public static ColumnValue integer(Integer value, String alias) {
-        return new ColumnValueImpl(value, alias);
-    }
-
-    public static ColumnValue integer(Integer value) {
-        return new ColumnValueImpl(value, "");
-    }
-
-    public static ColumnValue string(String value, String alias) {
-        return new ColumnValueImpl(value, alias);
-    }
-
-    public static ColumnValue string(String value) {
-        return new ColumnValueImpl(value, "");
-    }
-
-
-    public static BinaryColumnExpression sum(ColumnExpression leftOperand,
+    public static <T extends Comparable<T>> BinaryColumnExpression sum(ColumnExpression leftOperand,
                                              ColumnExpression rightOperand,
                                              String alias) {
         return new BinaryColumnExprImpl(ColumnExpression.ExprType.SUM, leftOperand,

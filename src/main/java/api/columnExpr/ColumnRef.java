@@ -1,5 +1,7 @@
 package api.columnExpr;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface ColumnRef extends ColumnExpression {
 
     String getColumnName();
@@ -8,7 +10,9 @@ public interface ColumnRef extends ColumnExpression {
 
     String getSchemaName();
 
-    @Override default String getAlias() {
+    @NotNull
+    @Override
+    default String getAlias() {
         return getColumnName();
     }
 

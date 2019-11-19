@@ -3,6 +3,9 @@ package api.exceptions;
 import api.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,15 +16,15 @@ public final class WrongValueTypeException extends SqlException {
     private final ColumnRef columnRef;
 
     @NotNull
-    private final Class expectedClass;
+    private final Collection<Class<?>> allowedTypes;
 
     @NotNull
-    private final Class actualClass;
+    private final Class<?> actualType;
 
-    public WrongValueTypeException(ColumnRef columnRef, Class expectedClass, Class actualClass) {
+    public WrongValueTypeException(ColumnRef columnRef, Collection<Class<?>> allowedTypes, Class actualType) {
         this.columnRef = columnRef;
-        this.expectedClass = expectedClass;
-        this.actualClass = actualClass;
+        this.allowedTypes = allowedTypes;
+        this.actualType = actualType;
     }
 
     @Override
@@ -32,9 +35,13 @@ public final class WrongValueTypeException extends SqlException {
                 .collect(Collectors.joining("."));
         sb.append(fullName);
         sb.append("; Expected: ");
-        sb.append(expectedClass.getSimpleName());
+        List<String> classNames = new ArrayList<>();
+        for (Class<?> cl : allowedTypes) {
+            classNames.add(cl.getSimpleName());
+        }
+        sb.append(classNames.stream().collect(Collectors.joining(", ")));
         sb.append("; Actual: ");
-        sb.append(actualClass.getSimpleName());
+        sb.append(actualType.getSimpleName());
         return sb.toString();
     }
 
@@ -42,11 +49,11 @@ public final class WrongValueTypeException extends SqlException {
         return columnRef;
     }
 
-    public Class getExpectedClass() {
-        return expectedClass;
+    public Collection<Class<?>> getAllowedTypes() {
+        return allowedTypes;
     }
 
-    public Class getActualClass() {
-        return actualClass;
+    public Class getActualType() {
+        return actualType;
     }
 }

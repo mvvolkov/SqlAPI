@@ -1,6 +1,5 @@
 import api.connect.SqlServer;
 import api.exceptions.SqlException;
-import api.metadata.ColumnMetadata;
 import api.selectResult.ResultRow;
 import api.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
@@ -28,7 +27,7 @@ public class TestServerLocalFileImpl {
             sqlServer.createDatabase("DB1");
 
             sqlServer.executeStatement(SqlQueryFactory
-                    .createTable("DB1", "table1", Arrays.<ColumnMetadata<?>>asList(
+                    .createTable("DB1", "table1", Arrays.asList(
                             MetadataFactory.integerBuilder("column1").notNull()
                                     .primaryKey().build(),
                             MetadataFactory.integerBuilder("column2").defaultValue(15)
@@ -58,7 +57,7 @@ public class TestServerLocalFileImpl {
 
             sqlServer.executeStatement(
                     SqlQueryFactory.createTable("DB1", "table2",
-                            Arrays.<ColumnMetadata<?>>asList(
+                            Arrays.asList(
                                     MetadataFactory.integerBuilder("column4")
                                             .notNull().primaryKey().build(),
                                     MetadataFactory.varcharBuilder("column3", 15)
@@ -99,7 +98,7 @@ public class TestServerLocalFileImpl {
                                                                                     .columnRef(
                                                                                             "column4"),
                                                                             ColumnExprFactory
-                                                                                    .integer(
+                                                                                    .value(
                                                                                             10))))))));
 
             System.out.println("");
@@ -111,11 +110,11 @@ public class TestServerLocalFileImpl {
                                                             .columnRef("column1"),
                                                     Arrays.asList(
                                                             ColumnExprFactory
-                                                                    .integer(15),
+                                                                    .value(15),
                                                             ColumnExprFactory
-                                                                    .integer(12),
+                                                                    .value(12),
                                                             ColumnExprFactory
-                                                                    .integer(13)
+                                                                    .value(13)
                                                     )
                                             ))));
 
@@ -148,7 +147,7 @@ public class TestServerLocalFileImpl {
                                             .equals(ColumnExprFactory.columnRef(
                                                     "column2"),
                                                     ColumnExprFactory
-                                                            .integer(30))))));
+                                                            .value(30))))));
 
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table2",
                     SqlQueryFactory.select(TableRefFactory.dbTable("DB1", "table1"),
@@ -189,7 +188,7 @@ public class TestServerLocalFileImpl {
                     TableRefFactory.dbTable("DB1", "table2"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.sum(ColumnExprFactory.countAll(),
-                                    ColumnExprFactory.integer(1), "C1")),
+                                    ColumnExprFactory.value(1), "C1")),
                     Collections
                             .singletonList(ColumnExprFactory.columnRef("column3")))));
 

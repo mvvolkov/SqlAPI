@@ -12,6 +12,7 @@ import clientImpl.tableRef.TableRefFactory;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -76,8 +77,8 @@ public class InsertTest extends AbstractServerLocalFileTest {
         } catch (WrongValueTypeException wvte) {
             assertEquals("table1", wvte.getColumnRef().getTableName());
             assertEquals("column3", wvte.getColumnRef().getColumnName());
-            assertEquals("String", wvte.getExpectedClass().getSimpleName());
-            assertEquals("Integer", wvte.getActualClass().getSimpleName());
+            assertEquals("String", wvte.getAllowedTypes().stream().map(Class::getSimpleName).collect(Collectors.joining(", ")));
+            assertEquals("Integer", wvte.getActualType().getSimpleName());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());

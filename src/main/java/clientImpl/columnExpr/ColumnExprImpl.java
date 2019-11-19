@@ -5,13 +5,14 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class ColumnExprImpl implements ColumnExpression {
 
-    @NotNull
-    protected final ExprType exprType;
 
     @NotNull
-    protected final String alias;
+    final ExprType exprType;
 
-    protected ColumnExprImpl(@NotNull ExprType exprType, @NotNull String alias) {
+    @NotNull
+    final String alias;
+
+    ColumnExprImpl(@NotNull ExprType exprType, @NotNull String alias) {
         this.exprType = exprType;
         this.alias = alias;
     }

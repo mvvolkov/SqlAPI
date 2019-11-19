@@ -10,7 +10,6 @@ import serverLocalFileImpl.SqlServerImpl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class PersistentDatabase implements Serializable {
 
@@ -71,16 +70,15 @@ public class PersistentDatabase implements Serializable {
 
 
     private void createTable(CreateTableStatement stmt)
-            throws TableAlreadyExistsException, NoSuchSchemaException {
+            throws TableAlreadyExistsException, NoSuchSchemaException, WrongValueTypeException {
         PersistentSchema schema = this.getCurrentSchema();
         PersistentTable table = schema.getTableOrNull(stmt.getTableName());
         if (table != null) {
             throw new TableAlreadyExistsException(schema.getName(),
                     stmt.getTableName());
         }
-        schema.addTable(
-                new PersistentTable(schema.getName(), stmt.getTableName(),
-                        stmt.getColumns()));
+        schema.addTable(new PersistentTable(schema.getName(), stmt.getTableName(),
+                stmt.getColumns()));
     }
 
     private void insert(InsertStatement stmt)
