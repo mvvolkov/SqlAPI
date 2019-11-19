@@ -1,6 +1,6 @@
 package clientImpl.predicates;
 
-import api.predicates.Predicate;
+import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class PredicateImpl implements Predicate {

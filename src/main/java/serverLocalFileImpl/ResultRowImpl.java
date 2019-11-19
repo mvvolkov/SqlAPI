@@ -1,10 +1,8 @@
 package serverLocalFileImpl;
 
-import api.exceptions.NoSuchColumnException;
-import api.selectResult.ResultRow;
+import sqlapi.selectResult.ResultRow;
 
 import java.util.List;
-import java.util.Map;
 
 public final class ResultRowImpl implements ResultRow {
 

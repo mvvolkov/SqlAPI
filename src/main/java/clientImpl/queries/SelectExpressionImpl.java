@@ -1,10 +1,10 @@
 package clientImpl.queries;
 
-import api.columnExpr.ColumnRef;
-import api.queries.SelectExpression;
-import api.misc.SelectedItem;
-import api.tables.TableReference;
-import api.predicates.Predicate;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.queries.SelectExpression;
+import sqlapi.misc.SelectedItem;
+import sqlapi.tables.TableReference;
+import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package clientImpl.misc;
 
-import api.columnExpr.ColumnExpression;
-import api.misc.AssignmentOperation;
+import sqlapi.columnExpr.ColumnExpression;
+import sqlapi.misc.AssignmentOperation;
 
 public class AssignmentOperationFactory {
 

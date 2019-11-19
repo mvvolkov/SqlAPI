@@ -1,6 +1,6 @@
 package clientImpl.queries;
 
-import api.queries.SqlStatement;
+import sqlapi.queries.SqlStatement;
 
 public abstract class AbstractSqlStatement implements SqlStatement {
 

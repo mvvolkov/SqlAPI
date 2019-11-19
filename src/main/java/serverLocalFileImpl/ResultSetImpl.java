@@ -1,7 +1,7 @@
 package serverLocalFileImpl;
 
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
 
 import java.util.List;
 

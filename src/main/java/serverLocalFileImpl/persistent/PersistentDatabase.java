@@ -1,11 +1,10 @@
 package serverLocalFileImpl.persistent;
 
-import api.exceptions.*;
-import api.queries.*;
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
-import org.jetbrains.annotations.NotNull;
 import serverLocalFileImpl.SqlServerImpl;
+import sqlapi.exceptions.*;
+import sqlapi.queries.*;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class PersistentDatabase implements Serializable {
 
     private final Collection<PersistentSchema> schemas = new ArrayList<>();
 
-    private final PersistentSchema defaultSchema;
+    private PersistentSchema defaultSchema;
 
     private final transient SqlServerImpl sqlServer;
 
@@ -38,10 +37,21 @@ public class PersistentDatabase implements Serializable {
         return defaultSchema;
     }
 
-    public void createSchema(String schemaName) throws DatabaseAlreadyExistsException {
+    public void setCurrentSchema(String schemaName) throws NoSuchSchemaException {
         for (PersistentSchema schema : schemas) {
             if (schema.getName().equals(schemaName)) {
-                throw new DatabaseAlreadyExistsException(schemaName);
+                defaultSchema = schema;
+                return;
+            }
+        }
+        throw new NoSuchSchemaException(name, schemaName);
+    }
+
+    public void createSchema(String schemaName)
+            throws SchemaAlreadyExistsException {
+        for (PersistentSchema schema : schemas) {
+            if (schema.getName().equals(schemaName)) {
+                throw new SchemaAlreadyExistsException(name, schemaName);
             }
         }
         schemas.add(new PersistentSchema(schemaName));
@@ -70,7 +80,7 @@ public class PersistentDatabase implements Serializable {
 
 
     private void createTable(CreateTableStatement stmt)
-            throws TableAlreadyExistsException, NoSuchSchemaException, WrongValueTypeException {
+            throws TableAlreadyExistsException, WrongValueTypeException {
         PersistentSchema schema = this.getCurrentSchema();
         PersistentTable table = schema.getTableOrNull(stmt.getTableName());
         if (table != null) {
@@ -109,19 +119,8 @@ public class PersistentDatabase implements Serializable {
     }
 
     private PersistentTable getTable(SqlStatement stmt)
-            throws NoSuchSchemaException, NoSuchTableException {
+            throws NoSuchTableException {
         return this.getCurrentSchema().getTable(stmt.getTableName());
-    }
-
-
-    private @NotNull PersistentSchema getSchema(String schemaName)
-            throws NoSuchSchemaException {
-        for (PersistentSchema schema : schemas) {
-            if (schema.getName().equals(schemaName)) {
-                return schema;
-            }
-        }
-        throw new NoSuchSchemaException(schemaName);
     }
 
 
@@ -135,7 +134,7 @@ public class PersistentDatabase implements Serializable {
                 return schema.getTable(tableName);
             }
         }
-        throw new NoSuchSchemaException(schemaName);
+        throw new NoSuchSchemaException(name, schemaName);
     }
 
 

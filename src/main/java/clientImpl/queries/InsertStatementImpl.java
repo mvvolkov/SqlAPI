@@ -1,6 +1,6 @@
 package clientImpl.queries;
 
-import api.queries.InsertStatement;
+import sqlapi.queries.InsertStatement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

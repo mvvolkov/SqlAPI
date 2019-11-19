@@ -1,20 +1,20 @@
 package serverLoggerImpl;
 
-import api.columnExpr.ColumnExpression;
-import api.columnExpr.ColumnRef;
-import api.connect.SqlServer;
-import api.exceptions.*;
-import api.metadata.ColumnMetadata;
-import api.metadata.TableMetadata;
-import api.misc.AssignmentOperation;
-import api.queries.*;
-import api.misc.SelectedItem;
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
-import api.tables.DatabaseTableReference;
-import api.tables.JoinedTableReference;
-import api.tables.TableFromSelectReference;
-import api.tables.TableReference;
+import sqlapi.columnExpr.ColumnExpression;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.server.SqlServer;
+import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.metadata.TableMetadata;
+import sqlapi.misc.AssignmentOperation;
+import sqlapi.queries.*;
+import sqlapi.misc.SelectedItem;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
+import sqlapi.tables.DatabaseTableReference;
+import sqlapi.tables.JoinedTableReference;
+import sqlapi.tables.TableFromSelectReference;
+import sqlapi.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -47,8 +47,16 @@ public class SqlServerLoggerImpl implements SqlServer {
     }
 
     @Override
-    public void createDatabase(String dbName) throws DatabaseAlreadyExistsException {
+    public void createDatabase(String dbName) {
         System.out.println("CREATE DATABASE " + dbName);
+    }
+
+    @Override public void createSchema(String dbName, String schemaName) {
+        System.out.println("CREATE SCHEMA " + dbName + "." + schemaName);
+    }
+
+    @Override public void setCurrentSchema(String dbName, String schemaName) {
+        System.out.println("SET CURRENT SCHEMA = " + dbName + "." + schemaName);
     }
 
     @Override
@@ -221,7 +229,8 @@ public class SqlServerLoggerImpl implements SqlServer {
         if (btr.getSchemaName().isEmpty()) {
             return btr.getDatabaseName() + "." + btr.getTableName();
         }
-        return btr.getDatabaseName() + "." + btr.getSchemaName() + "." + btr.getTableName();
+        return btr.getDatabaseName() + "." + btr.getSchemaName() + "." +
+                btr.getTableName();
     }
 
     private static String getTableFromSelectString(TableFromSelectReference tsr) {

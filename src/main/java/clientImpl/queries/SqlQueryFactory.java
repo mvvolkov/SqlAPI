@@ -1,12 +1,12 @@
 package clientImpl.queries;
 
-import api.columnExpr.ColumnRef;
-import api.misc.AssignmentOperation;
-import api.misc.SelectedItem;
-import api.tables.TableReference;
-import api.metadata.ColumnMetadata;
-import api.predicates.Predicate;
-import api.queries.*;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.misc.AssignmentOperation;
+import sqlapi.misc.SelectedItem;
+import sqlapi.tables.TableReference;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.predicates.Predicate;
+import sqlapi.queries.*;
 import clientImpl.predicates.PredicateFactory;
 
 import java.util.Collections;

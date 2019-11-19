@@ -1,7 +1,7 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.BinaryColumnExpression;
-import api.columnExpr.ColumnExpression;
+import sqlapi.columnExpr.BinaryColumnExpression;
+import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
 public final class BinaryColumnExprImpl extends ColumnExprImpl

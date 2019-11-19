@@ -1,8 +1,8 @@
 package clientImpl.predicates;
 
-import api.columnExpr.ColumnRef;
-import api.columnExpr.ColumnValue;
-import api.predicates.ColumnInPredicate;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.columnExpr.ColumnValue;
+import sqlapi.predicates.ColumnInPredicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

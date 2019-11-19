@@ -1,6 +1,6 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.ColumnExpression;
+import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ColumnExprImpl implements ColumnExpression {

@@ -1,7 +1,7 @@
 package clientImpl.predicates;
 
-import api.columnExpr.ColumnExpression;
-import api.predicates.BinaryPredicate;
+import sqlapi.columnExpr.ColumnExpression;
+import sqlapi.predicates.BinaryPredicate;
 import org.jetbrains.annotations.NotNull;
 
 public final class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate {

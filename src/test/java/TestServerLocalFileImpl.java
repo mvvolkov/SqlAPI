@@ -1,13 +1,13 @@
-import api.connect.SqlServer;
-import api.exceptions.SqlException;
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
+import sqlapi.server.SqlServer;
+import sqlapi.exceptions.SqlException;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
-import sqlFactory.SqlManagerFactory;
+import ServerFactory.SqlManagerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;

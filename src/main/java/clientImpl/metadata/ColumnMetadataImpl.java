@@ -1,8 +1,9 @@
 package clientImpl.metadata;
 
-import api.metadata.ColumnMetadata;
+import sqlapi.metadata.ColumnMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sqlapi.metadata.SqlType;
 
 public final class ColumnMetadataImpl implements ColumnMetadata {
 

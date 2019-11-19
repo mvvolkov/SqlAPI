@@ -1,14 +1,14 @@
 package serverLocalFileImpl.persistent;
 
-import api.columnExpr.ColumnRef;
-import api.exceptions.*;
-import api.metadata.ColumnMetadata;
-import api.misc.AssignmentOperation;
-import api.predicates.Predicate;
-import api.queries.UpdateStatement;
-import serverLocalFileImpl.ColumnRefImpl;
-import serverLocalFileImpl.InternalResultRow;
-import serverLocalFileImpl.InternalResultSet;
+import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.metadata.SqlType;
+import sqlapi.misc.AssignmentOperation;
+import sqlapi.predicates.Predicate;
+import sqlapi.queries.UpdateStatement;
+import serverLocalFileImpl.intermediateresult.DataHeader;
+import serverLocalFileImpl.intermediateresult.DataRow;
+import serverLocalFileImpl.intermediateresult.DataSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,7 +47,8 @@ public final class PersistentTable implements Serializable {
         return columns;
     }
 
-    private PersistentColumnMetadata getColumnMetadate(String columnName) throws NoSuchColumnException {
+    private PersistentColumnMetadata getColumnMetadate(String columnName)
+            throws NoSuchColumnException {
         for (PersistentColumnMetadata cm : columns) {
             if (cm.getColumnName().equals(columnName)) {
                 return cm;
@@ -102,7 +103,7 @@ public final class PersistentTable implements Serializable {
         }
         List<PersistentRow> rowsToDelete = new ArrayList<>();
         for (PersistentRow row : rows) {
-            if (this.getInternalResultRow(row).matchPredicate(predicate)) {
+            if (this.getDataRow(row).evaluatePredicate(predicate)) {
                 rowsToDelete.add(row);
             }
         }
@@ -113,8 +114,8 @@ public final class PersistentTable implements Serializable {
             throws SqlException {
 
         for (PersistentRow row : rows) {
-            InternalResultRow irr = this.getInternalResultRow(row);
-            if (irr.matchPredicate(stmt.getPredicate())) {
+            DataRow irr = this.getDataRow(row);
+            if (irr.evaluatePredicate(stmt.getPredicate())) {
                 for (AssignmentOperation ao : stmt.getAssignmentOperations()) {
                     String columnName = ao.getColumnName();
                     Object newValue = irr.evaluateColumnExpr(ao.getValue());
@@ -126,13 +127,13 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    private InternalResultRow getInternalResultRow(PersistentRow row) {
-        Map<ColumnRef, Object> values = new HashMap<>();
-        for (String columnName : row.getValues().keySet()) {
-            values.put(this.createColumnRef(columnName),
-                    row.getValues().get(columnName));
+    private DataRow getDataRow(PersistentRow row) {
+        Map<DataHeader, Object> values = new HashMap<>();
+        for (PersistentColumnMetadata cm : columns) {
+            values.put(this.createColumnRef(cm.getColumnName(), cm.getSqlType()),
+                    row.getValues().get(cm.getColumnName()));
         }
-        return new InternalResultRow(values);
+        return new DataRow(values);
     }
 
 
@@ -165,20 +166,22 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    public InternalResultSet getData() {
-        List<ColumnRef> resultColumns = new ArrayList<>();
+    public DataSet getData() {
+        List<DataHeader> headers = new ArrayList<>();
         for (PersistentColumnMetadata column : columns) {
-            resultColumns.add(this.createColumnRef(column.getColumnName()));
+            headers.add(
+                    this.createColumnRef(column.getColumnName(), column.getSqlType()));
         }
-        List<InternalResultRow> resultRows = new ArrayList<>();
+        List<DataRow> resultRows = new ArrayList<>();
         for (PersistentRow row : rows) {
-            resultRows.add(this.getInternalResultRow(row));
+            resultRows.add(this.getDataRow(row));
         }
-        return new InternalResultSet(resultColumns, resultRows);
+        return new DataSet(headers, resultRows);
     }
 
-    private ColumnRef createColumnRef(String columnName) {
-        return new ColumnRefImpl(schemaName, tableName, columnName);
+    private DataHeader createColumnRef(String columnName,
+                                       SqlType sqlType) {
+        return new DataHeader(sqlType, schemaName, tableName, columnName);
     }
 
 }

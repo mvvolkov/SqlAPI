@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
-import api.queries.InsertFromSelectStatement;
-import api.queries.SelectExpression;
+import sqlapi.queries.InsertFromSelectStatement;
+import sqlapi.queries.SelectExpression;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

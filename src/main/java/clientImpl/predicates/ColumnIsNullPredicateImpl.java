@@ -1,12 +1,8 @@
 package clientImpl.predicates;
 
-import api.columnExpr.ColumnRef;
-import api.columnExpr.ColumnValue;
-import api.predicates.ColumnInPredicate;
-import api.predicates.ColumnIsNullPredicate;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.predicates.ColumnIsNullPredicate;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public final class ColumnIsNullPredicateImpl extends PredicateImpl
         implements ColumnIsNullPredicate {

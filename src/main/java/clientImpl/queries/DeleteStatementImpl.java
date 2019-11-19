@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
-import api.queries.DeleteStatement;
-import api.predicates.Predicate;
+import sqlapi.queries.DeleteStatement;
+import sqlapi.predicates.Predicate;
 
 public class DeleteStatementImpl extends AbstractSqlStatement implements DeleteStatement {
 

@@ -1,8 +1,8 @@
 package clientImpl.metadata;
 
 import org.jetbrains.annotations.NotNull;
-import api.metadata.ColumnMetadata;
-import api.metadata.TableMetadata;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.metadata.TableMetadata;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,6 +1,6 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.*;
+import sqlapi.columnExpr.*;
 import org.jetbrains.annotations.NotNull;
 
 public class ColumnExprFactory {

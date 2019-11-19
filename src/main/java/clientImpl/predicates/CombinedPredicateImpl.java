@@ -1,7 +1,7 @@
 package clientImpl.predicates;
 
-import api.predicates.CombinedPredicate;
-import api.predicates.Predicate;
+import sqlapi.predicates.CombinedPredicate;
+import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
 public final class CombinedPredicateImpl extends PredicateImpl

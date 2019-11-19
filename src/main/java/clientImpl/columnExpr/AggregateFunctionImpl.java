@@ -1,7 +1,7 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.AggregateFunction;
-import api.columnExpr.ColumnRef;
+import sqlapi.columnExpr.AggregateFunction;
+import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
 public final class AggregateFunctionImpl extends ColumnExprImpl

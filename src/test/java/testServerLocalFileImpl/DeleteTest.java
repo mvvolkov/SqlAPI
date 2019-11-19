@@ -1,7 +1,7 @@
 package testServerLocalFileImpl;
 
-import api.exceptions.SqlException;
-import api.selectResult.ResultSet;
+import sqlapi.exceptions.SqlException;
+import sqlapi.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;

@@ -1,6 +1,6 @@
 package clientImpl.tableRef;
 
-import api.tables.DatabaseTableReference;
+import sqlapi.tables.DatabaseTableReference;
 import org.jetbrains.annotations.NotNull;
 
 public final class DatabaseTableReferenceImpl implements DatabaseTableReference {

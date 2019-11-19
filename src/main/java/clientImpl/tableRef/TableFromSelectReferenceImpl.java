@@ -1,7 +1,7 @@
 package clientImpl.tableRef;
 
-import api.queries.SelectExpression;
-import api.tables.TableFromSelectReference;
+import sqlapi.queries.SelectExpression;
+import sqlapi.tables.TableFromSelectReference;
 
 public class TableFromSelectReferenceImpl implements TableFromSelectReference {
 

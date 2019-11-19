@@ -1,8 +1,8 @@
 package clientImpl.tableRef;
 
-import api.queries.SelectExpression;
-import api.tables.TableReference;
-import api.predicates.Predicate;
+import sqlapi.queries.SelectExpression;
+import sqlapi.tables.TableReference;
+import sqlapi.predicates.Predicate;
 
 public class TableRefFactory {
 

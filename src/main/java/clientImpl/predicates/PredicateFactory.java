@@ -1,10 +1,10 @@
 package clientImpl.predicates;
 
-import api.columnExpr.ColumnExpression;
-import api.columnExpr.ColumnRef;
-import api.columnExpr.ColumnValue;
-import api.predicates.CombinedPredicate;
-import api.predicates.Predicate;
+import sqlapi.columnExpr.ColumnExpression;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.columnExpr.ColumnValue;
+import sqlapi.predicates.CombinedPredicate;
+import sqlapi.predicates.Predicate;
 
 import java.util.List;
 

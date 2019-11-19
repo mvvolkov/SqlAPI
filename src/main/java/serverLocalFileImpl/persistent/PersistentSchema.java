@@ -1,6 +1,6 @@
 package serverLocalFileImpl.persistent;
 
-import api.exceptions.NoSuchTableException;
+import sqlapi.exceptions.NoSuchTableException;
 
 import java.io.Serializable;
 import java.util.ArrayList;

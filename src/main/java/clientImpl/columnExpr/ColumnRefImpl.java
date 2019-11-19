@@ -1,6 +1,6 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.ColumnRef;
+import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
 public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {

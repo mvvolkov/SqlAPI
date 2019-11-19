@@ -1,10 +1,10 @@
 package testServerLocalFileImpl;
 
-import api.exceptions.ConstraintException;
-import api.exceptions.InvalidQueryException;
-import api.exceptions.SqlException;
-import api.exceptions.WrongValueTypeException;
-import api.selectResult.ResultSet;
+import sqlapi.exceptions.ConstraintException;
+import sqlapi.exceptions.InvalidQueryException;
+import sqlapi.exceptions.SqlException;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
@@ -75,9 +75,11 @@ public class InsertTest extends AbstractServerLocalFileTest {
             sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(17, 35, 39, null)));
         } catch (WrongValueTypeException wvte) {
-            assertEquals("table1", wvte.getColumnRef().getTableName());
-            assertEquals("column3", wvte.getColumnRef().getColumnName());
-            assertEquals("String", wvte.getAllowedTypes().stream().map(Class::getSimpleName).collect(Collectors.joining(", ")));
+            assertEquals("table1", wvte.getTableName());
+            assertEquals("column3", wvte.getColumnName());
+            assertEquals("String",
+                    wvte.getAllowedTypes().stream().map(Class::getSimpleName)
+                            .collect(Collectors.joining(", ")));
             assertEquals("Integer", wvte.getActualType().getSimpleName());
             return;
         } catch (SqlException se) {

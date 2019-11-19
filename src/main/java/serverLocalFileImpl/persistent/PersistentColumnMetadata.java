@@ -1,8 +1,7 @@
 package serverLocalFileImpl.persistent;
 
-import api.exceptions.WrongValueTypeException;
-import api.metadata.ColumnMetadata;
-import serverLocalFileImpl.ColumnRefImpl;
+import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.metadata.SqlType;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -14,7 +13,7 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final String columnName;
 
-    private final ColumnMetadata.SqlType sqlType;
+    private final SqlType sqlType;
 
     private final boolean isNotNull;
 
@@ -26,8 +25,10 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final PersistentTable table;
 
-    public PersistentColumnMetadata(String columnName, ColumnMetadata.SqlType sqlType, boolean isNotNull,
-                                    boolean isPrimaryKey, int size, Object defaultValue, PersistentTable table)
+    public PersistentColumnMetadata(String columnName, SqlType sqlType,
+                                    boolean isNotNull,
+                                    boolean isPrimaryKey, int size, Object defaultValue,
+                                    PersistentTable table)
             throws WrongValueTypeException {
         this.columnName = columnName;
         this.sqlType = sqlType;
@@ -60,7 +61,7 @@ public final class PersistentColumnMetadata implements Serializable {
                 return;
             }
         }
-        throw new WrongValueTypeException(new ColumnRefImpl("dbo", table.getTableName(), columnName),
+        throw new WrongValueTypeException("dbo", table.getTableName(), columnName,
                 this.getAllowedJavaTypes(), value.getClass());
     }
 
@@ -81,7 +82,7 @@ public final class PersistentColumnMetadata implements Serializable {
         return size;
     }
 
-    public ColumnMetadata.SqlType getSqlType() {
+    public SqlType getSqlType() {
         return sqlType;
     }
 

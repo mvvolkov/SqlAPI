@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
-import api.metadata.ColumnMetadata;
-import api.queries.CreateTableStatement;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.queries.CreateTableStatement;
 
 import java.util.List;
 

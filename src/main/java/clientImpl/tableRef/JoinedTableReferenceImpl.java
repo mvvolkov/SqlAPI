@@ -1,8 +1,8 @@
 package clientImpl.tableRef;
 
-import api.tables.JoinedTableReference;
-import api.tables.TableReference;
-import api.predicates.Predicate;
+import sqlapi.tables.JoinedTableReference;
+import sqlapi.tables.TableReference;
+import sqlapi.predicates.Predicate;
 
 public class JoinedTableReferenceImpl implements JoinedTableReference {
 

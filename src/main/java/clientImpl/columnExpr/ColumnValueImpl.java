@@ -1,6 +1,6 @@
 package clientImpl.columnExpr;
 
-import api.columnExpr.ColumnValue;
+import sqlapi.columnExpr.ColumnValue;
 import org.jetbrains.annotations.Nullable;
 
 public final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {

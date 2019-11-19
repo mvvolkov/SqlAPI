@@ -1,25 +1,29 @@
 package serverLocalFileImpl;
 
-import api.columnExpr.ColumnExpression;
-import api.columnExpr.ColumnRef;
-import api.connect.SqlServer;
-import api.exceptions.*;
-import api.metadata.TableMetadata;
-import api.misc.SelectedItem;
-import api.predicates.Predicate;
-import api.queries.SelectExpression;
-import api.queries.SqlStatement;
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
-import api.tables.DatabaseTableReference;
-import api.tables.JoinedTableReference;
-import api.tables.TableFromSelectReference;
-import api.tables.TableReference;
+import serverLocalFileImpl.intermediateresult.DataGroup;
+import serverLocalFileImpl.intermediateresult.DataHeader;
+import serverLocalFileImpl.intermediateresult.DataRow;
+import serverLocalFileImpl.intermediateresult.DataSet;
+import sqlapi.columnExpr.ColumnExpression;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.server.SqlServer;
+import sqlapi.exceptions.*;
+import sqlapi.metadata.TableMetadata;
+import sqlapi.misc.SelectedItem;
+import sqlapi.predicates.Predicate;
+import sqlapi.queries.SelectExpression;
+import sqlapi.queries.SqlStatement;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
+import sqlapi.tables.DatabaseTableReference;
+import sqlapi.tables.JoinedTableReference;
+import sqlapi.tables.TableFromSelectReference;
+import sqlapi.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 import serverLocalFileImpl.persistent.PersistentColumnMetadata;
 import serverLocalFileImpl.persistent.PersistentDatabase;
 import serverLocalFileImpl.persistent.PersistentTable;
-import sqlFactory.SqlManagerFactory;
+import ServerFactory.SqlManagerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,6 +50,18 @@ public final class SqlServerImpl implements SqlServer {
 
     }
 
+    @Override public void createSchema(String dbName, String schemaName)
+            throws NoSuchDatabaseException, SchemaAlreadyExistsException {
+        logger.createSchema(dbName, schemaName);
+        this.getDatabase(dbName).createSchema(schemaName);
+    }
+
+    @Override public void setCurrentSchema(String dbName, String schemaName)
+            throws NoSuchDatabaseException, NoSuchSchemaException {
+        logger.setCurrentSchema(dbName, schemaName);
+        this.getDatabase(dbName).setCurrentSchema(schemaName);
+    }
+
     @Override
     public void openDatabaseWithTables(String dbName, List<TableMetadata> tables) {
     }
@@ -55,12 +71,14 @@ public final class SqlServerImpl implements SqlServer {
     public void persistDatabase(String dbName) {
     }
 
-    @Override public void executeStatement(SqlStatement statement) throws SqlException {
+    @Override
+    public void executeStatement(SqlStatement statement) throws SqlException {
         logger.executeStatement(statement);
         this.getDatabase(statement.getDatabaseName()).executeStatement(statement);
     }
 
-    @Override public ResultSet getQueryResult(SelectExpression selectExpression)
+    @Override
+    public ResultSet getQueryResult(SelectExpression selectExpression)
             throws SqlException {
         logger.getQueryResult(selectExpression);
         return createResultSet(this.getInternalQueryResult(selectExpression));
@@ -94,10 +112,10 @@ public final class SqlServerImpl implements SqlServer {
      * 7.The union is taken after each sub-select is evaluated.
      * 8.Finally, the resulting rows are sorted according to the columns specified in the order by clause.
      */
-    public InternalResultSet getInternalQueryResult(SelectExpression se) throws
+    public DataSet getInternalQueryResult(SelectExpression se) throws
             SqlException {
 
-        InternalResultSet result = this.getProductOfTables(se.getTableReferences());
+        DataSet result = this.getProductOfTables(se.getTableReferences());
         result = getFilteredResult(result, se.getPredicate());
 
         if (se.getSelectedItems().isEmpty()) {
@@ -107,35 +125,35 @@ public final class SqlServerImpl implements SqlServer {
         List<ColumnExpression> columnExpressions =
                 this.getSelectedColumnExpressions(se.getSelectedItems());
 
-        List<ColumnRef> resultColumns = getSelectedColumns(columnExpressions);
-        List<InternalResultRow> resultRows;
+        List<DataHeader> headers = getSelectedColumns(columnExpressions);
+        List<DataRow> resultRows;
         if (!se.getGroupByColumns().isEmpty()) {
-            Collection<InternalResultGroup> groups =
+            Collection<DataGroup> groups =
                     getGroups(se.getGroupByColumns(), result.getRows());
 
             resultRows = new ArrayList<>();
-            for (InternalResultGroup group : groups) {
-                Map<ColumnRef, Object> values = new HashMap<>();
+            for (DataGroup group : groups) {
+                Map<DataHeader, Object> values = new HashMap<>();
                 for (ColumnExpression ce : columnExpressions) {
                     String columnName = ce.getAlias().isEmpty() ? ce.toString() :
                             ce.getAlias();
-                    values.put(new ColumnRefImpl(columnName),
+                    values.put(new DataHeader(columnName),
                             group.evaluateColumnExpr(ce));
                 }
-                resultRows.add(new InternalResultRow(values));
+                resultRows.add(new DataRow(values));
             }
         } else {
-            resultRows = getSelectedValues(result, resultColumns, columnExpressions);
+            resultRows = getSelectedValues(result, headers, columnExpressions);
         }
-        return new InternalResultSet(resultColumns, resultRows);
+        return new DataSet(headers, resultRows);
     }
 
-    private static Collection<InternalResultGroup> getGroups(
+    private static Collection<DataGroup> getGroups(
             List<ColumnRef> groupByColumns,
-            Collection<InternalResultRow> rows)
+            Collection<DataRow> rows)
             throws NoSuchColumnException, AmbiguousColumnNameException {
-        Map<List<Object>, List<InternalResultRow>> map = new HashMap<>();
-        for (InternalResultRow row : rows) {
+        Map<List<Object>, List<DataRow>> map = new HashMap<>();
+        for (DataRow row : rows) {
             List<Object> values = new ArrayList<>();
             for (ColumnRef cr : groupByColumns) {
                 values.add(row.evaluateColumnRef(cr));
@@ -146,9 +164,9 @@ public final class SqlServerImpl implements SqlServer {
             }
             map.get(key).add(row);
         }
-        Collection<InternalResultGroup> groups = new ArrayList<>();
-        for (Map.Entry<List<Object>, List<InternalResultRow>> entry : map.entrySet()) {
-            groups.add(new InternalResultGroup(groupByColumns, entry.getKey(),
+        Collection<DataGroup> groups = new ArrayList<>();
+        for (Map.Entry<List<Object>, List<DataRow>> entry : map.entrySet()) {
+            groups.add(new DataGroup(groupByColumns, entry.getKey(),
                     entry.getValue()));
         }
         return groups;
@@ -168,8 +186,20 @@ public final class SqlServerImpl implements SqlServer {
                 List<PersistentColumnMetadata> columns =
                         this.getTable((DatabaseTableReference) selectedItem).getColumns();
                 for (PersistentColumnMetadata column : columns) {
-                    columnExpressions.add(new ColumnRefImpl(schemaName, tableName,
-                            column.getColumnName()));
+                    columnExpressions.add(new ColumnRef() {
+
+                        @Override public String getColumnName() {
+                            return column.getColumnName();
+                        }
+
+                        @Override public String getTableName() {
+                            return tableName;
+                        }
+
+                        @Override public String getSchemaName() {
+                            return schemaName;
+                        }
+                    });
                 }
             }
             if (selectedItem instanceof ColumnExpression) {
@@ -180,167 +210,173 @@ public final class SqlServerImpl implements SqlServer {
 
     }
 
-    private static List<ColumnRef> getSelectedColumns(
+    private static List<DataHeader> getSelectedColumns(
             List<ColumnExpression> columnExpressions) {
 
-        List<ColumnRef> resultColumns = new ArrayList<>();
+        List<DataHeader> resultColumns = new ArrayList<>();
         for (ColumnExpression columnExpression : columnExpressions) {
             if (columnExpression instanceof ColumnRef) {
-                resultColumns.add(new ColumnRefImpl((ColumnRef) columnExpression));
+                resultColumns.add(new DataHeader((ColumnRef) columnExpression));
             } else if (!columnExpression.getAlias().isEmpty()) {
-                resultColumns.add(new ColumnRefImpl((columnExpression).getAlias()));
+                resultColumns
+                        .add(new DataHeader((columnExpression).getAlias()));
             } else {
-                resultColumns.add(new ColumnRefImpl(columnExpression.toString()));
+                resultColumns.add(new DataHeader(columnExpression.toString()));
             }
         }
         return resultColumns;
     }
 
-    private static List<InternalResultRow> getSelectedValues(
-            InternalResultSet internalResultSet, List<ColumnRef> columns,
+    private static List<DataRow> getSelectedValues(
+            DataSet dataSet, List<DataHeader> columns,
             List<ColumnExpression> columnExpressions)
-            throws NoSuchColumnException, AmbiguousColumnNameException {
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
 
-        List<InternalResultRow> resultRows = new ArrayList<>();
-        for (InternalResultRow row : internalResultSet.getRows()) {
-            Map<ColumnRef, Object> values = new HashMap<>();
+        List<DataRow> resultRows = new ArrayList<>();
+        for (DataRow row : dataSet.getRows()) {
+            Map<DataHeader, Object> values = new HashMap<>();
             for (int i = 0; i < columns.size(); i++) {
                 values.put(columns.get(i),
                         row.evaluateColumnExpr(columnExpressions.get(i)));
             }
-            resultRows.add(new InternalResultRow(values));
+            resultRows.add(new DataRow(values));
         }
         return resultRows;
     }
 
 
-    public static ResultSetImpl createResultSet(InternalResultSet internalResultSet) {
+    public static ResultSetImpl createResultSet(DataSet dataSet) {
 
         List<ResultRow> resultRows = new ArrayList<>();
-        List<String> resultColumns = internalResultSet.getColumns().stream()
-                .map(ColumnRef::getColumnName).collect(Collectors.toList());
+        List<String> resultColumns = dataSet.getColumns().stream()
+                .map(DataHeader::getColumnName).collect(Collectors.toList());
 
-        for (InternalResultRow row : internalResultSet.getRows()) {
+        for (DataRow row : dataSet.getRows()) {
             List<Object> values = new ArrayList<>();
-            for (ColumnRef cr : internalResultSet.getColumns()) {
-                values.add(row.getValues().get(cr));
+            for (DataHeader cr : dataSet.getColumns()) {
+                values.add(row.getCells().get(cr));
             }
             resultRows.add(new ResultRowImpl(values));
         }
         return new ResultSetImpl(resultRows, resultColumns);
     }
 
-    private InternalResultSet getProductOfTables(List<TableReference> tableReferences)
+    private DataSet getProductOfTables(List<TableReference> tableReferences)
             throws SqlException {
 
-        List<InternalResultSet> resultSets = new ArrayList<>();
+        List<DataSet> dataSets = new ArrayList<>();
         for (TableReference tr : tableReferences) {
-            resultSets.add(this.getDataFromTableRef(tr));
+            dataSets.add(this.getDataFromTableRef(tr));
         }
-        if (resultSets.isEmpty()) {
-            return new InternalResultSet(Collections.emptyList(),
+        if (dataSets.isEmpty()) {
+            return new DataSet(Collections.emptyList(),
                     Collections.emptyList());
         }
-        Iterator<InternalResultSet> it = resultSets.iterator();
-        InternalResultSet resultSet = it.next();
+        Iterator<DataSet> it = dataSets.iterator();
+        DataSet resultSet = it.next();
         while (it.hasNext()) {
             resultSet = resultSet.joinWith(it.next());
         }
         return resultSet;
     }
 
-    private static InternalResultSet getFilteredResult(InternalResultSet resultSet,
-                                                       Predicate predicate)
+    private static DataSet getFilteredResult(DataSet resultSet,
+                                             Predicate predicate)
             throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException {
-        List<ColumnRef> columns = new ArrayList<>(resultSet.getColumns());
-        List<InternalResultRow> rows = new ArrayList<>();
-        for (InternalResultRow row : resultSet.getRows()) {
-            if (row.matchPredicate(predicate)) {
+            AmbiguousColumnNameException, InvalidQueryException {
+        List<DataHeader> columns = new ArrayList<>(resultSet.getColumns());
+        List<DataRow> rows = new ArrayList<>();
+        for (DataRow row : resultSet.getRows()) {
+            if (row.evaluatePredicate(predicate)) {
                 rows.add(row);
             }
         }
-        return new InternalResultSet(columns, rows);
+        return new DataSet(columns, rows);
     }
 
-    private static InternalResultSet innerJoin(InternalResultSet left,
-                                               InternalResultSet right, Predicate sc)
+    private static DataSet innerJoin(DataSet left,
+                                     DataSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException {
+            AmbiguousColumnNameException, InvalidQueryException {
 
-        InternalResultSet internalResultSet = left.joinWith(right);
-        return getFilteredResult(internalResultSet, sc);
+        DataSet dataSet = left.joinWith(right);
+        return getFilteredResult(dataSet, sc);
     }
 
-    private static InternalResultSet leftOuterJoin(InternalResultSet left,
-                                                   InternalResultSet right, Predicate sc)
+    private static DataSet leftOuterJoin(DataSet left,
+                                         DataSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException {
+            AmbiguousColumnNameException, InvalidQueryException {
 
-        List<ColumnRef> columns = new ArrayList<>();
+        List<DataHeader> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
-        List<InternalResultRow> rows = new ArrayList<>();
-        for (InternalResultRow leftRow : left.getRows()) {
+        List<DataRow> rows = new ArrayList<>();
+        for (DataRow leftRow : left.getRows()) {
             boolean matchFound = false;
-            for (InternalResultRow rightRow : right.getRows()) {
-                Map<ColumnRef, Object> values = new HashMap<>(leftRow.getValues());
-                values.putAll(rightRow.getValues());
-                InternalResultRow row = new InternalResultRow(values);
-                if (row.matchPredicate(sc)) {
+            for (DataRow rightRow : right.getRows()) {
+                Map<DataHeader, Object> values =
+                        new HashMap<>(leftRow.getCells());
+                values.putAll(rightRow.getCells());
+                DataRow row = new DataRow(values);
+                if (row.evaluatePredicate(sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
             }
             if (!matchFound) {
-                Map<ColumnRef, Object> values = new HashMap<>(leftRow.getValues());
-                rows.add(new InternalResultRow(values));
+                Map<DataHeader, Object> values =
+                        new HashMap<>(leftRow.getCells());
+                rows.add(new DataRow(values));
             }
         }
-        return new InternalResultSet(columns, rows);
+        return new DataSet(columns, rows);
     }
 
-    private static InternalResultSet rightOuterJoin(InternalResultSet left,
-                                                    InternalResultSet right, Predicate sc)
+    private static DataSet rightOuterJoin(DataSet left,
+                                          DataSet right, Predicate sc)
             throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException {
+            AmbiguousColumnNameException, InvalidQueryException {
 
-        List<ColumnRef> columns = new ArrayList<>();
+        List<DataHeader> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
         columns.addAll(right.getColumns());
-        List<InternalResultRow> rows = new ArrayList<>();
-        for (InternalResultRow rightRow : right.getRows()) {
+        List<DataRow> rows = new ArrayList<>();
+        for (DataRow rightRow : right.getRows()) {
             boolean matchFound = false;
-            for (InternalResultRow leftRow : left.getRows()) {
-                Map<ColumnRef, Object> values = new HashMap<>(leftRow.getValues());
-                values.putAll(rightRow.getValues());
-                InternalResultRow row = new InternalResultRow(values);
-                if (row.matchPredicate(sc)) {
+            for (DataRow leftRow : left.getRows()) {
+                Map<DataHeader, Object> values =
+                        new HashMap<>(leftRow.getCells());
+                values.putAll(rightRow.getCells());
+                DataRow row = new DataRow(values);
+                if (row.evaluatePredicate(sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
             }
             if (!matchFound) {
-                Map<ColumnRef, Object> values = new HashMap<>(rightRow.getValues());
-                rows.add(new InternalResultRow(values));
+                Map<DataHeader, Object> values =
+                        new HashMap<>(rightRow.getCells());
+                rows.add(new DataRow(values));
             }
         }
-        return new InternalResultSet(columns, rows);
+        return new DataSet(columns, rows);
     }
 
 
-    private InternalResultSet getDataFromDatabaseTable(DatabaseTableReference dtr)
+    private DataSet getDataFromPersistentTable(DatabaseTableReference dtr)
             throws SqlException {
         return this.getTable(dtr).getData();
     }
 
-    private InternalResultSet getDataFromJoinedTable(JoinedTableReference tableReference)
+    private DataSet getDataFromJoinedTable(JoinedTableReference tableReference)
             throws SqlException {
 
 
-        InternalResultSet left =
+        DataSet left =
                 this.getDataFromTableRef(tableReference.getLeftTableReference());
-        InternalResultSet right =
+        DataSet right =
                 this.getDataFromTableRef(tableReference.getRightTableReference());
         switch (tableReference.getTableRefType()) {
             case INNER_JOIN:
@@ -353,38 +389,41 @@ public final class SqlServerImpl implements SqlServer {
         throw new InvalidQueryException("Invalid type of join table reference");
     }
 
-    private InternalResultSet getSubqueryResult(TableFromSelectReference tr)
+    private DataSet getSubqueryResult(TableFromSelectReference tr)
             throws SqlException {
-        InternalResultSet internalResultSet =
+        DataSet dataSet =
                 getInternalQueryResult(tr.getSelectExpression());
         String alias = tr.getAlias();
         if (alias.isEmpty()) {
-            return internalResultSet;
+            return dataSet;
         }
-        List<ColumnRef> newColumns = new ArrayList<>();
-        for (ColumnRef cr : internalResultSet.getColumns()) {
-            newColumns.add(new ColumnRefImpl("", alias, cr.getColumnName()));
+        List<DataHeader> newColumns = new ArrayList<>();
+        for (DataHeader cr : dataSet.getColumns()) {
+            newColumns.add(new DataHeader(cr.getSqlType(), "", alias,
+                    cr.getColumnName()));
         }
-        List<InternalResultRow> newRows = new ArrayList<>();
-        for (InternalResultRow row : internalResultSet.getRows()) {
-            Map<ColumnRef, Object> values = new HashMap<>();
-            for (Map.Entry<ColumnRef, Object> entry : row.getValues().entrySet()) {
-                values.put(new ColumnRefImpl("", alias, entry.getKey().getColumnName()),
+        List<DataRow> newRows = new ArrayList<>();
+        for (DataRow row : dataSet.getRows()) {
+            Map<DataHeader, Object> values = new HashMap<>();
+            for (Map.Entry<DataHeader, Object> entry : row.getCells()
+                    .entrySet()) {
+                values.put(new DataHeader(entry.getKey().getSqlType(), "", alias,
+                                entry.getKey().getColumnName()),
                         entry.getValue());
             }
-            newRows.add(new InternalResultRow(values));
+            newRows.add(new DataRow(values));
         }
-        return new InternalResultSet(newColumns, newRows);
+        return new DataSet(newColumns, newRows);
     }
 
 
-    private @NotNull InternalResultSet getDataFromTableRef(
+    private @NotNull DataSet getDataFromTableRef(
             TableReference tableReference) throws
             SqlException {
 
         switch (tableReference.getTableRefType()) {
             case DATABASE_TABLE:
-                return this.getDataFromDatabaseTable(
+                return this.getDataFromPersistentTable(
                         (DatabaseTableReference) tableReference);
             case INNER_JOIN:
             case LEFT_OUTER_JOIN:

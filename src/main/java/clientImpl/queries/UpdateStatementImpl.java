@@ -1,8 +1,8 @@
 package clientImpl.queries;
 
-import api.misc.AssignmentOperation;
-import api.queries.UpdateStatement;
-import api.predicates.Predicate;
+import sqlapi.misc.AssignmentOperation;
+import sqlapi.queries.UpdateStatement;
+import sqlapi.predicates.Predicate;
 
 import java.util.List;
 

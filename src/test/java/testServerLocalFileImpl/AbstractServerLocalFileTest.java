@@ -1,14 +1,14 @@
 package testServerLocalFileImpl;
 
-import api.connect.SqlServer;
-import api.exceptions.SqlException;
-import api.selectResult.ResultRow;
-import api.selectResult.ResultSet;
+import sqlapi.server.SqlServer;
+import sqlapi.exceptions.SqlException;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
 import org.junit.Before;
-import sqlFactory.SqlManagerFactory;
+import ServerFactory.SqlManagerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,13 +28,16 @@ public abstract class AbstractServerLocalFileTest {
         try {
             // Create a database
             sqlServer.createDatabase("DB1");
+            sqlServer.createSchema("DB1", "MySchema");
+            sqlServer.setCurrentSchema("DB1", "MySchema");
 
             // Create a table
             sqlServer.executeStatement(SqlQueryFactory
                     .createTable("DB1", "table1", Arrays.asList(
                             MetadataFactory.integerBuilder("column1").notNull()
                                     .primaryKey().build(),
-                            MetadataFactory.integerBuilder("column2").defaultValue(15)
+                            MetadataFactory.integerBuilder("column2")
+                                    .defaultValue(15)
                                     .build(),
                             MetadataFactory.varcharBuilder("column3", 20)
                                     .notNull()
@@ -90,7 +93,7 @@ public abstract class AbstractServerLocalFileTest {
     static void checkHeaders(List<String> headers1, String... headers2) {
         assertEquals(headers1.size(), headers2.length);
         for (int i = 0; i < headers1.size(); i++) {
-            assertEquals(headers1.get(i), headers2[i]);
+            assertEquals(headers2[i], headers1.get(i));
         }
     }
 
