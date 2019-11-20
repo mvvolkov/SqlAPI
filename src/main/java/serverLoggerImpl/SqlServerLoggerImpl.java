@@ -26,7 +26,7 @@ public class SqlServerLoggerImpl implements SqlServer {
 
 
     @Override
-    public void executeStatement(SqlStatement stmt) throws SqlException {
+    public void executeQuery(SqlStatement stmt) throws SqlException {
         switch (stmt.getType()) {
             case CREATE_TABLE:
                 createTable((CreateTableStatement) stmt);
@@ -51,11 +51,13 @@ public class SqlServerLoggerImpl implements SqlServer {
         System.out.println("CREATE DATABASE " + dbName);
     }
 
-    @Override public void createSchema(String dbName, String schemaName) {
+    @Override
+    public void createSchema(String dbName, String schemaName) {
         System.out.println("CREATE SCHEMA " + dbName + "." + schemaName);
     }
 
-    @Override public void setCurrentSchema(String dbName, String schemaName) {
+    @Override
+    public void setCurrentSchema(String dbName, String schemaName) {
         System.out.println("SET CURRENT SCHEMA = " + dbName + "." + schemaName);
     }
 
@@ -132,7 +134,7 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static void insert(InsertStatement stmt) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(stmt.getTableName());
+        sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         if (!stmt.getColumns().isEmpty()) {
             String columns = stmt.getColumns().stream()
                     .collect(Collectors.joining(", ", "(", ")"));
@@ -150,7 +152,7 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static void insert(InsertFromSelectStatement stmt) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(stmt.getTableName());
+        sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         if (!stmt.getColumns().isEmpty()) {
             String columns = stmt.getColumns().stream()
                     .collect(Collectors.joining(", ", "(", ")"));
@@ -164,7 +166,7 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void delete(DeleteStatement stmt) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(stmt.getTableName());
+        sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         if (!stmt.getPredicate().isEmpty()) {
             sb.append(" WHERE ");
             sb.append(stmt.getPredicate());
@@ -181,7 +183,7 @@ public class SqlServerLoggerImpl implements SqlServer {
 
     private static void update(UpdateStatement stmt) {
         StringBuilder sb = new StringBuilder("UPDATE ");
-        sb.append(stmt.getTableName());
+        sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         sb.append(" SET ");
         String assignmetns = stmt.getAssignmentOperations().stream()
                 .map(op -> getAssignmentOperationString(op))
@@ -200,12 +202,12 @@ public class SqlServerLoggerImpl implements SqlServer {
         return new ResultSet() {
             @Override
             public List<String> getHeaders() {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
 
             @Override
             public List<ResultRow> getRows() {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
         };
     }
@@ -261,11 +263,25 @@ public class SqlServerLoggerImpl implements SqlServer {
                 operator = "";
         }
         StringBuilder sb = new StringBuilder();
+        boolean leftRefIsDbTable = jtr.getLeftTableReference() instanceof DatabaseTableReference;
+        boolean rightRefIsDbTable = jtr.getRightTableReference() instanceof DatabaseTableReference;
+        if (!leftRefIsDbTable) {
+            sb.append("(");
+        }
         sb.append(getTableReferencesString(jtr.getLeftTableReference()));
+        if (!leftRefIsDbTable) {
+            sb.append(")");
+        }
         sb.append(" ");
         sb.append(operator);
         sb.append(" ");
+        if (!rightRefIsDbTable) {
+            sb.append("(");
+        }
         sb.append(getTableReferencesString(jtr.getRightTableReference()));
+        if (!rightRefIsDbTable) {
+            sb.append(")");
+        }
         if (!jtr.getPredicate().isEmpty()) {
             sb.append(" ON ");
             sb.append(jtr.getPredicate());

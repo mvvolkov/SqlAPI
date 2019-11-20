@@ -1,23 +1,23 @@
 package clientImpl.columnExpr;
 
 import sqlapi.columnExpr.AggregateFunction;
+import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
 public final class AggregateFunctionImpl extends ColumnExprImpl
         implements AggregateFunction {
 
-    private final ColumnRef column;
-
     private final Type type;
+
+    private final ColumnRef column;
 
     private final String alias;
 
-    public AggregateFunctionImpl(ColumnRef column,
-                                 Type type, String alias) {
+    public AggregateFunctionImpl(Type type, ColumnExpression column, String alias) {
         super(ExprType.AGGR_FUNC, alias);
-        this.column = column;
         this.type = type;
+        this.column = (ColumnRef) column;
         this.alias = alias;
     }
 

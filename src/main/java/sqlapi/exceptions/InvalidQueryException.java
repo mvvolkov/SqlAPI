@@ -6,6 +6,7 @@ public class InvalidQueryException extends SqlException {
 
 
     public InvalidQueryException(String message) {
+
         this.message = message;
     }
 

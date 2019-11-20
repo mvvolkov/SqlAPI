@@ -124,8 +124,11 @@ public class DataGroup {
         Integer sum = 0;
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
+            if (value == null) {
+                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+            }
             if (!(value instanceof Integer)) {
-                throw new InvalidQueryException("");
+                throw new InvalidQueryException("Wrong value type in aggregate function");
             }
             sum += (Integer) value;
         }

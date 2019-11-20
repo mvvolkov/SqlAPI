@@ -72,8 +72,8 @@ public final class SqlServerImpl implements SqlServer {
     }
 
     @Override
-    public void executeStatement(SqlStatement statement) throws SqlException {
-        logger.executeStatement(statement);
+    public void executeQuery(SqlStatement statement) throws SqlException {
+        logger.executeQuery(statement);
         this.getDatabase(statement.getDatabaseName()).executeStatement(statement);
     }
 

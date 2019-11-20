@@ -22,7 +22,7 @@ public interface SqlServer {
 
     void persistDatabase(String dbName);
 
-    void executeStatement(SqlStatement statement) throws SqlException;
+    void executeQuery(SqlStatement statement) throws SqlException;
 
     ResultSet getQueryResult(SelectExpression selectExpression) throws SqlException;
 

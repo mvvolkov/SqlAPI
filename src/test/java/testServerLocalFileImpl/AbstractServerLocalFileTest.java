@@ -32,7 +32,7 @@ public abstract class AbstractServerLocalFileTest {
             sqlServer.setCurrentSchema("DB1", "MySchema");
 
             // Create a table
-            sqlServer.executeStatement(SqlQueryFactory
+            sqlServer.executeQuery(SqlQueryFactory
                     .createTable("DB1", "table1", Arrays.asList(
                             MetadataFactory.integerBuilder("column1").notNull()
                                     .primaryKey().build(),
@@ -46,21 +46,21 @@ public abstract class AbstractServerLocalFileTest {
                     )));
 
             // Fill table1
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(10, 30, "test1", "t21")));
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(11, 31, "test2", null)));
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(12, 32, "test3", "t43")));
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(13, 33, "test2", "t653")));
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(15, 34, "test1", null)));
-            sqlServer.executeStatement(SqlQueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(16, null, "test1", null)));
 
             // Create a table
-            sqlServer.executeStatement(
+            sqlServer.executeQuery(
                     SqlQueryFactory.createTable("DB1", "table2",
                             Arrays.asList(
                                     MetadataFactory.integerBuilder("column5")
@@ -70,11 +70,11 @@ public abstract class AbstractServerLocalFileTest {
                             )));
 
             // Fill table2
-            sqlServer.executeStatement(
+            sqlServer.executeQuery(
                     SqlQueryFactory.insert("DB1", "table2", Arrays.asList(22, "test3")));
-            sqlServer.executeStatement(
+            sqlServer.executeQuery(
                     SqlQueryFactory.insert("DB1", "table2", Arrays.asList(23, "test2")));
-            sqlServer.executeStatement(
+            sqlServer.executeQuery(
                     SqlQueryFactory.insert("DB1", "table2", Arrays.asList(25, "test4")));
 
             System.out.println("===== END OF SET UP =====");
@@ -84,10 +84,31 @@ public abstract class AbstractServerLocalFileTest {
         }
     }
 
-    protected ResultSet getTableData(String dbName, String tableName)
+    ResultSet getTableData(String dbName, String tableName)
             throws SqlException {
-        return sqlServer.getQueryResult(
+        ResultSet resultSet = sqlServer.getQueryResult(
                 SqlQueryFactory.select(TableRefFactory.dbTable(dbName, tableName)));
+        printResultSet(resultSet);
+        return resultSet;
+    }
+
+    static void printResultSet(ResultSet resultSet) {
+
+        StringBuilder sb = new StringBuilder();
+
+        String columnsHeaders = resultSet.getHeaders().stream()
+                .collect(Collectors.joining(", "));
+
+        sb.append(columnsHeaders);
+        for (ResultRow row : resultSet.getRows()) {
+            String rowString =
+                    row.getValues().stream().map(o -> String.valueOf(o))
+                            .collect(Collectors.joining(
+                                    ", "));
+            sb.append("\n" + rowString);
+        }
+        System.out.println(sb);
+        System.out.println("");
     }
 
     static void checkHeaders(List<String> headers1, String... headers2) {

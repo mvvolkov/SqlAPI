@@ -160,7 +160,10 @@ public final class DataRow {
             InvalidQueryException {
         Object leftValue = evaluateColumnExpr(bce.getLeftOperand());
         Object rightValue = evaluateColumnExpr(bce.getRightOperand());
-        if (!(leftValue instanceof Integer) && !(rightValue instanceof Integer)) {
+        if (leftValue == null || rightValue == null) {
+            throw new InvalidQueryException("Null values can not be used in arithmetical expressions");
+        }
+        if (!(leftValue instanceof Integer) || !(rightValue instanceof Integer)) {
             throw new InvalidQueryException("Only numerical types can be used in " +
                     "arithmetical expressions");
         }
