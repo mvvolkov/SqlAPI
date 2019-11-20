@@ -50,13 +50,15 @@ public final class SqlServerImpl implements SqlServer {
 
     }
 
-    @Override public void createSchema(String dbName, String schemaName)
+    @Override
+    public void createSchema(String dbName, String schemaName)
             throws NoSuchDatabaseException, SchemaAlreadyExistsException {
         logger.createSchema(dbName, schemaName);
         this.getDatabase(dbName).createSchema(schemaName);
     }
 
-    @Override public void setCurrentSchema(String dbName, String schemaName)
+    @Override
+    public void setCurrentSchema(String dbName, String schemaName)
             throws NoSuchDatabaseException, NoSuchSchemaException {
         logger.setCurrentSchema(dbName, schemaName);
         this.getDatabase(dbName).setCurrentSchema(schemaName);
@@ -165,9 +167,8 @@ public final class SqlServerImpl implements SqlServer {
             map.get(key).add(row);
         }
         Collection<DataGroup> groups = new ArrayList<>();
-        for (Map.Entry<List<Object>, List<DataRow>> entry : map.entrySet()) {
-            groups.add(new DataGroup(groupByColumns, entry.getKey(),
-                    entry.getValue()));
+        for (List<DataRow> group : map.values()) {
+            groups.add(new DataGroup(groupByColumns, group));
         }
         return groups;
     }
@@ -188,15 +189,18 @@ public final class SqlServerImpl implements SqlServer {
                 for (PersistentColumnMetadata column : columns) {
                     columnExpressions.add(new ColumnRef() {
 
-                        @Override public String getColumnName() {
+                        @Override
+                        public String getColumnName() {
                             return column.getColumnName();
                         }
 
-                        @Override public String getTableName() {
+                        @Override
+                        public String getTableName() {
                             return tableName;
                         }
 
-                        @Override public String getSchemaName() {
+                        @Override
+                        public String getSchemaName() {
                             return schemaName;
                         }
                     });

@@ -155,11 +155,8 @@ public final class DataRow {
         return null;
     }
 
-    private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
-        Object leftValue = evaluateColumnExpr(bce.getLeftOperand());
-        Object rightValue = evaluateColumnExpr(bce.getRightOperand());
+    static Object evaluateBinaryColumnExpr(Object leftValue, Object rightValue, ColumnExpression.ExprType type)
+            throws InvalidQueryException {
         if (leftValue == null || rightValue == null) {
             throw new InvalidQueryException("Null values can not be used in arithmetical expressions");
         }
@@ -169,7 +166,7 @@ public final class DataRow {
         }
         Integer i1 = (Integer) leftValue;
         Integer i2 = (Integer) rightValue;
-        switch (bce.getExprType()) {
+        switch (type) {
             case SUM:
                 return i1 + i2;
             case DIFF:
@@ -185,6 +182,14 @@ public final class DataRow {
             default:
                 throw new InvalidQueryException("Unknown arithmetical operation");
         }
+    }
+
+    private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+            throws NoSuchColumnException, AmbiguousColumnNameException,
+            InvalidQueryException {
+        Object leftValue = evaluateColumnExpr(bce.getLeftOperand());
+        Object rightValue = evaluateColumnExpr(bce.getRightOperand());
+        return evaluateBinaryColumnExpr(leftValue, rightValue, bce.getExprType());
     }
 
     public Object evaluateColumnRef(ColumnRef cr)

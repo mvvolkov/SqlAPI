@@ -8,20 +8,17 @@ import sqlapi.exceptions.NoSuchColumnException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataGroup {
+public final class DataGroup {
 
     private final List<DataHeader> groupedByColumns;
-    private final List<Object> keyValues;
     private final List<DataRow> rows;
 
 
-    public DataGroup(List<ColumnRef> groupedByColumns,
-                     List<Object> keyValues, List<DataRow> rows) {
+    public DataGroup(List<ColumnRef> groupedByColumns, List<DataRow> rows) {
         this.groupedByColumns = new ArrayList<>();
         for (ColumnRef cr : groupedByColumns) {
             this.groupedByColumns.add(new DataHeader(cr));
         }
-        this.keyValues = keyValues;
         this.rows = rows;
     }
 
@@ -51,28 +48,7 @@ public class DataGroup {
         Object leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
         Object rightValue =
                 this.evaluateColumnExpr(bce.getRightOperand());
-        switch (bce.getExprType()) {
-            case SUM:
-                if (leftValue instanceof Integer && rightValue instanceof Integer) {
-                    return (Integer) (((Integer) leftValue) + ((Integer) rightValue));
-                }
-                if (leftValue instanceof String && rightValue instanceof String) {
-                    return (String) (((String) leftValue) + ((String) rightValue));
-                }
-            case DIFF:
-                if (leftValue instanceof Integer && rightValue instanceof Integer) {
-                    return (Integer) (((Integer) leftValue) - ((Integer) rightValue));
-                }
-            case PRODUCT:
-                if (leftValue instanceof Integer && rightValue instanceof Integer) {
-                    return (Integer) (((Integer) leftValue) * ((Integer) rightValue));
-                }
-            case DIVIDE:
-                if (leftValue instanceof Integer && rightValue instanceof Integer) {
-                    return (Integer) (((Integer) leftValue) / ((Integer) rightValue));
-                }
-        }
-        return null;
+        return DataRow.evaluateBinaryColumnExpr(leftValue, rightValue, bce.getExprType());
     }
 
 
@@ -103,7 +79,7 @@ public class DataGroup {
             case MIN:
                 return this.getMin(af.getColumnRef());
         }
-        throw new InvalidQueryException("");
+        throw new InvalidQueryException("Unknown type of aggregate function.");
 
     }
 
@@ -141,8 +117,11 @@ public class DataGroup {
         Comparable max = null;
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
+            if (value == null) {
+                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+            }
             if (!(value instanceof Comparable)) {
-                throw new InvalidQueryException("");
+                throw new InvalidQueryException("Comparable values only can be used for MAX()");
             }
             Comparable cmpValue = (Comparable) value;
             if (max == null) {
@@ -162,8 +141,11 @@ public class DataGroup {
         Comparable min = null;
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
+            if (value == null) {
+                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+            }
             if (!(value instanceof Comparable)) {
-                throw new InvalidQueryException("");
+                throw new InvalidQueryException("Comparable values only can be used for MIN()");
             }
             Comparable cmpValue = (Comparable) value;
             if (min == null) {
