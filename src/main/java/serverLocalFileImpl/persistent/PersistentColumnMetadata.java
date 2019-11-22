@@ -1,6 +1,8 @@
 package serverLocalFileImpl.persistent;
 
 import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.metadata.ColumnConstraint;
+import sqlapi.metadata.ColumnConstraintType;
 import sqlapi.metadata.SqlType;
 
 import java.io.Serializable;
@@ -15,30 +17,26 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final SqlType sqlType;
 
-    private final boolean isNotNull;
-
-    private final boolean isPrimaryKey;
-
     private final int size;
 
-    private final Object defaultValue;
+    private final Collection<ColumnConstraint> constraints;
 
     private final PersistentTable table;
 
-    public PersistentColumnMetadata(String columnName, SqlType sqlType,
-                                    boolean isNotNull,
-                                    boolean isPrimaryKey, int size, Object defaultValue,
+
+    public PersistentColumnMetadata(String columnName, SqlType sqlType, int size, Collection<ColumnConstraint> constraints,
                                     PersistentTable table)
             throws WrongValueTypeException {
         this.columnName = columnName;
         this.sqlType = sqlType;
-        this.isNotNull = isNotNull;
-        this.isPrimaryKey = isPrimaryKey;
+        this.constraints = constraints;
         this.size = size;
         this.table = table;
-        this.checkValueType(defaultValue);
-        this.defaultValue = defaultValue;
-
+        for (ColumnConstraint constraint : constraints) {
+            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
+                this.checkValueType(constraint.getParameters().get(0));
+            }
+        }
     }
 
     public Collection<Class<?>> getAllowedJavaTypes() {
@@ -69,15 +67,6 @@ public final class PersistentColumnMetadata implements Serializable {
         return columnName;
     }
 
-
-    public boolean isNotNull() {
-        return isNotNull;
-    }
-
-    public boolean isPrimaryKey() {
-        return isPrimaryKey;
-    }
-
     public int getSize() {
         return size;
     }
@@ -86,8 +75,17 @@ public final class PersistentColumnMetadata implements Serializable {
         return sqlType;
     }
 
+    public Collection<ColumnConstraint> getConstraints() {
+        return constraints;
+    }
+
     public Object getDefaultValue() {
-        return defaultValue;
+        for (ColumnConstraint constraint : constraints) {
+            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
+                return constraint.getParameters().get(0);
+            }
+        }
+        return null;
     }
 
 

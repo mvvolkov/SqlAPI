@@ -1,14 +1,16 @@
 package serverLocalFileImpl.persistent;
 
+import serverLocalFileImpl.intermediateresult.DataHeader;
+import serverLocalFileImpl.intermediateresult.DataRow;
+import serverLocalFileImpl.intermediateresult.DataSet;
 import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnConstraint;
+import sqlapi.metadata.ColumnConstraintType;
 import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.SqlType;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateStatement;
-import serverLocalFileImpl.intermediateresult.DataHeader;
-import serverLocalFileImpl.intermediateresult.DataRow;
-import serverLocalFileImpl.intermediateresult.DataSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,8 +36,7 @@ public final class PersistentTable implements Serializable {
         this.tableName = tableName;
         for (ColumnMetadata c : columns) {
             this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
-                    c.getSqlType(), c.isNotNull(),
-                    c.isPrimaryKey(), c.getSize(), c.getDefaultValue(), this));
+                    c.getSqlType(), c.getSize(), c.getConstraints(), this));
         }
     }
 
@@ -59,7 +60,7 @@ public final class PersistentTable implements Serializable {
 
 
     public void insert(List<String> columnNames, List<Object> values)
-            throws WrongValueTypeException, ConstraintException, InvalidQueryException {
+            throws WrongValueTypeException, ConstraintViolationException, InvalidQueryException, MaxSizeExceededException {
 
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -136,31 +137,50 @@ public final class PersistentTable implements Serializable {
         return new DataRow(values);
     }
 
+    private void checkNotNullConstraint(Object newValue, String ColumnName, ColumnConstraintType type) throws ConstraintViolationException {
+        if (newValue == null) {
+            throw new ConstraintViolationException(schemaName, tableName,
+                    ColumnName, type);
+        }
+    }
+
+    private void checkUniqueConstraint(Object newValue, String columnName, ColumnConstraintType type) throws ConstraintViolationException {
+        for (PersistentRow row : rows) {
+            if (row.getValue(columnName).equals(newValue)) {
+                throw new ConstraintViolationException(schemaName, tableName,
+                        columnName, type);
+            }
+        }
+    }
 
     private void checkConstraints(PersistentColumnMetadata cm,
                                   Object newValue)
-            throws WrongValueTypeException, ConstraintException {
+            throws WrongValueTypeException, ConstraintViolationException, MaxSizeExceededException {
 
         cm.checkValueType(newValue);
 
-        if (newValue == null && cm.isNotNull()) {
-            throw new ConstraintException(schemaName, tableName,
-                    cm.getColumnName(), "NOT NULL");
-        }
-
-        if (cm.isPrimaryKey()) {
-            for (PersistentRow row : rows) {
-                if (row.getValue(cm.getColumnName()).equals(newValue)) {
-                    throw new ConstraintException(schemaName, tableName,
-                            cm.getColumnName(), "PRIMARY KEY");
-                }
+        for (ColumnConstraint constraint : cm.getConstraints()) {
+            ColumnConstraintType type = constraint.getConstraintType();
+            switch (type) {
+                case NOT_NULL:
+                    this.checkNotNullConstraint(newValue, cm.getColumnName(), type);
+                    break;
+                case UNIQUE:
+                    this.checkUniqueConstraint(newValue, cm.getColumnName(), type);
+                    break;
+                case PRIMARY_KEY:
+                    this.checkNotNullConstraint(newValue, cm.getColumnName(), type);
+                    this.checkUniqueConstraint(newValue, cm.getColumnName(), type);
+                    break;
             }
         }
+
+
         if (cm.getSize() != -1 && newValue != null) {
             String strValue = (String) newValue;
             if (strValue.length() > cm.getSize()) {
-                throw new ConstraintException(schemaName, tableName,
-                        cm.getColumnName(), "SIZE EXCEEDED");
+                throw new MaxSizeExceededException(schemaName, tableName,
+                        cm.getColumnName(), cm.getSize(), strValue.length());
             }
         }
     }

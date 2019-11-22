@@ -1,11 +1,12 @@
 package sqlapi.exceptions;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.metadata.ColumnConstraintType;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class ConstraintException extends SqlException {
+public final class ConstraintViolationException extends SqlException {
 
 
     @NotNull
@@ -18,16 +19,16 @@ public final class ConstraintException extends SqlException {
     private final String columnName;
 
     @NotNull
-    private final String reason;
+    private final ColumnConstraintType constraintType;
 
 
-    public ConstraintException(
+    public ConstraintViolationException(
             String databaseName, String tableName, String columnName,
-            @NotNull String reason) {
+            @NotNull ColumnConstraintType constraintType) {
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
-        this.reason = reason;
+        this.constraintType = constraintType;
     }
 
     @Override
@@ -35,13 +36,13 @@ public final class ConstraintException extends SqlException {
         return "Constraint violation for the column "
                 + Stream.of(databaseName, tableName, columnName)
                 .collect(Collectors.joining(".")) +
-                ": " + reason;
+                ": " + constraintType;
     }
 
 
     @NotNull
-    public String getReason() {
-        return reason;
+    public ColumnConstraintType getConstraintType() {
+        return constraintType;
     }
 
     public String getDatabaseName() {

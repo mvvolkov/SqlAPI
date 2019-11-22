@@ -1,15 +1,13 @@
 package testServerLocalFileImpl;
 
-import sqlapi.exceptions.ConstraintException;
-import sqlapi.exceptions.InvalidQueryException;
-import sqlapi.exceptions.SqlException;
-import sqlapi.exceptions.WrongValueTypeException;
-import sqlapi.selectResult.ResultSet;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
 import org.junit.Test;
+import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnConstraintType;
+import sqlapi.selectResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -53,10 +51,10 @@ public class InsertTest extends AbstractServerLocalFileTest {
         try {
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(10, 42, "test")));
-        } catch (ConstraintException ce) {
+        } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column1", ce.getColumnName());
-            assertEquals("PRIMARY KEY", ce.getReason());
+            assertEquals(ColumnConstraintType.PRIMARY_KEY, ce.getConstraintType());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -75,10 +73,10 @@ public class InsertTest extends AbstractServerLocalFileTest {
         try {
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList(21, 43, null)));
-        } catch (ConstraintException ce) {
+        } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column3", ce.getColumnName());
-            assertEquals("NOT NULL", ce.getReason());
+            assertEquals(ColumnConstraintType.NOT_NULL, ce.getConstraintType());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -212,10 +210,11 @@ public class InsertTest extends AbstractServerLocalFileTest {
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList("column3", "column1", "column4"),
                     Arrays.asList("test15", 17, "t12345")));
-        } catch (ConstraintException ce) {
-            System.out.println(ce.getMessage());
-            assertEquals("column4", ce.getColumnName());
-            assertEquals("SIZE EXCEEDED", ce.getReason());
+        } catch (MaxSizeExceededException me) {
+            System.out.println(me.getMessage());
+            assertEquals("column4", me.getColumnName());
+            assertEquals(5, me.getMaxSize());
+            assertEquals(6, me.getActualSize());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());

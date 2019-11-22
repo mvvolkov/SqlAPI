@@ -1,9 +1,11 @@
 package clientImpl.metadata;
 
-import sqlapi.metadata.ColumnMetadata;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import sqlapi.metadata.ColumnConstraint;
+import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.SqlType;
+
+import java.util.Collection;
 
 public final class ColumnMetadataImpl implements ColumnMetadata {
 
@@ -11,26 +13,20 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
     private final String columnName;
 
     @NotNull
-    public final SqlType sqlType;
-
-    private final boolean isNotNull;
-
-    private final boolean isPrimaryKey;
+    private final SqlType sqlType;
 
     private final int size;
 
-    @Nullable
-    private final Object defaultValue;
+    @NotNull
+    private final Collection<ColumnConstraint> constraints;
 
-
-    protected ColumnMetadataImpl(@NotNull Builder builder) {
-        this.columnName = builder.columnName;
-        this.sqlType = builder.sqlType;
-        this.isNotNull = builder.isNotNull;
-        this.isPrimaryKey = builder.isPrimaryKey;
-        this.size = builder.size;
-        this.defaultValue = builder.defaultValue;
+    public ColumnMetadataImpl(String columnName, SqlType sqlType, int size, Collection<ColumnConstraint> constraints) {
+        this.columnName = columnName;
+        this.sqlType = sqlType;
+        this.size = size;
+        this.constraints = constraints;
     }
+
 
     @NotNull
     @Override
@@ -44,15 +40,17 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
         return sqlType;
     }
 
+    @NotNull
     @Override
-    public boolean isNotNull() {
-        return isNotNull;
+    public Collection<ColumnConstraint> getConstraints() {
+        return constraints;
     }
 
     @Override
-    public boolean isPrimaryKey() {
-        return isPrimaryKey;
+    public int getSize() {
+        return size;
     }
+
 
     @Override
     public String toString() {
@@ -64,76 +62,23 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
             sb.append(this.getSize());
             sb.append(")");
         }
-        if (this.isNotNull()) {
-            sb.append(" NOT NULL");
-        }
-        if (this.isPrimaryKey()) {
-            sb.append(" PRIMARY KEY");
-        }
-        if (defaultValue != null) {
-            sb.append(" DEFAULT ");
-            sb.append(defaultValue);
+        for (ColumnConstraint constraint : constraints) {
+            switch (constraint.getConstraintType()) {
+                case NOT_NULL:
+                    sb.append(" NOT NULL");
+                    break;
+                case PRIMARY_KEY:
+                    sb.append(" PRIMARY KEY");
+                    break;
+                case DEFAULT_VALUE:
+                    sb.append(" DEFAULT ");
+                    sb.append(constraint.getParameters().get(0));
+                default:
+                    // do nothing
+            }
         }
         return sb.toString();
     }
 
 
-    @Override
-    public int getSize() {
-        return size;
-    }
-
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public static class Builder {
-
-        @NotNull
-        private final String columnName;
-
-        @NotNull
-        private final SqlType sqlType;
-
-        private boolean isNotNull = false;
-
-        private boolean isPrimaryKey = false;
-
-        private int size = -1;
-
-        @NotNull
-        private Object defaultValue;
-
-
-        public Builder(@NotNull String columnName, @NotNull SqlType sqlType) {
-            this.columnName = columnName;
-            this.sqlType = sqlType;
-        }
-
-        public Builder(@NotNull String columnName, @NotNull SqlType sqlType, int size) {
-            this(columnName, sqlType);
-            this.size = size;
-        }
-
-        public Builder notNull() {
-            isNotNull = true;
-            return this;
-        }
-
-        public Builder primaryKey() {
-            isPrimaryKey = true;
-            return this;
-        }
-
-        public Builder defaultValue(Object defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-
-        public ColumnMetadataImpl build() {
-            return new ColumnMetadataImpl(this);
-        }
-    }
 }

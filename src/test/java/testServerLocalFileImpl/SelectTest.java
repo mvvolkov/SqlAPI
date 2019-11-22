@@ -53,14 +53,10 @@ public class SelectTest extends AbstractServerLocalFileTest {
             // Create one more table
             sqlServer.executeQuery(SqlQueryFactory
                     .createTable("DB1", "table3", Arrays.asList(
-                            MetadataFactory.varcharBuilder("column11", 20).notNull()
-                                    .primaryKey().build(),
-                            MetadataFactory.varcharBuilder("column12", 20).notNull()
-                                    .defaultValue("default")
-                                    .build(),
-                            MetadataFactory.integerBuilder("column13")
-                                    .notNull()
-                                    .build()
+                            MetadataFactory.varchar("column11", 20, Collections.singletonList(MetadataFactory.primaryKey())),
+                            MetadataFactory.varchar("column12", 20, Arrays.asList(MetadataFactory.notNull(),
+                                    MetadataFactory.defaultVal("default"))),
+                            MetadataFactory.integer("column13", Collections.singletonList(MetadataFactory.notNull()))
                     )));
 
             // Fill table3

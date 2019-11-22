@@ -11,6 +11,7 @@ import org.junit.Before;
 import ServerFactory.SqlManagerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,15 +35,10 @@ public abstract class AbstractServerLocalFileTest {
             // Create a table
             sqlServer.executeQuery(SqlQueryFactory
                     .createTable("DB1", "table1", Arrays.asList(
-                            MetadataFactory.integerBuilder("column1").notNull()
-                                    .primaryKey().build(),
-                            MetadataFactory.integerBuilder("column2")
-                                    .defaultValue(15)
-                                    .build(),
-                            MetadataFactory.varcharBuilder("column3", 20)
-                                    .notNull()
-                                    .build(),
-                            MetadataFactory.varcharBuilder("column4", 5).build()
+                            MetadataFactory.integer("column1", Arrays.asList(MetadataFactory.primaryKey())),
+                            MetadataFactory.integer("column2", Collections.singletonList(MetadataFactory.defaultVal(15))),
+                            MetadataFactory.varchar("column3", 20, Collections.singletonList(MetadataFactory.notNull())),
+                            MetadataFactory.varchar("column4", 5)
                     )));
 
             // Fill table1
@@ -63,10 +59,8 @@ public abstract class AbstractServerLocalFileTest {
             sqlServer.executeQuery(
                     SqlQueryFactory.createTable("DB1", "table2",
                             Arrays.asList(
-                                    MetadataFactory.integerBuilder("column5")
-                                            .notNull().primaryKey().build(),
-                                    MetadataFactory.varcharBuilder("column3", 15)
-                                            .build()
+                                    MetadataFactory.integer("column5", Collections.singletonList(MetadataFactory.primaryKey())),
+                                    MetadataFactory.varchar("column3", 15)
                             )));
 
             // Fill table2
