@@ -1,18 +1,14 @@
 package serverLocalFileImpl;
 
-import serverLocalFileImpl.intermediateresult.DataGroup;
-import serverLocalFileImpl.intermediateresult.DataHeader;
-import serverLocalFileImpl.intermediateresult.DataRow;
-import serverLocalFileImpl.intermediateresult.DataSet;
+import serverLocalFileImpl.intermediateresult.*;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
+import sqlapi.metadata.TableMetadata;
+import sqlapi.queries.*;
 import sqlapi.server.SqlServer;
 import sqlapi.exceptions.*;
-import sqlapi.metadata.TableMetadata;
 import sqlapi.misc.SelectedItem;
 import sqlapi.predicates.Predicate;
-import sqlapi.queries.SelectExpression;
-import sqlapi.queries.SqlStatement;
 import sqlapi.selectResult.ResultRow;
 import sqlapi.selectResult.ResultSet;
 import sqlapi.tables.DatabaseTableReference;
@@ -25,6 +21,7 @@ import serverLocalFileImpl.persistent.PersistentDatabase;
 import serverLocalFileImpl.persistent.PersistentTable;
 import ServerFactory.SqlManagerFactory;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,53 +34,110 @@ public final class SqlServerImpl implements SqlServer {
 
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
+    private final SelectQueryHandler selectQueryHandler = new SelectQueryHandler();
+
+    public SqlServerImpl() {
+        System.out.println("New local file SQL server instantiated.");
+    }
+
 
     @Override
     public void createDatabase(String databaseName)
             throws DatabaseAlreadyExistsException {
         logger.createDatabase(databaseName);
+        PersistentDatabase database = this.getDatabaseOrNull(databaseName);
+        if (database != null) {
+            throw new DatabaseAlreadyExistsException(databaseName);
+        }
+        databases.add(new PersistentDatabase(databaseName, this));
+    }
+
+    @Override
+    public void readDatabase(String fileName, String databaseName,
+                             Collection<TableMetadata> tables)
+            throws IOException, ClassNotFoundException, NoSuchTableException,
+            NoSuchColumnException {
+        logger.readDatabase(fileName, databaseName, tables);
+        PersistentDatabase database = this.getDatabaseOrNull(databaseName);
+        if (database != null) {
+            databases.remove(database);
+        }
+
+        ObjectInputStream ois = null;
+        try {
+            FileInputStream fis = new FileInputStream(fileName);
+            ois = new ObjectInputStream(fis);
+            database = (PersistentDatabase) ois.readObject();
+            database.validate(tables);
+            databases.add(database);
+        } finally {
+            if (ois != null) {
+                ois.close();
+            }
+        }
+    }
+
+    @Override public void saveDatabase(String databaseName, String fileName)
+            throws IOException, NoSuchDatabaseException {
+        logger.saveDatabase(databaseName, fileName);
+        ObjectOutputStream oos = null;
+        try {
+            File outputFile = new File(fileName);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(this.getDatabase(databaseName));
+        } finally {
+            if (oos != null) {
+                oos.close();
+            }
+        }
+    }
+
+    @Override
+    public void executeQuery(@NotNull SqlQuery query) throws SqlException {
+        logger.executeQuery(query);
+
+
+        if (query instanceof CreateDatabaseQuery) {
+            this.createDatabase((CreateDatabaseQuery) query);
+            return;
+        }
+        if (query instanceof CreateTableQuery) {
+            this.createTable((CreateTableQuery) query);
+            return;
+        }
+        if (query instanceof SqlTableQuery) {
+            this.executeTableQuery((SqlTableQuery) query);
+            return;
+        }
+    }
+
+    @Override
+    public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
+            throws SqlException {
+        logger.getQueryResult(selectQuery);
+        return createResultSet(this.getInternalQueryResult(selectQuery));
+    }
+
+    private void createDatabase(CreateDatabaseQuery query)
+            throws DatabaseAlreadyExistsException {
+        String databaseName = ((CreateDatabaseQuery) query).getDatabaseName();
         PersistentDatabase db = this.getDatabaseOrNull(databaseName);
         if (db != null) {
             throw new DatabaseAlreadyExistsException(databaseName);
         }
         databases.add(new PersistentDatabase(databaseName, this));
-
     }
 
-    @Override
-    public void createSchema(String dbName, String schemaName)
-            throws NoSuchDatabaseException, SchemaAlreadyExistsException {
-        logger.createSchema(dbName, schemaName);
-        this.getDatabase(dbName).createSchema(schemaName);
+    private void executeTableQuery(SqlTableQuery query) throws SqlException {
+        this.getDatabase(query.getDatabaseName()).executeQuery(query);
     }
 
-    @Override
-    public void setCurrentSchema(String dbName, String schemaName)
-            throws NoSuchDatabaseException, NoSuchSchemaException {
-        logger.setCurrentSchema(dbName, schemaName);
-        this.getDatabase(dbName).setCurrentSchema(schemaName);
-    }
-
-    @Override
-    public void openDatabaseWithTables(String dbName, List<TableMetadata> tables) {
-    }
-
-
-    @Override
-    public void persistDatabase(String dbName) {
-    }
-
-    @Override
-    public void executeQuery(SqlStatement statement) throws SqlException {
-        logger.executeQuery(statement);
-        this.getDatabase(statement.getDatabaseName()).executeStatement(statement);
-    }
-
-    @Override
-    public ResultSet getQueryResult(SelectExpression selectExpression)
-            throws SqlException {
-        logger.getQueryResult(selectExpression);
-        return createResultSet(this.getInternalQueryResult(selectExpression));
+    private void createTable(CreateTableQuery query)
+            throws NoSuchDatabaseException, TableAlreadyExistsException,
+            WrongValueTypeException {
+        this.getDatabase(query.getDatabaseName())
+                .createTable(query.getTableMetadata());
     }
 
     private PersistentDatabase getDatabase(String name) throws NoSuchDatabaseException {
@@ -114,7 +168,7 @@ public final class SqlServerImpl implements SqlServer {
      * 7.The union is taken after each sub-select is evaluated.
      * 8.Finally, the resulting rows are sorted according to the columns specified in the order by clause.
      */
-    public DataSet getInternalQueryResult(SelectExpression se) throws
+    public DataSet getInternalQueryResult(SelectQuery se) throws
             SqlException {
 
         DataSet result = this.getProductOfTables(se.getTableReferences());
@@ -175,7 +229,7 @@ public final class SqlServerImpl implements SqlServer {
 
     private List<ColumnExpression> getSelectedColumnExpressions(
             List<SelectedItem> selectedItems)
-            throws NoSuchTableException, NoSuchSchemaException, NoSuchDatabaseException {
+            throws NoSuchTableException, NoSuchDatabaseException {
 
         List<ColumnExpression> columnExpressions = new ArrayList<>();
         for (SelectedItem selectedItem : selectedItems) {
@@ -396,7 +450,7 @@ public final class SqlServerImpl implements SqlServer {
     private DataSet getSubqueryResult(TableFromSelectReference tr)
             throws SqlException {
         DataSet dataSet =
-                getInternalQueryResult(tr.getSelectExpression());
+                getInternalQueryResult(tr.getSelectQuery());
         String alias = tr.getAlias();
         if (alias.isEmpty()) {
             return dataSet;
@@ -442,9 +496,9 @@ public final class SqlServerImpl implements SqlServer {
     }
 
     private PersistentTable getTable(DatabaseTableReference tableReference) throws
-            NoSuchTableException, NoSuchSchemaException, NoSuchDatabaseException {
+            NoSuchTableException, NoSuchDatabaseException {
         return this.getDatabase(tableReference.getDatabaseName())
-                .getTable(tableReference.getSchemaName(), tableReference.getTableName());
+                .getTable(tableReference.getTableName());
     }
 
 

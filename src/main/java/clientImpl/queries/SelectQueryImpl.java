@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.queries.SelectExpression;
+import sqlapi.queries.SelectQuery;
 import sqlapi.misc.SelectedItem;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 
-public final class SelectExpressionImpl implements SelectExpression {
+final class SelectQueryImpl implements SelectQuery {
 
     @NotNull
     private final List<TableReference> tableReferences;
@@ -22,10 +22,10 @@ public final class SelectExpressionImpl implements SelectExpression {
     private final List<ColumnRef> groupByColumns;
 
 
-    public SelectExpressionImpl(@NotNull List<TableReference> tableReferences,
-                                @NotNull List<SelectedItem> selectedItems,
-                                @NotNull Predicate predicate,
-                                @NotNull List<ColumnRef> groupByColumns) {
+    SelectQueryImpl(@NotNull List<TableReference> tableReferences,
+                           @NotNull List<SelectedItem> selectedItems,
+                           @NotNull Predicate predicate,
+                           @NotNull List<ColumnRef> groupByColumns) {
         this.tableReferences = tableReferences;
         this.selectedItems = selectedItems;
         this.predicate = predicate;

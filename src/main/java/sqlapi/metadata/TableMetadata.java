@@ -1,10 +1,12 @@
 package sqlapi.metadata;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public interface TableMetadata {
 
-    String getTableName();
+    @NotNull String getTableName();
 
-    List<ColumnMetadata> getColumnsMetadata();
+    @NotNull List<ColumnMetadata> getColumnsMetadata();
 }

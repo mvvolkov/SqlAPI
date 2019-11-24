@@ -1,17 +1,17 @@
 package clientImpl.tableRef;
 
-import sqlapi.queries.SelectExpression;
+import sqlapi.queries.SelectQuery;
 import sqlapi.tables.TableFromSelectReference;
 
 public class TableFromSelectReferenceImpl implements TableFromSelectReference {
 
-    private final SelectExpression selectExpression;
+    private final SelectQuery selectQuery;
 
     private final String alias;
 
 
-    public TableFromSelectReferenceImpl(SelectExpression selectExpression, String alias) {
-        this.selectExpression = selectExpression;
+    public TableFromSelectReferenceImpl(SelectQuery selectQuery, String alias) {
+        this.selectQuery = selectQuery;
         this.alias = alias;
     }
 
@@ -21,7 +21,7 @@ public class TableFromSelectReferenceImpl implements TableFromSelectReference {
     }
 
     @Override
-    public SelectExpression getSelectExpression() {
-        return selectExpression;
+    public SelectQuery getSelectQuery() {
+        return selectQuery;
     }
 }

@@ -18,6 +18,7 @@ import sqlapi.tables.TableReference;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,64 +26,58 @@ import java.util.stream.Collectors;
 public class SqlServerLoggerImpl implements SqlServer {
 
 
+    @Override public void createDatabase(String databaseName) {
+        System.out.println("Creating new database: " + databaseName);
+    }
+
+    @Override public void readDatabase(String fileName, String databaseName,
+                                       Collection<TableMetadata> tables) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Reading database \"").append(databaseName);
+        sb.append("\" from file ").append(fileName);
+        sb.append("\nTables: ");
+        sb.append(tables.stream().map(TableMetadata::toString)
+                .collect(Collectors.joining("; ")));
+        System.out.println(sb);
+    }
+
+    @Override public void saveDatabase(String databaseName, String fileName) {
+        System.out
+                .println("Saving database \"" + databaseName + "\" to file " + fileName);
+    }
+
     @Override
-    public void executeQuery(SqlStatement stmt) throws SqlException {
-        switch (stmt.getType()) {
-            case CREATE_TABLE:
-                createTable((CreateTableStatement) stmt);
-                return;
-            case INSERT:
-                insert((InsertStatement) stmt);
-                return;
-            case INSERT_FROM_SELECT:
-                insert((InsertFromSelectStatement) stmt);
-                return;
-            case DELETE:
-                delete((DeleteStatement) stmt);
-                return;
-            case UPDATE:
-                update((UpdateStatement) stmt);
-                return;
+    public void executeQuery(SqlQuery query) throws SqlException {
+        if (query instanceof CreateTableQuery) {
+            createTable((CreateTableQuery) query);
+        }
+        if (query instanceof InsertQuery) {
+            insert((InsertQuery) query);
+        }
+        if (query instanceof InsertFromSelectQuery) {
+            insert((InsertFromSelectQuery) query);
+        }
+        if (query instanceof DeleteQuery) {
+            delete((DeleteQuery) query);
+        }
+        if (query instanceof UpdateQuery) {
+            update((UpdateQuery) query);
         }
     }
 
     @Override
-    public void createDatabase(String dbName) {
-        System.out.println("CREATE DATABASE " + dbName);
-    }
-
-    @Override
-    public void createSchema(String dbName, String schemaName) {
-        System.out.println("CREATE SCHEMA " + dbName + "." + schemaName);
-    }
-
-    @Override
-    public void setCurrentSchema(String dbName, String schemaName) {
-        System.out.println("SET CURRENT SCHEMA = " + dbName + "." + schemaName);
-    }
-
-    @Override
-    public void openDatabaseWithTables(String dbName, List<TableMetadata> tables) {
-    }
-
-    @Override
-    public void persistDatabase(String dbName) {
-    }
-
-
-    @Override
-    public @NotNull ResultSet getQueryResult(SelectExpression selectExpression) {
-        System.out.println(getSelectString(selectExpression) + ";");
+    public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery) {
+        System.out.println(getSelectString(selectQuery) + ";");
         return getEmptyResultSet();
     }
 
-    private static String getSelectString(SelectExpression selectExpression) {
+    private static String getSelectString(SelectQuery selectQuery) {
         StringBuilder sb = new StringBuilder("SELECT ");
-        if (selectExpression.getSelectedItems().isEmpty()) {
+        if (selectQuery.getSelectedItems().isEmpty()) {
             sb.append("*");
         } else {
             List<String> columns = new ArrayList<>();
-            for (SelectedItem se : selectExpression.getSelectedItems()) {
+            for (SelectedItem se : selectQuery.getSelectedItems()) {
                 if (se instanceof ColumnExpression) {
                     columns.add(se.toString());
                 }
@@ -94,31 +89,30 @@ public class SqlServerLoggerImpl implements SqlServer {
             sb.append(from);
         }
         sb.append(" FROM ");
-        String tables = selectExpression.getTableReferences().stream().
+        String tables = selectQuery.getTableReferences().stream().
                 map(table -> getTableReferencesString(table))
                 .collect(Collectors.joining(", "));
         sb.append(tables);
-        if (!selectExpression.getPredicate().isEmpty()) {
+        if (!selectQuery.getPredicate().isEmpty()) {
             sb.append(" WHERE ");
-            sb.append(selectExpression.getPredicate());
+            sb.append(selectQuery.getPredicate());
         }
-        if (!selectExpression.getGroupByColumns().isEmpty()) {
+        if (!selectQuery.getGroupByColumns().isEmpty()) {
             sb.append(" GROUP BY ");
             sb.append(
-                    selectExpression.getGroupByColumns().stream().map(ColumnRef::toString)
+                    selectQuery.getGroupByColumns().stream().map(ColumnRef::toString)
                             .collect(Collectors.joining(", ")));
         }
         return sb.toString();
     }
 
 
-    private static void createTable(CreateTableStatement stmt) {
+    private static void createTable(CreateTableQuery query) {
         StringBuilder sb = new StringBuilder("CREATE TABLE ");
-        sb.append(stmt.getTableName());
-        sb.append("(");
-        sb.append(stmt.getColumns().stream().map(ColumnMetadata::toString)
-                .collect(Collectors.joining(", ")));
-        sb.append(");");
+        sb.append(query.getDatabaseName());
+        sb.append(".");
+        sb.append(query.getTableMetadata().toString());
+        sb.append(";");
         System.out.println(sb);
     }
 
@@ -131,25 +125,24 @@ public class SqlServerLoggerImpl implements SqlServer {
         return String.valueOf(value);
     }
 
-    private static void insert(InsertStatement stmt) {
-
+    private static void insert(InsertQuery query) {
         StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
-        if (!stmt.getColumns().isEmpty()) {
-            String columns = stmt.getColumns().stream()
+        sb.append(query.getDatabaseName() + "." + query.getTableName());
+        if (!query.getColumns().isEmpty()) {
+            String columns = query.getColumns().stream()
                     .collect(Collectors.joining(", ", "(", ")"));
             sb.append(columns);
         }
         sb.append(" VALUES (");
         String valuesString =
-                stmt.getValues().stream().map(o -> getStringFromValue(o))
+                query.getValues().stream().map(o -> getStringFromValue(o))
                         .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
         System.out.println(sb);
     }
 
-    private static void insert(InsertFromSelectStatement stmt) {
+    private static void insert(InsertFromSelectQuery stmt) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");
         sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
@@ -159,12 +152,12 @@ public class SqlServerLoggerImpl implements SqlServer {
             sb.append(columns);
         }
         sb.append(" ");
-        sb.append(getSelectString(stmt.getSelectExpression()));
+        sb.append(getSelectString(stmt.getSelectQuery()));
         sb.append(";");
         System.out.println(sb);
     }
 
-    private static void delete(DeleteStatement stmt) {
+    private static void delete(DeleteQuery stmt) {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         if (!stmt.getPredicate().isEmpty()) {
@@ -181,7 +174,7 @@ public class SqlServerLoggerImpl implements SqlServer {
                 assignmentOperation.getValue();
     }
 
-    private static void update(UpdateStatement stmt) {
+    private static void update(UpdateQuery stmt) {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(stmt.getDatabaseName() + "." + stmt.getTableName());
         sb.append(" SET ");
@@ -238,7 +231,7 @@ public class SqlServerLoggerImpl implements SqlServer {
     private static String getTableFromSelectString(TableFromSelectReference tsr) {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
-        sb.append(getSelectString(tsr.getSelectExpression()));
+        sb.append(getSelectString(tsr.getSelectQuery()));
         sb.append(")");
         if (!tsr.getAlias().isEmpty()) {
             sb.append(" ");
@@ -263,8 +256,10 @@ public class SqlServerLoggerImpl implements SqlServer {
                 operator = "";
         }
         StringBuilder sb = new StringBuilder();
-        boolean leftRefIsDbTable = jtr.getLeftTableReference() instanceof DatabaseTableReference;
-        boolean rightRefIsDbTable = jtr.getRightTableReference() instanceof DatabaseTableReference;
+        boolean leftRefIsDbTable =
+                jtr.getLeftTableReference() instanceof DatabaseTableReference;
+        boolean rightRefIsDbTable =
+                jtr.getRightTableReference() instanceof DatabaseTableReference;
         if (!leftRefIsDbTable) {
             sb.append("(");
         }

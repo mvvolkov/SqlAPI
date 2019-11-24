@@ -2,6 +2,7 @@ package clientImpl.metadata;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.ColumnConstraint;
+import sqlapi.metadata.ColumnConstraintType;
 import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.SqlType;
 
@@ -15,15 +16,14 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
     @NotNull
     private final SqlType sqlType;
 
-    private final int size;
 
     @NotNull
     private final Collection<ColumnConstraint> constraints;
 
-    public ColumnMetadataImpl(String columnName, SqlType sqlType, int size, Collection<ColumnConstraint> constraints) {
+    public ColumnMetadataImpl(String columnName, SqlType sqlType,
+                              Collection<ColumnConstraint> constraints) {
         this.columnName = columnName;
         this.sqlType = sqlType;
-        this.size = size;
         this.constraints = constraints;
     }
 
@@ -46,38 +46,19 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
         return constraints;
     }
 
-    @Override
-    public int getSize() {
-        return size;
-    }
-
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(columnName);
-        sb.append(" ");
-        sb.append(this.getSqlType());
-        if (this.getSize() != -1) {
-            sb.append("(");
-            sb.append(this.getSize());
-            sb.append(")");
-        }
+        StringBuilder sb = new StringBuilder();
         for (ColumnConstraint constraint : constraints) {
-            switch (constraint.getConstraintType()) {
-                case NOT_NULL:
-                    sb.append(" NOT NULL");
-                    break;
-                case PRIMARY_KEY:
-                    sb.append(" PRIMARY KEY");
-                    break;
-                case DEFAULT_VALUE:
-                    sb.append(" DEFAULT ");
-                    sb.append(constraint.getParameters().get(0));
-                default:
-                    // do nothing
+            if (constraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
+                sb.insert(0, "(" + constraint.getParameters().get(0) + ")");
+                continue;
             }
+            sb.append(" ").append(constraint.toString());
         }
-        return sb.toString();
+
+        return columnName + " " + sqlType + sb.toString();
     }
 
 

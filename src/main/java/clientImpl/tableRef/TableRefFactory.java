@@ -1,7 +1,7 @@
 package clientImpl.tableRef;
 
 import clientImpl.predicates.PredicateFactory;
-import sqlapi.queries.SelectExpression;
+import sqlapi.queries.SelectQuery;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
 
@@ -133,12 +133,12 @@ public class TableRefFactory {
         return rightOuterJoin(dbTable(dbName1, tableName1), dbTable(dbName2, tableName2));
     }
 
-    public static TableReference tableFromSelect(SelectExpression selectExpression,
+    public static TableReference tableFromSelect(SelectQuery selectQuery,
                                                  String alias) {
-        return new TableFromSelectReferenceImpl(selectExpression, alias);
+        return new TableFromSelectReferenceImpl(selectQuery, alias);
     }
 
-    public static TableReference tableFromSelect(SelectExpression selectExpression) {
-        return new TableFromSelectReferenceImpl(selectExpression, "");
+    public static TableReference tableFromSelect(SelectQuery selectQuery) {
+        return new TableFromSelectReferenceImpl(selectQuery, "");
     }
 }

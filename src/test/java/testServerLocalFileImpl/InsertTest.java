@@ -210,11 +210,10 @@ public class InsertTest extends AbstractServerLocalFileTest {
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
                     Arrays.asList("column3", "column1", "column4"),
                     Arrays.asList("test15", 17, "t12345")));
-        } catch (MaxSizeExceededException me) {
-            System.out.println(me.getMessage());
-            assertEquals("column4", me.getColumnName());
-            assertEquals(5, me.getMaxSize());
-            assertEquals(6, me.getActualSize());
+        } catch (ConstraintViolationException ce) {
+            System.out.println(ce.getMessage());
+            assertEquals("column4", ce.getColumnName());
+            assertEquals(ColumnConstraintType.MAX_SIZE, ce.getConstraintType());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());

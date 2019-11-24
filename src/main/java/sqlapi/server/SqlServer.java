@@ -1,29 +1,31 @@
 package sqlapi.server;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
-import sqlapi.queries.SelectExpression;
-import sqlapi.queries.SqlStatement;
+import sqlapi.queries.SelectQuery;
+import sqlapi.queries.SqlQuery;
 import sqlapi.selectResult.ResultSet;
 
-import java.util.List;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
 
 public interface SqlServer {
 
-    void createDatabase(String dbName) throws DatabaseAlreadyExistsException;
+    void createDatabase(String databaseName) throws DatabaseAlreadyExistsException;
 
-    void createSchema(String dbName, String schemaName)
-            throws NoSuchDatabaseException, SchemaAlreadyExistsException;
+    void readDatabase(String fileName, String databaseName,
+                      Collection<TableMetadata> tables)
+            throws IOException, ClassNotFoundException, NoSuchTableException,
+            NoSuchColumnException;
 
-    void setCurrentSchema(String dbName, String schemaName)
-            throws NoSuchDatabaseException, NoSuchSchemaException;
+    void saveDatabase(String databaseName, String fileName)
+            throws IOException, NoSuchDatabaseException;
 
-    void openDatabaseWithTables(String dbName, List<TableMetadata> tables);
 
-    void persistDatabase(String dbName);
+    void executeQuery(@NotNull SqlQuery query) throws SqlException;
 
-    void executeQuery(SqlStatement statement) throws SqlException;
-
-    ResultSet getQueryResult(SelectExpression selectExpression) throws SqlException;
-
+    @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
+            throws SqlException;
 }

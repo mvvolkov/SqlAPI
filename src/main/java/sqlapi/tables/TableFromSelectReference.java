@@ -1,12 +1,12 @@
 package sqlapi.tables;
 
-import sqlapi.queries.SelectExpression;
+import sqlapi.queries.SelectQuery;
 
 public interface TableFromSelectReference extends TableReference {
 
     String getAlias();
 
-    SelectExpression getSelectExpression();
+    SelectQuery getSelectQuery();
 
     @Override
     default TableRefType getTableRefType() {

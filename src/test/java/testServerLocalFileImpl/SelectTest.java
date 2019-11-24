@@ -52,12 +52,17 @@ public class SelectTest extends AbstractServerLocalFileTest {
         try {
             // Create one more table
             sqlServer.executeQuery(SqlQueryFactory
-                    .createTable("DB1", "table3", Arrays.asList(
-                            MetadataFactory.varchar("column11", 20, Collections.singletonList(MetadataFactory.primaryKey())),
-                            MetadataFactory.varchar("column12", 20, Arrays.asList(MetadataFactory.notNull(),
-                                    MetadataFactory.defaultVal("default"))),
-                            MetadataFactory.integer("column13", Collections.singletonList(MetadataFactory.notNull()))
-                    )));
+                    .createTable("DB1",
+                            MetadataFactory.tableMetadata("table3", Arrays.asList(
+                                    MetadataFactory.varchar("column11", 20, Collections
+                                            .singletonList(MetadataFactory.primaryKey())),
+                                    MetadataFactory.varchar("column12", 20,
+                                            Arrays.asList(MetadataFactory.notNull(),
+                                                    MetadataFactory
+                                                            .defaultVal("default"))),
+                                    MetadataFactory.integer("column13", Collections
+                                            .singletonList(MetadataFactory.notNull()))
+                            ))));
 
             // Fill table3
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table3",
@@ -265,7 +270,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
                                     ColumnExprFactory.columnRef("column5"),
                                     ColumnExprFactory.columnRef("table2", "column3")
                             ),
-                            PredicateFactory.equals("table2", "column3", "table1", "column3")
+                            PredicateFactory
+                                    .equals("table2", "column3", "table1", "column3")
                                     .and(PredicateFactory.isNotNull("column4"))));
 
             printResultSet(resultSet);
@@ -364,7 +370,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
             // 1.
             ResultSet resultSet = sqlServer.getQueryResult(SqlQueryFactory.select(
                     TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
-                            PredicateFactory.equals("table2", "column3", "table1", "column3"))));
+                            PredicateFactory
+                                    .equals("table2", "column3", "table1", "column3"))));
 
             printResultSet(resultSet);
 
@@ -379,7 +386,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
             // 2.
             resultSet = sqlServer.getQueryResult(SqlQueryFactory.select(
                     TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
-                            PredicateFactory.equals("table2", "column3", "table1", "column3")),
+                            PredicateFactory
+                                    .equals("table2", "column3", "table1", "column3")),
                     Arrays.asList(
                             ColumnExprFactory.columnRef("column5"),
                             ColumnExprFactory.columnRef("column1"),
@@ -390,7 +398,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
 
             printResultSet(resultSet);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column1", "column2", "column4");
+            checkHeaders(resultSet.getHeaders(), "column5", "column1", "column2",
+                    "column4");
             assertEquals(1, resultSet.getRows().size());
             checkRowExists(resultSet, 23, 13, 33, "t653");
 
@@ -399,7 +408,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
                     TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
                             PredicateFactory.isNotNull("column2").and(
                                     PredicateFactory.equals("column5",
-                                            ColumnExprFactory.diff("column2", ColumnExprFactory.value(9))
+                                            ColumnExprFactory.diff("column2",
+                                                    ColumnExprFactory.value(9))
                                     )))));
 
             printResultSet(resultSet);
@@ -417,10 +427,12 @@ public class SelectTest extends AbstractServerLocalFileTest {
                             TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
                                     PredicateFactory.isNotNull("column2").and(
                                             PredicateFactory.equals("column5",
-                                                    ColumnExprFactory.diff("column2", ColumnExprFactory.value(9))
+                                                    ColumnExprFactory.diff("column2",
+                                                            ColumnExprFactory.value(9))
                                             ))),
                             "DB1", "table3",
-                            PredicateFactory.equals("table2", "column3", "table3", "column11").or(
+                            PredicateFactory
+                                    .equals("table2", "column3", "table3", "column11").or(
                                     PredicateFactory.equals("column4", "column12")
                             )
                     )));
@@ -429,8 +441,10 @@ public class SelectTest extends AbstractServerLocalFileTest {
             checkHeaders(resultSet.getHeaders(), "column5", "column3", "column1",
                     "column2", "column3", "column4", "column11", "column12", "column13");
             assertEquals(2, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 11, 31, "test2", null, "test3", "cc", 41);
-            checkRowExists(resultSet, 23, "test2", 12, 32, "test3", "t43", "ccc", "t43", 38);
+            checkRowExists(resultSet, 22, "test3", 11, 31, "test2", null, "test3", "cc",
+                    41);
+            checkRowExists(resultSet, 23, "test2", 12, 32, "test3", "t43", "ccc", "t43",
+                    38);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -451,7 +465,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
         try {
             ResultSet resultSet = sqlServer.getQueryResult(SqlQueryFactory.select(
                     TableRefFactory.leftOuterJoin("DB1", "table2", "DB1", "table3",
-                            PredicateFactory.equals("table2", "column3", "table3", "column11"))));
+                            PredicateFactory
+                                    .equals("table2", "column3", "table3", "column11"))));
 
             printResultSet(resultSet);
 
@@ -479,11 +494,13 @@ public class SelectTest extends AbstractServerLocalFileTest {
         try {
             ResultSet resultSet = sqlServer.getQueryResult(SqlQueryFactory.select(
                     TableRefFactory.rightOuterJoin("DB1", "table1", "DB1", "table3",
-                            PredicateFactory.equals("table1", "column4", "table3", "column12"))));
+                            PredicateFactory
+                                    .equals("table1", "column4", "table3", "column12"))));
 
             printResultSet(resultSet);
 
-            checkHeaders(resultSet.getHeaders(), "column1", "column2", "column3", "column4",
+            checkHeaders(resultSet.getHeaders(), "column1", "column2", "column3",
+                    "column4",
                     "column11", "column12", "column13");
             assertEquals(2, resultSet.getRows().size());
             checkRowExists(resultSet, null, null, null, null, "test3", "cc", 41);
@@ -510,7 +527,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
             ResultSet resultSet = sqlServer.getQueryResult(SqlQueryFactory.select(
                     Arrays.asList(TableRefFactory.dbTable("DB1", "table2"),
                             TableRefFactory.tableFromSelect(SqlQueryFactory.select(
-                                    TableRefFactory.dbTable("DB1", "table1"), Arrays.asList(
+                                    TableRefFactory.dbTable("DB1", "table1"),
+                                    Arrays.asList(
                                             ColumnExprFactory.columnRef("column2"),
                                             ColumnExprFactory.columnRef("column3")
                                     )), "t1")
@@ -521,7 +539,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
 
             printResultSet(resultSet);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column2", "column3");
+            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column2",
+                    "column3");
             assertEquals(3, resultSet.getRows().size());
             checkRowExists(resultSet, 22, "test3", 32, "test3");
             checkRowExists(resultSet, 23, "test2", 31, "test2");
@@ -559,7 +578,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
                             .singletonList(ColumnExprFactory.columnRef("column3"))));
 
             printResultSet(resultSet);
-            checkHeaders(resultSet.getHeaders(), "column3", "COUNT ALL + 1", "COUNT column2");
+            checkHeaders(resultSet.getHeaders(), "column3", "COUNT ALL + 1",
+                    "COUNT column2");
             assertEquals(3, resultSet.getRows().size());
             checkRowExists(resultSet, "test3", 2, 1);
             checkRowExists(resultSet, "test1", 4, 2);
@@ -589,7 +609,8 @@ public class SelectTest extends AbstractServerLocalFileTest {
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.groupSum("column1"),
                             ColumnExprFactory.groupSumWithAlias("column2", "S2")),
-                    PredicateFactory.isNotNull("column1").and(PredicateFactory.isNotNull("column2")),
+                    PredicateFactory.isNotNull("column1")
+                            .and(PredicateFactory.isNotNull("column2")),
                     Collections.singletonList(ColumnExprFactory.columnRef("column3"))));
 
             printResultSet(resultSet);
@@ -624,11 +645,13 @@ public class SelectTest extends AbstractServerLocalFileTest {
                             ColumnExprFactory.groupMaxWithAlias("column2", "MAX2"),
                             ColumnExprFactory.groupMinWithAlias("column2", "MIN2")),
 
-                    PredicateFactory.isNotNull("column1").and(PredicateFactory.isNotNull("column2")),
+                    PredicateFactory.isNotNull("column1")
+                            .and(PredicateFactory.isNotNull("column2")),
                     Collections.singletonList(ColumnExprFactory.columnRef("column3"))));
 
             printResultSet(resultSet);
-            checkHeaders(resultSet.getHeaders(), "column3", "SUM1", "MAX1", "MIN1", "SUM2", "MAX2", "MIN2");
+            checkHeaders(resultSet.getHeaders(), "column3", "SUM1", "MAX1", "MIN1",
+                    "SUM2", "MAX2", "MIN2");
             assertEquals(3, resultSet.getRows().size());
             checkRowExists(resultSet, "test3", 12, 12, 12, 32, 32, 32);
             checkRowExists(resultSet, "test1", 25, 15, 10, 64, 34, 30);

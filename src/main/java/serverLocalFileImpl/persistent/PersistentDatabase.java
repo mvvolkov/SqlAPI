@@ -2,6 +2,8 @@ package serverLocalFileImpl.persistent;
 
 import serverLocalFileImpl.SqlServerImpl;
 import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnMetadata;
+import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
 import sqlapi.selectResult.ResultRow;
 import sqlapi.selectResult.ResultSet;
@@ -16,126 +18,104 @@ public class PersistentDatabase implements Serializable {
 
     private final String name;
 
-    private final Collection<PersistentSchema> schemas = new ArrayList<>();
-
-    private PersistentSchema defaultSchema;
+    private final Collection<PersistentTable> tables = new ArrayList<>();
 
     private final transient SqlServerImpl sqlServer;
 
     public PersistentDatabase(String name, SqlServerImpl sqlServer) {
         this.name = name;
         this.sqlServer = sqlServer;
-        defaultSchema = new PersistentSchema("dbo");
-        schemas.add(defaultSchema);
     }
 
     public String getName() {
         return name;
     }
 
-    private PersistentSchema getCurrentSchema() {
-        return defaultSchema;
-    }
 
-    public void setCurrentSchema(String schemaName) throws NoSuchSchemaException {
-        for (PersistentSchema schema : schemas) {
-            if (schema.getName().equals(schemaName)) {
-                defaultSchema = schema;
-                return;
-            }
+    public void createTable(TableMetadata tableMetadata)
+            throws TableAlreadyExistsException, WrongValueTypeException {
+
+        PersistentTable table = this.getTableOrNull(tableMetadata.getTableName());
+        if (table != null) {
+            throw new TableAlreadyExistsException(name,
+                    tableMetadata.getTableName());
         }
-        throw new NoSuchSchemaException(name, schemaName);
+        tables.add(new PersistentTable(name, tableMetadata));
     }
 
-    public void createSchema(String schemaName)
-            throws SchemaAlreadyExistsException {
-        for (PersistentSchema schema : schemas) {
-            if (schema.getName().equals(schemaName)) {
-                throw new SchemaAlreadyExistsException(name, schemaName);
-            }
+    public void executeQuery(SqlTableQuery query) throws SqlException {
+        if (query instanceof InsertQuery) {
+            this.insert((InsertQuery) query);
+            return;
         }
-        schemas.add(new PersistentSchema(schemaName));
-    }
-
-    public void executeStatement(SqlStatement stmt) throws SqlException {
-        switch (stmt.getType()) {
-            case CREATE_TABLE:
-                this.createTable((CreateTableStatement) stmt);
-                return;
-            case INSERT:
-                this.insert((InsertStatement) stmt);
-                return;
-            case INSERT_FROM_SELECT:
-                this.insert((InsertFromSelectStatement) stmt);
-                return;
-            case DELETE:
-                this.delete((DeleteStatement) stmt);
-                return;
-            case UPDATE:
-                this.update((UpdateStatement) stmt);
-                return;
+        if (query instanceof InsertFromSelectQuery) {
+            this.insert((InsertFromSelectQuery) query);
+            return;
+        }
+        if (query instanceof DeleteQuery) {
+            this.delete((DeleteQuery) query);
+            return;
+        }
+        if (query instanceof UpdateQuery) {
+            this.update((UpdateQuery) query);
+            return;
         }
         throw new InvalidQueryException("Invalid type of SQL query.");
     }
 
 
-    private void createTable(CreateTableStatement stmt)
-            throws TableAlreadyExistsException, WrongValueTypeException {
-        PersistentSchema schema = this.getCurrentSchema();
-        PersistentTable table = schema.getTableOrNull(stmt.getTableName());
-        if (table != null) {
-            throw new TableAlreadyExistsException(schema.getName(),
-                    stmt.getTableName());
-        }
-        schema.addTable(new PersistentTable(schema.getName(), stmt.getTableName(),
-                stmt.getColumns()));
-    }
-
-    private void insert(InsertStatement stmt)
+    private void insert(InsertQuery query)
             throws SqlException {
-        this.getTable(stmt).insert(stmt.getColumns(), stmt.getValues());
+        this.getTable(query.getTableName()).insert(query.getColumns(), query.getValues());
     }
 
-    private void insert(InsertFromSelectStatement stmt)
+    private void insert(InsertFromSelectQuery query)
             throws SqlException {
         ResultSet resultSet =
                 SqlServerImpl.createResultSet(
-                        sqlServer.getInternalQueryResult(stmt.getSelectExpression()));
+                        sqlServer.getInternalQueryResult(query.getSelectQuery()));
         for (ResultRow row : resultSet.getRows()) {
-            this.getTable(stmt).insert(stmt.getColumns(), row.getValues());
+            this.getTable(query.getTableName())
+                    .insert(query.getColumns(), row.getValues());
         }
     }
 
 
-    private void delete(DeleteStatement stmt)
+    private void delete(DeleteQuery query)
             throws SqlException {
-        this.getTable(stmt).delete(stmt.getPredicate());
+        this.getTable(query.getTableName()).delete(query.getPredicate());
     }
 
-    private void update(UpdateStatement stmt)
+    private void update(UpdateQuery query)
             throws SqlException {
-        PersistentTable table = this.getTable(stmt);
-        table.update(stmt);
-    }
-
-    private PersistentTable getTable(SqlStatement stmt)
-            throws NoSuchTableException {
-        return this.getCurrentSchema().getTable(stmt.getTableName());
+        this.getTable(query.getTableName()).update(query);
     }
 
 
-    public PersistentTable getTable(String schemaName, String tableName) throws
-            NoSuchTableException, NoSuchSchemaException {
-        if (schemaName.isEmpty()) {
-            schemaName = this.getCurrentSchema().getName();
-        }
-        for (PersistentSchema schema : schemas) {
-            if (schema.getName().equals(schemaName)) {
-                return schema.getTable(tableName);
+    private PersistentTable getTableOrNull(String tableName) {
+        for (PersistentTable table : tables) {
+            if (table.getTableName().equals(tableName)) {
+                return table;
             }
         }
-        throw new NoSuchSchemaException(name, schemaName);
+        return null;
     }
 
 
+    public PersistentTable getTable(String tableName) throws NoSuchTableException {
+        PersistentTable table = this.getTableOrNull(tableName);
+        if (table == null) {
+            throw new NoSuchTableException(tableName);
+        }
+        return table;
+    }
+
+    public void validate(Collection<TableMetadata> tableMetadataCollection)
+            throws NoSuchTableException, NoSuchColumnException {
+
+        for (TableMetadata tableMetadata : tableMetadataCollection) {
+            PersistentTable table = this.getTable(tableMetadata.getTableName());
+            table.validate(tableMetadata);
+        }
+    }
 }

@@ -9,11 +9,4 @@ public interface ColumnMetadata {
     SqlType getSqlType();
 
     Collection<ColumnConstraint> getConstraints();
-    
-    default int getSize() {
-        return -1;
-    }
-
-//    Object getDefaultValue();
-
 }

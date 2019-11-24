@@ -16,18 +16,20 @@ public final class TableMetadataImpl implements TableMetadata {
     private final List<ColumnMetadata> columnMetadata;
 
 
-    public TableMetadataImpl(@NotNull String tableName,
-                             @NotNull List<ColumnMetadata> columnMetadata) {
+    TableMetadataImpl(@NotNull String tableName,
+                      @NotNull List<ColumnMetadata> columnMetadata) {
         this.tableName = tableName;
         this.columnMetadata = columnMetadata;
     }
 
 
     @NotNull
+    @Override
     public List<ColumnMetadata> getColumnsMetadata() {
         return columnMetadata;
     }
 
+    @NotNull
     @Override
     public String getTableName() {
         return tableName;

@@ -28,18 +28,22 @@ public abstract class AbstractServerLocalFileTest {
         sqlServer = SqlManagerFactory.getServerLocalFileSqlManager();
         try {
             // Create a database
-            sqlServer.createDatabase("DB1");
-            sqlServer.createSchema("DB1", "MySchema");
-            sqlServer.setCurrentSchema("DB1", "MySchema");
+            sqlServer.executeQuery(SqlQueryFactory.createDatabase("DB1"));
 
             // Create a table
             sqlServer.executeQuery(SqlQueryFactory
-                    .createTable("DB1", "table1", Arrays.asList(
-                            MetadataFactory.integer("column1", Arrays.asList(MetadataFactory.primaryKey())),
-                            MetadataFactory.integer("column2", Collections.singletonList(MetadataFactory.defaultVal(15))),
-                            MetadataFactory.varchar("column3", 20, Collections.singletonList(MetadataFactory.notNull())),
-                            MetadataFactory.varchar("column4", 5)
-                    )));
+                    .createTable("DB1",
+                            MetadataFactory.tableMetadata("table1", Arrays.asList(
+                                    MetadataFactory.integer("column1",
+                                            Arrays.asList(MetadataFactory.primaryKey())),
+                                    MetadataFactory.integer("column2", Collections
+                                            .singletonList(
+                                                    MetadataFactory.defaultVal(15))),
+                                    MetadataFactory.varchar("column3", 20,
+                                            Collections.singletonList(
+                                                    MetadataFactory.notNull())),
+                                    MetadataFactory.varchar("column4", 5)
+                            ))));
 
             // Fill table1
             sqlServer.executeQuery(SqlQueryFactory.insert("DB1", "table1",
@@ -57,11 +61,14 @@ public abstract class AbstractServerLocalFileTest {
 
             // Create a table
             sqlServer.executeQuery(
-                    SqlQueryFactory.createTable("DB1", "table2",
-                            Arrays.asList(
-                                    MetadataFactory.integer("column5", Collections.singletonList(MetadataFactory.primaryKey())),
-                                    MetadataFactory.varchar("column3", 15)
-                            )));
+                    SqlQueryFactory
+                            .createTable("DB1", MetadataFactory.tableMetadata("table2",
+                                    Arrays.asList(
+                                            MetadataFactory.integer("column5", Collections
+                                                    .singletonList(MetadataFactory
+                                                            .primaryKey())),
+                                            MetadataFactory.varchar("column3", 15)
+                                    ))));
 
             // Fill table2
             sqlServer.executeQuery(

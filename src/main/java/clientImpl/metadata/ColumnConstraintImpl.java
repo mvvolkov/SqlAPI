@@ -31,4 +31,20 @@ public class ColumnConstraintImpl implements ColumnConstraint {
     public List<Object> getParameters() {
         return parameters;
     }
+
+    @Override
+    public String toString() {
+        switch (type) {
+            case MAX_SIZE:
+                return "MAX SIZE (" + parameters.get(0) + ")";
+            case NOT_NULL:
+                return "NOT NULL";
+            case PRIMARY_KEY:
+                return "PRIMARY KEY";
+            case DEFAULT_VALUE:
+                return "DEFAULT " + parameters.get(0);
+            default:
+                return "";
+        }
+    }
 }

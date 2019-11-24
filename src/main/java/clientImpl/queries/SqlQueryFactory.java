@@ -1,14 +1,16 @@
 package clientImpl.queries;
 
+import clientImpl.predicates.PredicateFactory;
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnRef;
+import sqlapi.metadata.TableMetadata;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.misc.SelectedItem;
-import sqlapi.tables.TableReference;
-import sqlapi.metadata.ColumnMetadata;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.*;
-import clientImpl.predicates.PredicateFactory;
+import sqlapi.tables.TableReference;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,147 +19,156 @@ public class SqlQueryFactory {
     private SqlQueryFactory() {
     }
 
-    public static CreateTableStatement createTable(String databaseName, String tableName,
-                                                   List<ColumnMetadata> columns) {
-        return new CreateTableStatementImpl(databaseName, tableName, columns);
+    public static @NotNull CreateDatabaseQuery createDatabase(
+            @NotNull String databaseName) {
+        return new CreateDatabaseQueryImpl(databaseName);
     }
 
-    public static InsertStatement insert(String databaseName, String tableName,
-                                         List<String> columns,
-                                         List<Object> values) {
-        return new InsertStatementImpl(databaseName, tableName, columns, values);
+    public static @NotNull CreateTableQuery createTable(@NotNull String databaseName,
+                                                        @NotNull TableMetadata tableMetadata) {
+        return new CreateTableQueryImpl(databaseName, tableMetadata);
     }
 
-    public static InsertStatement insert(String databaseName, String tableName,
-                                         List<Object> values) {
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull List<String> columns,
+                                              @NotNull List<Object> values) {
+        return new @NotNull InsertQueryImpl(databaseName, tableName, columns, values);
+    }
+
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull List<Object> values) {
         return insert(databaseName, tableName, Collections.emptyList(), values);
     }
 
-    public static InsertFromSelectStatementImpl insert(String databaseName,
-                                                       String tableName,
-                                                       List<String> columns,
-                                                       SelectExpression selectExpression) {
-        return new InsertFromSelectStatementImpl(databaseName, tableName, columns,
-                selectExpression);
+    public static @NotNull InsertFromSelectQueryImpl insert(@NotNull String databaseName,
+                                                            @NotNull String tableName,
+                                                            @NotNull List<String> columns,
+                                                            @NotNull SelectQuery selectQuery) {
+        return new InsertFromSelectQueryImpl(databaseName, tableName, columns,
+                selectQuery);
     }
 
-    public static InsertFromSelectStatementImpl insert(String databaseName,
-                                                       String tableName,
-                                                       SelectExpression selectExpression) {
+    public static @NotNull InsertFromSelectQueryImpl insert(@NotNull String databaseName,
+                                                            @NotNull String tableName,
+                                                            @NotNull SelectQuery selectQuery) {
         return insert(databaseName, tableName, Collections.emptyList(),
-                selectExpression);
+                selectQuery);
     }
 
-    public static DeleteStatement delete(String databaseName, String tableName,
-                                         Predicate predicate) {
-        return new DeleteStatementImpl(databaseName, tableName, predicate);
+    public static @NotNull DeleteQuery delete(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull Predicate predicate) {
+        return new DeleteQueryImpl(databaseName, tableName, predicate);
     }
 
-    public static DeleteStatement delete(String databaseName, String tableName) {
+    public static @NotNull DeleteQuery delete(@NotNull String databaseName,
+                                              @NotNull String tableName) {
         return delete(databaseName, tableName, PredicateFactory.empty());
     }
 
 
-    public static UpdateStatement update(String databaseName, String tableName,
-                                         List<AssignmentOperation> assignmentOperations,
-                                         Predicate predicate) {
-        return new UpdateStatementImpl(databaseName, tableName, assignmentOperations,
+    public static @NotNull UpdateQuery update(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull Collection<AssignmentOperation> assignmentOperations,
+                                              @NotNull Predicate predicate) {
+        return new UpdateQueryImpl(databaseName, tableName, assignmentOperations,
                 predicate);
     }
 
-    public static UpdateStatement update(String databaseName, String tableName,
-                                         List<AssignmentOperation> assignmentOperations) {
+    public static @NotNull UpdateQuery update(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull Collection<AssignmentOperation> assignmentOperations) {
         return update(databaseName, tableName, assignmentOperations,
                 PredicateFactory.empty());
     }
 
 
-    public static SelectExpression selectGrouped(
-            List<TableReference> tableReferences, List<SelectedItem> selectedItems,
-            Predicate predicate, List<ColumnRef> groupByColumns) {
-        return new SelectExpressionImpl(tableReferences, selectedItems, predicate,
-                groupByColumns);
-    }
-
-    public static SelectExpression select(
-            List<TableReference> tableReferences, List<SelectedItem> selectedItems,
-            Predicate predicate) {
-        return new SelectExpressionImpl(tableReferences, selectedItems, predicate,
+    public static @NotNull SelectQuery select(
+            @NotNull List<TableReference> tableReferences,
+            @NotNull List<SelectedItem> selectedItems,
+            @NotNull Predicate predicate) {
+        return new SelectQueryImpl(tableReferences, selectedItems, predicate,
                 Collections.emptyList());
     }
 
-    public static SelectExpression selectGrouped(TableReference tableReference,
-                                                 List<SelectedItem> selectedItems,
-                                                 Predicate predicate,
-                                                 List<ColumnRef> groupByColumns) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                selectedItems,
+    public static @NotNull SelectQuery select(@NotNull TableReference tableReference,
+                                              @NotNull List<SelectedItem> selectedItems,
+                                              @NotNull Predicate predicate) {
+        return select(Collections.singletonList(tableReference), selectedItems,
+                predicate);
+    }
+
+
+    public static @NotNull SelectQuery select(
+            @NotNull List<TableReference> tableReferences,
+            @NotNull Predicate predicate) {
+        return select(tableReferences, Collections.emptyList(), predicate);
+    }
+
+
+    public static @NotNull SelectQuery select(
+            @NotNull TableReference tableReference,
+            @NotNull Predicate predicate) {
+        return select(Collections.singletonList(tableReference), predicate);
+    }
+
+    public static @NotNull SelectQuery select(
+            @NotNull List<TableReference> tableReferences,
+            @NotNull List<SelectedItem> selectedItems) {
+        return select(tableReferences, selectedItems, PredicateFactory.empty());
+    }
+
+    public static @NotNull SelectQuery select(
+            @NotNull TableReference tableReference,
+            @NotNull List<SelectedItem> selectedItems) {
+        return select(Collections.singletonList(tableReference), selectedItems);
+    }
+
+    public static @NotNull SelectQuery select(
+            @NotNull List<TableReference> tableReferences) {
+        return select(tableReferences, Collections.emptyList());
+    }
+
+    public static @NotNull SelectQuery select(
+            @NotNull TableReference tableReference) {
+        return select(Collections.singletonList(tableReference));
+    }
+
+
+    public static SelectQuery selectGrouped(
+            @NotNull List<TableReference> tableReferences,
+            @NotNull List<SelectedItem> selectedItems,
+            @NotNull Predicate predicate, @NotNull List<ColumnRef> groupByColumns) {
+        return new SelectQueryImpl(tableReferences, selectedItems, predicate,
+                groupByColumns);
+    }
+
+    public static @NotNull SelectQuery selectGrouped(
+            @NotNull TableReference tableReference,
+            @NotNull List<SelectedItem> selectedItems,
+            @NotNull Predicate predicate,
+            @NotNull List<ColumnRef> groupByColumns) {
+        return selectGrouped(Collections.singletonList(tableReference), selectedItems,
                 predicate, groupByColumns);
     }
 
-    public static SelectExpression select(TableReference tableReference,
-                                          List<SelectedItem> selectedItems,
-                                          Predicate predicate) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                selectedItems,
-                predicate, Collections.emptyList());
+
+    public static @NotNull SelectQuery selectGrouped(
+            @NotNull List<TableReference> tableReferences,
+            @NotNull List<SelectedItem> selectedItems,
+            @NotNull List<ColumnRef> groupByColumns) {
+        return selectGrouped(tableReferences, selectedItems, PredicateFactory.empty(),
+                groupByColumns);
     }
 
 
-    public static SelectExpression select(
-            List<TableReference> tableReferences,
-            Predicate predicate) {
-        return new SelectExpressionImpl(tableReferences, Collections.emptyList(),
-                predicate, Collections.emptyList());
-    }
-
-
-    public static SelectExpression select(
-            TableReference tableReference,
-            Predicate predicate) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                Collections.emptyList(),
-                predicate, Collections.emptyList());
-    }
-
-    public static SelectExpression selectGrouped(
-            List<TableReference> tableReferences, List<SelectedItem> selectedItems,
-            List<ColumnRef> groupByColumns) {
-        return new SelectExpressionImpl(tableReferences, selectedItems,
-                PredicateFactory.empty(), groupByColumns);
-    }
-
-    public static SelectExpression select(
-            List<TableReference> tableReferences, List<SelectedItem> selectedItems) {
-        return new SelectExpressionImpl(tableReferences, selectedItems,
-                PredicateFactory.empty(), Collections.emptyList());
-    }
-
-    public static SelectExpression selectGrouped(
-            TableReference tableReference, List<SelectedItem> selectedItems,
-            List<ColumnRef> groupByColumns) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                selectedItems,
-                PredicateFactory.empty(), groupByColumns);
-    }
-
-    public static SelectExpression select(
-            TableReference tableReference, List<SelectedItem> selectedItems) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                selectedItems,
-                PredicateFactory.empty(), Collections.emptyList());
-    }
-
-    public static SelectExpression select(
-            List<TableReference> tableReferences) {
-        return new SelectExpressionImpl(tableReferences, Collections.emptyList(),
-                PredicateFactory.empty(), Collections.emptyList());
-    }
-
-    public static SelectExpression select(
-            TableReference tableReference) {
-        return new SelectExpressionImpl(Collections.singletonList(tableReference),
-                Collections.emptyList(),
-                PredicateFactory.empty(), Collections.emptyList());
+    public static @NotNull SelectQuery selectGrouped(
+            @NotNull TableReference tableReference,
+            @NotNull List<SelectedItem> selectedItems,
+            @NotNull List<ColumnRef> groupByColumns) {
+        return selectGrouped(tableReference, selectedItems, PredicateFactory.empty(),
+                groupByColumns);
     }
 }
