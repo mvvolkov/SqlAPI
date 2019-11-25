@@ -15,4 +15,8 @@ final class CreateDatabaseQueryImpl implements CreateDatabaseQuery {
     @Override public @NotNull String getDatabaseName() {
         return databaseName;
     }
+
+    @Override public String toString() {
+        return "CREATE DATABASE " + databaseName + ";";
+    }
 }

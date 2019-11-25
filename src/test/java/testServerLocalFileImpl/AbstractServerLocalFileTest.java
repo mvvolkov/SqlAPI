@@ -1,14 +1,14 @@
 package testServerLocalFileImpl;
 
-import sqlapi.server.SqlServer;
-import sqlapi.exceptions.SqlException;
-import sqlapi.selectResult.ResultRow;
-import sqlapi.selectResult.ResultSet;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
 import org.junit.Before;
-import ServerFactory.SqlManagerFactory;
+import serverLocalFileImpl.SqlLocalFileServerFactory;
+import serverLocalFileImpl.SqlServerLocalFile;
+import sqlapi.exceptions.SqlException;
+import sqlapi.selectResult.ResultRow;
+import sqlapi.selectResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,12 +20,12 @@ import static org.junit.Assert.fail;
 
 public abstract class AbstractServerLocalFileTest {
 
-    SqlServer sqlServer;
+    SqlServerLocalFile sqlServer;
 
     @Before
     public void setUp() {
         System.out.println("===== SET UP =====");
-        sqlServer = SqlManagerFactory.getServerLocalFileSqlManager();
+        sqlServer = SqlLocalFileServerFactory.getServer();
         try {
             // Create a database
             sqlServer.executeQuery(SqlQueryFactory.createDatabase("DB1"));
@@ -35,7 +35,8 @@ public abstract class AbstractServerLocalFileTest {
                     .createTable("DB1",
                             MetadataFactory.tableMetadata("table1", Arrays.asList(
                                     MetadataFactory.integer("column1",
-                                            Arrays.asList(MetadataFactory.primaryKey())),
+                                            Collections.singletonList(
+                                                    MetadataFactory.primaryKey())),
                                     MetadataFactory.integer("column2", Collections
                                             .singletonList(
                                                     MetadataFactory.defaultVal(15))),
@@ -97,19 +98,17 @@ public abstract class AbstractServerLocalFileTest {
 
         StringBuilder sb = new StringBuilder();
 
-        String columnsHeaders = resultSet.getHeaders().stream()
-                .collect(Collectors.joining(", "));
+        String columnsHeaders = String.join(", ", resultSet.getHeaders());
 
         sb.append(columnsHeaders);
         for (ResultRow row : resultSet.getRows()) {
             String rowString =
-                    row.getValues().stream().map(o -> String.valueOf(o))
+                    row.getValues().stream().map(String::valueOf)
                             .collect(Collectors.joining(
                                     ", "));
-            sb.append("\n" + rowString);
+            sb.append("\n").append(rowString);
         }
         System.out.println(sb);
-        System.out.println("");
     }
 
     static void checkHeaders(List<String> headers1, String... headers2) {
@@ -146,7 +145,7 @@ public abstract class AbstractServerLocalFileTest {
             }
         }
         fail("Row not found: " +
-                Arrays.stream(values).map(obj -> String.valueOf(obj)).collect(
+                Arrays.stream(values).map(String::valueOf).collect(
                         Collectors.joining(", ", "{", "}")));
 
     }

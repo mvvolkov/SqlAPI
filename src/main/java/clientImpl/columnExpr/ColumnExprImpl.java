@@ -3,14 +3,12 @@ package clientImpl.columnExpr;
 import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ColumnExprImpl implements ColumnExpression {
+abstract class ColumnExprImpl implements ColumnExpression {
 
 
-    @NotNull
-    final ExprType exprType;
+    @NotNull final ExprType exprType;
 
-    @NotNull
-    final String alias;
+    @NotNull final String alias;
 
     ColumnExprImpl(@NotNull ExprType exprType, @NotNull String alias) {
         this.exprType = exprType;

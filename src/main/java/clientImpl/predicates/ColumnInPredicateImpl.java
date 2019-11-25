@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class ColumnInPredicateImpl extends PredicateImpl
+final class ColumnInPredicateImpl extends PredicateImpl
         implements ColumnInPredicate {
 
     @NotNull
@@ -17,18 +17,21 @@ public final class ColumnInPredicateImpl extends PredicateImpl
     @NotNull
     private final List<ColumnValue> values;
 
-    public ColumnInPredicateImpl(ColumnRef columnRef, List<ColumnValue> values) {
+    ColumnInPredicateImpl(@NotNull ColumnRef columnRef,
+                          @NotNull List<ColumnValue> values) {
         super(Type.IN);
         this.columnRef = columnRef;
         this.values = values;
     }
 
 
+    @NotNull
     @Override
     public ColumnRef getColumnRef() {
         return columnRef;
     }
 
+    @NotNull
     @Override
     public List<ColumnValue> getColumnValues() {
         return values;

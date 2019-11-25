@@ -10,7 +10,8 @@ public final class TableAlreadyExistsException extends SqlException {
     @NotNull
     private final String databaseName;
 
-    public TableAlreadyExistsException(@NotNull String databaseName, @NotNull String tableName) {
+    public TableAlreadyExistsException(@NotNull String databaseName,
+                                       @NotNull String tableName) {
         this.databaseName = databaseName;
         this.tableName = tableName;
     }
@@ -21,10 +22,12 @@ public final class TableAlreadyExistsException extends SqlException {
                 + "." + tableName + " already exists.";
     }
 
+    @NotNull
     public String getTableName() {
         return tableName;
     }
 
+    @NotNull
     public String getDatabaseName() {
         return databaseName;
     }

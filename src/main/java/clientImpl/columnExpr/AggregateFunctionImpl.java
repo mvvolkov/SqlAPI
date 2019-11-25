@@ -5,16 +5,20 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
-public final class AggregateFunctionImpl extends ColumnExprImpl
+final class AggregateFunctionImpl extends ColumnExprImpl
         implements AggregateFunction {
 
+    @NotNull
     private final Type type;
 
+    @NotNull
     private final ColumnRef column;
 
+    @NotNull
     private final String alias;
 
-    public AggregateFunctionImpl(Type type, ColumnExpression column, String alias) {
+    AggregateFunctionImpl(@NotNull Type type, @NotNull ColumnExpression column,
+                          @NotNull String alias) {
         super(ExprType.AGGR_FUNC, alias);
         this.type = type;
         this.column = (ColumnRef) column;
@@ -32,6 +36,7 @@ public final class AggregateFunctionImpl extends ColumnExprImpl
         return alias;
     }
 
+    @NotNull
     @Override
     public Type getType() {
         return type;

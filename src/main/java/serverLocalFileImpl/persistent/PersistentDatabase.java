@@ -1,8 +1,6 @@
 package serverLocalFileImpl.persistent;
 
-import serverLocalFileImpl.SqlServerImpl;
 import sqlapi.exceptions.*;
-import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
 import sqlapi.selectResult.ResultRow;
@@ -11,6 +9,7 @@ import sqlapi.selectResult.ResultSet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class PersistentDatabase implements Serializable {
 
@@ -20,11 +19,8 @@ public class PersistentDatabase implements Serializable {
 
     private final Collection<PersistentTable> tables = new ArrayList<>();
 
-    private final transient SqlServerImpl sqlServer;
-
-    public PersistentDatabase(String name, SqlServerImpl sqlServer) {
+    public PersistentDatabase(String name) {
         this.name = name;
-        this.sqlServer = sqlServer;
     }
 
     public String getName() {
@@ -48,10 +44,6 @@ public class PersistentDatabase implements Serializable {
             this.insert((InsertQuery) query);
             return;
         }
-        if (query instanceof InsertFromSelectQuery) {
-            this.insert((InsertFromSelectQuery) query);
-            return;
-        }
         if (query instanceof DeleteQuery) {
             this.delete((DeleteQuery) query);
             return;
@@ -69,11 +61,8 @@ public class PersistentDatabase implements Serializable {
         this.getTable(query.getTableName()).insert(query.getColumns(), query.getValues());
     }
 
-    private void insert(InsertFromSelectQuery query)
+    public void insert(InsertFromSelectQuery query, ResultSet resultSet)
             throws SqlException {
-        ResultSet resultSet =
-                SqlServerImpl.createResultSet(
-                        sqlServer.getInternalQueryResult(query.getSelectQuery()));
         for (ResultRow row : resultSet.getRows()) {
             this.getTable(query.getTableName())
                     .insert(query.getColumns(), row.getValues());
@@ -117,5 +106,9 @@ public class PersistentDatabase implements Serializable {
             PersistentTable table = this.getTable(tableMetadata.getTableName());
             table.validate(tableMetadata);
         }
+    }
+
+    public Collection<TableMetadata> getTables() {
+        return Collections.emptyList();
     }
 }

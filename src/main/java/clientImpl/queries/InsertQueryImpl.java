@@ -1,9 +1,10 @@
 package clientImpl.queries;
 
-import sqlapi.queries.InsertQuery;
 import org.jetbrains.annotations.NotNull;
+import sqlapi.queries.InsertQuery;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 final class InsertQueryImpl extends AbstractSqlTableQueryImpl implements InsertQuery {
 
@@ -13,8 +14,8 @@ final class InsertQueryImpl extends AbstractSqlTableQueryImpl implements InsertQ
     @NotNull
     private final List<Object> values;
 
-    InsertQueryImpl(String databaseName, String tableName,
-                           List<String> columns, List<Object> values) {
+    InsertQueryImpl(@NotNull String databaseName, @NotNull String tableName,
+                    @NotNull List<String> columns, @NotNull List<Object> values) {
         super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
@@ -29,5 +30,32 @@ final class InsertQueryImpl extends AbstractSqlTableQueryImpl implements InsertQ
     @NotNull @Override
     public List<String> getColumns() {
         return columns;
+    }
+
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(this.getDatabaseName());
+        sb.append(".");
+        sb.append(this.getTableName());
+        if (!this.getColumns().isEmpty()) {
+            sb.append("(");
+            sb.append(String.join(", ", this.getColumns()));
+            sb.append(")");
+        }
+        sb.append(" VALUES (");
+        String valuesString = values.stream().map(this::getStringFromValue)
+                .collect(Collectors.joining(", "));
+        sb.append(valuesString);
+        sb.append(");");
+        return sb.toString();
+    }
+
+    private String getStringFromValue(Object value) {
+        if (value instanceof String) {
+            return '\'' + (String) value + '\'';
+        } else if (value == null) {
+            return "NULL";
+        }
+        return String.valueOf(value);
     }
 }

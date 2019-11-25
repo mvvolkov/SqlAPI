@@ -7,7 +7,7 @@ import sqlapi.metadata.TableMetadata;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class TableMetadataImpl implements TableMetadata {
+final class TableMetadataImpl implements TableMetadata {
 
     @NotNull
     private final String tableName;

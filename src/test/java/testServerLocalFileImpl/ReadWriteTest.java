@@ -1,14 +1,14 @@
 package testServerLocalFileImpl;
 
-import ServerFactory.SqlManagerFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.SqlQueryFactory;
 import clientImpl.tableRef.TableRefFactory;
 import org.junit.Test;
+import serverLocalFileImpl.SqlLocalFileServerFactory;
+import serverLocalFileImpl.SqlServerLocalFile;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.selectResult.ResultSet;
-import sqlapi.server.SqlServer;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,8 +21,8 @@ public class ReadWriteTest extends AbstractServerLocalFileTest {
 
     @Test
     public void test1() {
-        SqlServer sqlServer = SqlManagerFactory.getServerLocalFileSqlManager();
-        SqlServer sqlServer1 = SqlManagerFactory.getServerLocalFileSqlManager();
+        SqlServerLocalFile sqlServer = SqlLocalFileServerFactory.getServer();
+        SqlServerLocalFile sqlServer1 = SqlLocalFileServerFactory.getServer();
 
         try {
 

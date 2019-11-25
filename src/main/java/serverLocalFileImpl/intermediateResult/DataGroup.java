@@ -1,12 +1,11 @@
-package serverLocalFileImpl.intermediateresult;
+package serverLocalFileImpl.intermediateResult;
 
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.AmbiguousColumnNameException;
 import sqlapi.exceptions.InvalidQueryException;
 import sqlapi.exceptions.NoSuchColumnException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public final class DataGroup {
 
@@ -101,7 +100,8 @@ public final class DataGroup {
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
             if (value == null) {
-                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+                throw new InvalidQueryException(
+                        "Null value can not be used in aggregate function except for COUNT(*)");
             }
             if (!(value instanceof Integer)) {
                 throw new InvalidQueryException("Wrong value type in aggregate function");
@@ -118,10 +118,12 @@ public final class DataGroup {
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
             if (value == null) {
-                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+                throw new InvalidQueryException(
+                        "Null value can not be used in aggregate function except for COUNT(*)");
             }
             if (!(value instanceof Comparable)) {
-                throw new InvalidQueryException("Comparable values only can be used for MAX()");
+                throw new InvalidQueryException(
+                        "Comparable values only can be used for MAX()");
             }
             Comparable cmpValue = (Comparable) value;
             if (max == null) {
@@ -142,10 +144,12 @@ public final class DataGroup {
         for (DataRow row : rows) {
             Object value = row.evaluateColumnRef(cr);
             if (value == null) {
-                throw new InvalidQueryException("Null value can not be used in aggregate function except for COUNT(*)");
+                throw new InvalidQueryException(
+                        "Null value can not be used in aggregate function except for COUNT(*)");
             }
             if (!(value instanceof Comparable)) {
-                throw new InvalidQueryException("Comparable values only can be used for MIN()");
+                throw new InvalidQueryException(
+                        "Comparable values only can be used for MIN()");
             }
             Comparable cmpValue = (Comparable) value;
             if (min == null) {
@@ -157,5 +161,28 @@ public final class DataGroup {
             }
         }
         return min;
+    }
+
+    public static Collection<DataGroup> getGroups(
+            List<ColumnRef> groupByColumns,
+            Collection<DataRow> rows)
+            throws NoSuchColumnException, AmbiguousColumnNameException {
+        Map<List<Object>, List<DataRow>> map = new HashMap<>();
+        for (DataRow row : rows) {
+            List<Object> values = new ArrayList<>();
+            for (ColumnRef cr : groupByColumns) {
+                values.add(row.evaluateColumnRef(cr));
+            }
+            List<Object> key = Collections.unmodifiableList(values);
+            if (!map.containsKey(key)) {
+                map.put(key, new ArrayList<>());
+            }
+            map.get(key).add(row);
+        }
+        Collection<DataGroup> groups = new ArrayList<>();
+        for (List<DataRow> group : map.values()) {
+            groups.add(new DataGroup(groupByColumns, group));
+        }
+        return groups;
     }
 }

@@ -1,8 +1,8 @@
 package serverLocalFileImpl.persistent;
 
-import serverLocalFileImpl.intermediateresult.DataHeader;
-import serverLocalFileImpl.intermediateresult.DataRow;
-import serverLocalFileImpl.intermediateresult.DataSet;
+import serverLocalFileImpl.intermediateResult.DataHeader;
+import serverLocalFileImpl.intermediateResult.DataRow;
+import serverLocalFileImpl.intermediateResult.DataSet;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
 import sqlapi.misc.AssignmentOperation;
@@ -209,7 +209,7 @@ public final class PersistentTable implements Serializable {
 
     private DataHeader createColumnRef(String columnName,
                                        SqlType sqlType) {
-        return new DataHeader(sqlType, databaseName, tableName, columnName);
+        return new DataHeader(sqlType, tableName, columnName);
     }
 
     void validate(TableMetadata tableMetadata)

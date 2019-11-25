@@ -1,32 +1,37 @@
 package clientImpl.metadata;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.ColumnConstraint;
 import sqlapi.metadata.ColumnConstraintType;
 
 import java.util.Collections;
 import java.util.List;
 
-public class ColumnConstraintImpl implements ColumnConstraint {
+class ColumnConstraintImpl implements ColumnConstraint {
 
+    @NotNull
     private final ColumnConstraintType type;
 
+    @NotNull
     private final List<Object> parameters;
 
-    public ColumnConstraintImpl(ColumnConstraintType type, List<Object> parameters) {
+    ColumnConstraintImpl(@NotNull ColumnConstraintType type, @NotNull List<Object> parameters) {
         this.type = type;
         this.parameters = parameters;
     }
 
-    public ColumnConstraintImpl(ColumnConstraintType type) {
+    ColumnConstraintImpl(@NotNull ColumnConstraintType type) {
         this.type = type;
         this.parameters = Collections.emptyList();
     }
 
+    @NotNull
     @Override
     public ColumnConstraintType getConstraintType() {
         return type;
     }
 
+    @NotNull
     @Override
     public List<Object> getParameters() {
         return parameters;

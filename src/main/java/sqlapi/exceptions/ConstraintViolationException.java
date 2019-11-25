@@ -3,8 +3,6 @@ package sqlapi.exceptions;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.ColumnConstraintType;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class ConstraintViolationException extends SqlException {
 
@@ -23,7 +21,8 @@ public final class ConstraintViolationException extends SqlException {
 
 
     public ConstraintViolationException(
-            String databaseName, String tableName, String columnName,
+            @NotNull String databaseName, @NotNull String tableName,
+            @NotNull String columnName,
             @NotNull ColumnConstraintType constraintType) {
         this.databaseName = databaseName;
         this.tableName = tableName;
@@ -34,8 +33,7 @@ public final class ConstraintViolationException extends SqlException {
     @Override
     public String getMessage() {
         return "Constraint violation for the column "
-                + Stream.of(databaseName, tableName, columnName)
-                .collect(Collectors.joining(".")) +
+                + String.join(".", databaseName, tableName, columnName) +
                 ": " + constraintType;
     }
 
@@ -45,14 +43,17 @@ public final class ConstraintViolationException extends SqlException {
         return constraintType;
     }
 
+    @NotNull
     public String getDatabaseName() {
         return databaseName;
     }
 
+    @NotNull
     public String getTableName() {
         return tableName;
     }
 
+    @NotNull
     public String getColumnName() {
         return columnName;
     }

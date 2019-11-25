@@ -4,7 +4,7 @@ import sqlapi.columnExpr.BinaryColumnExpression;
 import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
-public final class BinaryColumnExprImpl extends ColumnExprImpl
+final class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {
 
     @NotNull
@@ -13,8 +13,9 @@ public final class BinaryColumnExprImpl extends ColumnExprImpl
     @NotNull
     private final ColumnExpression rightOperand;
 
-    public BinaryColumnExprImpl(@NotNull ExprType exprType, @NotNull ColumnExpression leftOperand,
-                                @NotNull ColumnExpression rightOperand, @NotNull String alias) {
+    BinaryColumnExprImpl(@NotNull ExprType exprType,
+                         @NotNull ColumnExpression leftOperand,
+                         @NotNull ColumnExpression rightOperand, @NotNull String alias) {
         super(exprType, alias);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;

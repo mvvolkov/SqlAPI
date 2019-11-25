@@ -1,55 +1,43 @@
 package serverLocalFileImpl;
 
-import serverLocalFileImpl.intermediateresult.*;
+import org.jetbrains.annotations.NotNull;
+import serverLocalFileImpl.intermediateResult.*;
+import serverLocalFileImpl.persistent.PersistentColumnMetadata;
+import serverLocalFileImpl.persistent.PersistentDatabase;
+import serverLocalFileImpl.persistent.PersistentTable;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.metadata.TableMetadata;
-import sqlapi.queries.*;
-import sqlapi.server.SqlServer;
 import sqlapi.exceptions.*;
+import sqlapi.metadata.TableMetadata;
 import sqlapi.misc.SelectedItem;
-import sqlapi.predicates.Predicate;
-import sqlapi.selectResult.ResultRow;
+import sqlapi.queries.*;
 import sqlapi.selectResult.ResultSet;
 import sqlapi.tables.DatabaseTableReference;
 import sqlapi.tables.JoinedTableReference;
 import sqlapi.tables.TableFromSelectReference;
 import sqlapi.tables.TableReference;
-import org.jetbrains.annotations.NotNull;
-import serverLocalFileImpl.persistent.PersistentColumnMetadata;
-import serverLocalFileImpl.persistent.PersistentDatabase;
-import serverLocalFileImpl.persistent.PersistentTable;
-import ServerFactory.SqlManagerFactory;
 
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
-public final class SqlServerImpl implements SqlServer {
-
-
-    private final SqlServer logger =
-            SqlManagerFactory.getServerLoggerSqlManager();
+final class SqlServerImpl implements SqlServerLocalFile {
 
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
-    private final SelectQueryHandler selectQueryHandler = new SelectQueryHandler();
-
-    public SqlServerImpl() {
+    SqlServerImpl() {
         System.out.println("New local file SQL server instantiated.");
     }
-
 
     @Override
     public void createDatabase(String databaseName)
             throws DatabaseAlreadyExistsException {
-        logger.createDatabase(databaseName);
         PersistentDatabase database = this.getDatabaseOrNull(databaseName);
         if (database != null) {
             throw new DatabaseAlreadyExistsException(databaseName);
         }
-        databases.add(new PersistentDatabase(databaseName, this));
+        databases.add(new PersistentDatabase(databaseName));
     }
 
     @Override
@@ -57,7 +45,6 @@ public final class SqlServerImpl implements SqlServer {
                              Collection<TableMetadata> tables)
             throws IOException, ClassNotFoundException, NoSuchTableException,
             NoSuchColumnException {
-        logger.readDatabase(fileName, databaseName, tables);
         PersistentDatabase database = this.getDatabaseOrNull(databaseName);
         if (database != null) {
             databases.remove(database);
@@ -77,9 +64,9 @@ public final class SqlServerImpl implements SqlServer {
         }
     }
 
-    @Override public void saveDatabase(String databaseName, String fileName)
+    @Override
+    public void saveDatabase(String databaseName, String fileName)
             throws IOException, NoSuchDatabaseException {
-        logger.saveDatabase(databaseName, fileName);
         ObjectOutputStream oos = null;
         try {
             File outputFile = new File(fileName);
@@ -95,8 +82,7 @@ public final class SqlServerImpl implements SqlServer {
 
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
-        logger.executeQuery(query);
-
+        System.out.println(query);
 
         if (query instanceof CreateDatabaseQuery) {
             this.createDatabase((CreateDatabaseQuery) query);
@@ -107,26 +93,46 @@ public final class SqlServerImpl implements SqlServer {
             return;
         }
         if (query instanceof SqlTableQuery) {
+            if (query instanceof InsertFromSelectQuery) {
+                InsertFromSelectQuery insertFromSelectQuery =
+                        (InsertFromSelectQuery) query;
+                ResultSet resultSet = DataUtil.createResultSet(
+                        this.getInternalQueryResult(
+                                (insertFromSelectQuery.getSelectQuery())));
+                this.getDatabase(insertFromSelectQuery.getDatabaseName())
+                        .insert(insertFromSelectQuery,
+                                resultSet);
+                return;
+            }
             this.executeTableQuery((SqlTableQuery) query);
-            return;
         }
     }
 
     @Override
     public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
-        logger.getQueryResult(selectQuery);
-        return createResultSet(this.getInternalQueryResult(selectQuery));
+        System.out.println(selectQuery);
+        return DataUtil.createResultSet(this.getInternalQueryResult(selectQuery));
+    }
+
+    @Override public @NotNull Collection<String> getDatabases() {
+        return databases.stream().map(PersistentDatabase::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override public @NotNull Collection<TableMetadata> getTables(String databaseName)
+            throws NoSuchDatabaseException {
+        return this.getDatabase(databaseName).getTables();
     }
 
     private void createDatabase(CreateDatabaseQuery query)
             throws DatabaseAlreadyExistsException {
-        String databaseName = ((CreateDatabaseQuery) query).getDatabaseName();
+        String databaseName = query.getDatabaseName();
         PersistentDatabase db = this.getDatabaseOrNull(databaseName);
         if (db != null) {
             throw new DatabaseAlreadyExistsException(databaseName);
         }
-        databases.add(new PersistentDatabase(databaseName, this));
+        databases.add(new PersistentDatabase(databaseName));
     }
 
     private void executeTableQuery(SqlTableQuery query) throws SqlException {
@@ -168,11 +174,11 @@ public final class SqlServerImpl implements SqlServer {
      * 7.The union is taken after each sub-select is evaluated.
      * 8.Finally, the resulting rows are sorted according to the columns specified in the order by clause.
      */
-    public DataSet getInternalQueryResult(SelectQuery se) throws
+    private DataSet getInternalQueryResult(SelectQuery se) throws
             SqlException {
 
         DataSet result = this.getProductOfTables(se.getTableReferences());
-        result = getFilteredResult(result, se.getPredicate());
+        result = DataUtil.getFilteredResult(result, se.getPredicate());
 
         if (se.getSelectedItems().isEmpty()) {
             return result;
@@ -181,11 +187,11 @@ public final class SqlServerImpl implements SqlServer {
         List<ColumnExpression> columnExpressions =
                 this.getSelectedColumnExpressions(se.getSelectedItems());
 
-        List<DataHeader> headers = getSelectedColumns(columnExpressions);
+        List<DataHeader> headers = DataUtil.getSelectedColumns(columnExpressions);
         List<DataRow> resultRows;
         if (!se.getGroupByColumns().isEmpty()) {
             Collection<DataGroup> groups =
-                    getGroups(se.getGroupByColumns(), result.getRows());
+                    DataGroup.getGroups(se.getGroupByColumns(), result.getRows());
 
             resultRows = new ArrayList<>();
             for (DataGroup group : groups) {
@@ -199,33 +205,11 @@ public final class SqlServerImpl implements SqlServer {
                 resultRows.add(new DataRow(values));
             }
         } else {
-            resultRows = getSelectedValues(result, headers, columnExpressions);
+            resultRows = DataUtil.getSelectedValues(result, headers, columnExpressions);
         }
         return new DataSet(headers, resultRows);
     }
 
-    private static Collection<DataGroup> getGroups(
-            List<ColumnRef> groupByColumns,
-            Collection<DataRow> rows)
-            throws NoSuchColumnException, AmbiguousColumnNameException {
-        Map<List<Object>, List<DataRow>> map = new HashMap<>();
-        for (DataRow row : rows) {
-            List<Object> values = new ArrayList<>();
-            for (ColumnRef cr : groupByColumns) {
-                values.add(row.evaluateColumnRef(cr));
-            }
-            List<Object> key = Collections.unmodifiableList(values);
-            if (!map.containsKey(key)) {
-                map.put(key, new ArrayList<>());
-            }
-            map.get(key).add(row);
-        }
-        Collection<DataGroup> groups = new ArrayList<>();
-        for (List<DataRow> group : map.values()) {
-            groups.add(new DataGroup(groupByColumns, group));
-        }
-        return groups;
-    }
 
     private List<ColumnExpression> getSelectedColumnExpressions(
             List<SelectedItem> selectedItems)
@@ -236,8 +220,6 @@ public final class SqlServerImpl implements SqlServer {
             if (selectedItem instanceof DatabaseTableReference) {
                 String tableName =
                         ((DatabaseTableReference) selectedItem).getTableName();
-                String schemaName =
-                        ((DatabaseTableReference) selectedItem).getSchemaName();
                 List<PersistentColumnMetadata> columns =
                         this.getTable((DatabaseTableReference) selectedItem).getColumns();
                 for (PersistentColumnMetadata column : columns) {
@@ -253,10 +235,6 @@ public final class SqlServerImpl implements SqlServer {
                             return tableName;
                         }
 
-                        @Override
-                        public String getSchemaName() {
-                            return schemaName;
-                        }
                     });
                 }
             }
@@ -268,57 +246,6 @@ public final class SqlServerImpl implements SqlServer {
 
     }
 
-    private static List<DataHeader> getSelectedColumns(
-            List<ColumnExpression> columnExpressions) {
-
-        List<DataHeader> resultColumns = new ArrayList<>();
-        for (ColumnExpression columnExpression : columnExpressions) {
-            if (columnExpression instanceof ColumnRef) {
-                resultColumns.add(new DataHeader((ColumnRef) columnExpression));
-            } else if (!columnExpression.getAlias().isEmpty()) {
-                resultColumns
-                        .add(new DataHeader((columnExpression).getAlias()));
-            } else {
-                resultColumns.add(new DataHeader(columnExpression.toString()));
-            }
-        }
-        return resultColumns;
-    }
-
-    private static List<DataRow> getSelectedValues(
-            DataSet dataSet, List<DataHeader> columns,
-            List<ColumnExpression> columnExpressions)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
-
-        List<DataRow> resultRows = new ArrayList<>();
-        for (DataRow row : dataSet.getRows()) {
-            Map<DataHeader, Object> values = new HashMap<>();
-            for (int i = 0; i < columns.size(); i++) {
-                values.put(columns.get(i),
-                        row.evaluateColumnExpr(columnExpressions.get(i)));
-            }
-            resultRows.add(new DataRow(values));
-        }
-        return resultRows;
-    }
-
-
-    public static ResultSetImpl createResultSet(DataSet dataSet) {
-
-        List<ResultRow> resultRows = new ArrayList<>();
-        List<String> resultColumns = dataSet.getColumns().stream()
-                .map(DataHeader::getColumnName).collect(Collectors.toList());
-
-        for (DataRow row : dataSet.getRows()) {
-            List<Object> values = new ArrayList<>();
-            for (DataHeader cr : dataSet.getColumns()) {
-                values.add(row.getCells().get(cr));
-            }
-            resultRows.add(new ResultRowImpl(values));
-        }
-        return new ResultSetImpl(resultRows, resultColumns);
-    }
 
     private DataSet getProductOfTables(List<TableReference> tableReferences)
             throws SqlException {
@@ -339,89 +266,6 @@ public final class SqlServerImpl implements SqlServer {
         return resultSet;
     }
 
-    private static DataSet getFilteredResult(DataSet resultSet,
-                                             Predicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
-        List<DataHeader> columns = new ArrayList<>(resultSet.getColumns());
-        List<DataRow> rows = new ArrayList<>();
-        for (DataRow row : resultSet.getRows()) {
-            if (row.evaluatePredicate(predicate)) {
-                rows.add(row);
-            }
-        }
-        return new DataSet(columns, rows);
-    }
-
-    private static DataSet innerJoin(DataSet left,
-                                     DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
-
-        DataSet dataSet = left.joinWith(right);
-        return getFilteredResult(dataSet, sc);
-    }
-
-    private static DataSet leftOuterJoin(DataSet left,
-                                         DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
-
-        List<DataHeader> columns = new ArrayList<>();
-        columns.addAll(left.getColumns());
-        columns.addAll(right.getColumns());
-        List<DataRow> rows = new ArrayList<>();
-        for (DataRow leftRow : left.getRows()) {
-            boolean matchFound = false;
-            for (DataRow rightRow : right.getRows()) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
-                values.putAll(rightRow.getCells());
-                DataRow row = new DataRow(values);
-                if (row.evaluatePredicate(sc)) {
-                    rows.add(row);
-                    matchFound = true;
-                }
-            }
-            if (!matchFound) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
-                rows.add(new DataRow(values));
-            }
-        }
-        return new DataSet(columns, rows);
-    }
-
-    private static DataSet rightOuterJoin(DataSet left,
-                                          DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
-
-        List<DataHeader> columns = new ArrayList<>();
-        columns.addAll(left.getColumns());
-        columns.addAll(right.getColumns());
-        List<DataRow> rows = new ArrayList<>();
-        for (DataRow rightRow : right.getRows()) {
-            boolean matchFound = false;
-            for (DataRow leftRow : left.getRows()) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
-                values.putAll(rightRow.getCells());
-                DataRow row = new DataRow(values);
-                if (row.evaluatePredicate(sc)) {
-                    rows.add(row);
-                    matchFound = true;
-                }
-            }
-            if (!matchFound) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(rightRow.getCells());
-                rows.add(new DataRow(values));
-            }
-        }
-        return new DataSet(columns, rows);
-    }
-
 
     private DataSet getDataFromPersistentTable(DatabaseTableReference dtr)
             throws SqlException {
@@ -431,33 +275,37 @@ public final class SqlServerImpl implements SqlServer {
     private DataSet getDataFromJoinedTable(JoinedTableReference tableReference)
             throws SqlException {
 
-
         DataSet left =
                 this.getDataFromTableRef(tableReference.getLeftTableReference());
         DataSet right =
                 this.getDataFromTableRef(tableReference.getRightTableReference());
         switch (tableReference.getTableRefType()) {
             case INNER_JOIN:
-                return innerJoin(left, right, tableReference.getPredicate());
+                return DataUtil.innerJoin(left, right, tableReference.getPredicate());
             case LEFT_OUTER_JOIN:
-                return leftOuterJoin(left, right, tableReference.getPredicate());
+                return DataUtil.leftOuterJoin(left, right, tableReference.getPredicate());
             case RIGHT_OUTER_JOIN:
-                return rightOuterJoin(left, right, tableReference.getPredicate());
+                return DataUtil
+                        .rightOuterJoin(left, right, tableReference.getPredicate());
         }
         throw new InvalidQueryException("Invalid type of join table reference");
     }
 
     private DataSet getSubqueryResult(TableFromSelectReference tr)
             throws SqlException {
+
+        // first, get a result of subquery.
         DataSet dataSet =
                 getInternalQueryResult(tr.getSelectQuery());
         String alias = tr.getAlias();
         if (alias.isEmpty()) {
             return dataSet;
         }
+
+        // second, replace table name with the alias everythere in the result data.
         List<DataHeader> newColumns = new ArrayList<>();
         for (DataHeader cr : dataSet.getColumns()) {
-            newColumns.add(new DataHeader(cr.getSqlType(), "", alias,
+            newColumns.add(new DataHeader(cr.getSqlType(), alias,
                     cr.getColumnName()));
         }
         List<DataRow> newRows = new ArrayList<>();
@@ -465,7 +313,7 @@ public final class SqlServerImpl implements SqlServer {
             Map<DataHeader, Object> values = new HashMap<>();
             for (Map.Entry<DataHeader, Object> entry : row.getCells()
                     .entrySet()) {
-                values.put(new DataHeader(entry.getKey().getSqlType(), "", alias,
+                values.put(new DataHeader(entry.getKey().getSqlType(), alias,
                                 entry.getKey().getColumnName()),
                         entry.getValue());
             }
@@ -495,6 +343,7 @@ public final class SqlServerImpl implements SqlServer {
         throw new IllegalArgumentException("Invalid type of table reference.");
     }
 
+    @NotNull
     private PersistentTable getTable(DatabaseTableReference tableReference) throws
             NoSuchTableException, NoSuchDatabaseException {
         return this.getDatabase(tableReference.getDatabaseName())

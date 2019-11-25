@@ -1,8 +1,8 @@
 package clientImpl.queries;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.InsertFromSelectQuery;
 import sqlapi.queries.SelectQuery;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -31,5 +31,19 @@ final class InsertFromSelectQueryImpl extends AbstractSqlTableQueryImpl implemen
     @NotNull @Override
     public SelectQuery getSelectQuery() {
         return selectQuery;
+    }
+
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(this.getDatabaseName());
+        sb.append(".");
+        sb.append(this.getTableName());
+        if (!this.getColumns().isEmpty()) {
+            sb.append("(");
+            sb.append(String.join(", ", this.getColumns()));
+            sb.append(")");
+        }
+        sb.append(" ").append(selectQuery).append(";");
+        return sb.toString();
     }
 }

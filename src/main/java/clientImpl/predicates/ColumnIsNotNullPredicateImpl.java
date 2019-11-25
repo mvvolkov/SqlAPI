@@ -4,19 +4,20 @@ import sqlapi.columnExpr.ColumnRef;
 import sqlapi.predicates.ColumnIsNotNullPredicate;
 import org.jetbrains.annotations.NotNull;
 
-public final class ColumnIsNotNullPredicateImpl extends PredicateImpl
+final class ColumnIsNotNullPredicateImpl extends PredicateImpl
         implements ColumnIsNotNullPredicate {
 
     @NotNull
     private final ColumnRef columnRef;
 
 
-    public ColumnIsNotNullPredicateImpl(@NotNull ColumnRef columnRef) {
+    ColumnIsNotNullPredicateImpl(@NotNull ColumnRef columnRef) {
         super(Type.IS_NOT_NULL);
         this.columnRef = columnRef;
     }
 
 
+    @NotNull
     @Override
     public ColumnRef getColumnRef() {
         return columnRef;

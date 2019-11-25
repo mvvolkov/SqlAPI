@@ -1,4 +1,4 @@
-package serverLocalFileImpl.intermediateresult;
+package serverLocalFileImpl.intermediateResult;
 
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
@@ -8,8 +8,6 @@ import java.util.Objects;
 
 public final class DataHeader {
 
-    @NotNull
-    private final String schemaName;
 
     @NotNull
     private final String tableName;
@@ -18,31 +16,24 @@ public final class DataHeader {
     private final String columnName;
 
 
-    SqlType sqlType;
+    private SqlType sqlType;
 
 
-    public DataHeader(SqlType sqlType, @NotNull String schemaName,
-                      @NotNull String tableName,
-                      @NotNull String columnName) {
-        this.schemaName = schemaName;
+    public DataHeader(SqlType sqlType,
+               @NotNull String tableName,
+               @NotNull String columnName) {
         this.tableName = tableName;
         this.columnName = columnName;
         this.sqlType = sqlType;
     }
 
 
-    public DataHeader(@NotNull String tableName,
-                      @NotNull String columnName) {
-        this(null, "", tableName, columnName);
-    }
-
     public DataHeader(@NotNull String columnName) {
-        this(null, "", "", columnName);
+        this(null, "", columnName);
     }
 
 
     public DataHeader(@NotNull ColumnRef columnRef) {
-        this.schemaName = columnRef.getSchemaName();
         this.tableName = columnRef.getTableName();
         this.columnName = columnRef.getColumnName();
     }
@@ -57,10 +48,6 @@ public final class DataHeader {
         return tableName;
     }
 
-    @NotNull
-    public String getSchemaName() {
-        return schemaName;
-    }
 
     public SqlType getSqlType() {
         return sqlType;
@@ -74,14 +61,13 @@ public final class DataHeader {
             return false;
         }
         DataHeader cr = (DataHeader) obj;
-        return Objects.equals(schemaName, cr.schemaName) &&
-                Objects.equals(tableName, cr.tableName)
+        return Objects.equals(tableName, cr.tableName)
                 && Objects.equals(columnName, cr.columnName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(schemaName, tableName, columnName);
+        return Objects.hash(tableName, columnName);
     }
 
     @Override
@@ -90,10 +76,6 @@ public final class DataHeader {
         if (!tableName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, tableName);
-        }
-        if (!schemaName.isEmpty()) {
-            sb.insert(0, ".");
-            sb.insert(0, schemaName);
         }
         return sb.toString();
     }

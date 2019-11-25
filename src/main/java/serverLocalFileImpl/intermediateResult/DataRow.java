@@ -1,4 +1,4 @@
-package serverLocalFileImpl.intermediateresult;
+package serverLocalFileImpl.intermediateResult;
 
 import sqlapi.columnExpr.BinaryColumnExpression;
 import sqlapi.columnExpr.ColumnExpression;
@@ -116,7 +116,8 @@ public final class DataRow {
 
         for (ColumnValue columnValue : predicate.getColumnValues()) {
             Comparable rightValue = (Comparable) columnValue.getValue();
-            if (leftValue.compareTo(rightValue) == 0) {
+            if (leftValue != null && rightValue != null &&
+                    leftValue.compareTo(rightValue) == 0) {
                 return true;
             }
         }
@@ -155,10 +156,12 @@ public final class DataRow {
         return null;
     }
 
-    static Object evaluateBinaryColumnExpr(Object leftValue, Object rightValue, ColumnExpression.ExprType type)
+    static Object evaluateBinaryColumnExpr(Object leftValue, Object rightValue,
+                                           ColumnExpression.ExprType type)
             throws InvalidQueryException {
         if (leftValue == null || rightValue == null) {
-            throw new InvalidQueryException("Null values can not be used in arithmetical expressions");
+            throw new InvalidQueryException(
+                    "Null values can not be used in arithmetical expressions");
         }
         if (!(leftValue instanceof Integer) || !(rightValue instanceof Integer)) {
             throw new InvalidQueryException("Only numerical types can be used in " +
@@ -198,10 +201,6 @@ public final class DataRow {
         List<DataHeader> matchingHeaders = new ArrayList<>();
 
         for (DataHeader key : values.keySet()) {
-            if (!cr.getSchemaName().isEmpty() &&
-                    !cr.getSchemaName().equals(key.getSchemaName())) {
-                continue;
-            }
             if (!cr.getTableName().isEmpty() &&
                     !cr.getTableName().equals(key.getTableName())) {
                 continue;

@@ -5,8 +5,8 @@ import sqlapi.queries.SqlTableQuery;
 
 abstract class AbstractSqlTableQueryImpl implements SqlTableQuery {
 
-    protected final @NotNull String databaseName;
-    protected final @NotNull String tableName;
+    private final @NotNull String databaseName;
+    private final @NotNull String tableName;
 
     AbstractSqlTableQueryImpl(@NotNull String databaseName, @NotNull String tableName) {
         this.databaseName = databaseName;

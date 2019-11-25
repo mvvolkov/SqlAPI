@@ -2,11 +2,11 @@ package clientImpl.queries;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.misc.AssignmentOperation;
-import sqlapi.queries.UpdateQuery;
 import sqlapi.predicates.Predicate;
+import sqlapi.queries.UpdateQuery;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Collectors;
 
 final class UpdateQueryImpl extends AbstractSqlTableQueryImpl
         implements UpdateQuery {
@@ -30,5 +30,22 @@ final class UpdateQueryImpl extends AbstractSqlTableQueryImpl
     @NotNull @Override
     public Predicate getPredicate() {
         return predicate;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("UPDATE ");
+        sb.append(this.getDatabaseName());
+        sb.append(".");
+        sb.append(this.getTableName());
+        sb.append(" SET ");
+        sb.append(
+                assignmentOperations.stream().map(AssignmentOperation::toString).collect(
+                        Collectors.joining(", ")));
+        if (!predicate.isEmpty()) {
+            sb.append(" WHERE ").append(predicate);
+        }
+        sb.append(";");
+        return sb.toString();
     }
 }

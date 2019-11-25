@@ -1,6 +1,9 @@
-package serverLocalFileImpl.intermediateresult;
+package serverLocalFileImpl.intermediateResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class DataSet {
 
@@ -36,5 +39,6 @@ public final class DataSet {
         }
         return new DataSet(newColumns, newRows);
     }
+
 
 }

@@ -1,4 +1,4 @@
-package serverLocalFileImpl;
+package serverLocalFileImpl.queryResult;
 
 import sqlapi.selectResult.ResultRow;
 import sqlapi.selectResult.ResultSet;

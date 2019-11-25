@@ -4,15 +4,15 @@ import sqlapi.predicates.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public final class CombinedPredicateImpl extends PredicateImpl
+final class CombinedPredicateImpl extends PredicateImpl
         implements CombinedPredicate {
 
 
     @NotNull
-    protected final Predicate leftPredicate;
+    private final Predicate leftPredicate;
 
     @NotNull
-    protected final Predicate rightPredicate;
+    private final Predicate rightPredicate;
 
 
     CombinedPredicateImpl(@NotNull Type type, @NotNull Predicate leftPredicate,

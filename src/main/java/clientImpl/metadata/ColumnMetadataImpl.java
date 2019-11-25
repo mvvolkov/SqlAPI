@@ -8,7 +8,7 @@ import sqlapi.metadata.SqlType;
 
 import java.util.Collection;
 
-public final class ColumnMetadataImpl implements ColumnMetadata {
+final class ColumnMetadataImpl implements ColumnMetadata {
 
     @NotNull
     private final String columnName;
@@ -16,12 +16,11 @@ public final class ColumnMetadataImpl implements ColumnMetadata {
     @NotNull
     private final SqlType sqlType;
 
-
     @NotNull
     private final Collection<ColumnConstraint> constraints;
 
-    public ColumnMetadataImpl(String columnName, SqlType sqlType,
-                              Collection<ColumnConstraint> constraints) {
+    ColumnMetadataImpl(@NotNull String columnName, @NotNull SqlType sqlType,
+                       @NotNull Collection<ColumnConstraint> constraints) {
         this.columnName = columnName;
         this.sqlType = sqlType;
         this.constraints = constraints;

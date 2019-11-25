@@ -8,7 +8,7 @@ final class CreateTableQueryImpl
         implements CreateTableQuery {
 
     @NotNull
-    protected final String databaseName;
+    private final String databaseName;
 
     @NotNull
     private final TableMetadata tableMetadata;
@@ -25,5 +25,9 @@ final class CreateTableQueryImpl
 
     @Override public @NotNull TableMetadata getTableMetadata() {
         return tableMetadata;
+    }
+
+    @Override public String toString() {
+        return "CREATE TABLE " + databaseName + "." + tableMetadata + ";";
     }
 }

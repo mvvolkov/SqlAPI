@@ -3,11 +3,10 @@ package clientImpl.tableRef;
 import sqlapi.tables.DatabaseTableReference;
 import org.jetbrains.annotations.NotNull;
 
-public final class DatabaseTableReferenceImpl implements DatabaseTableReference {
+final class DatabaseTableReferenceImpl implements DatabaseTableReference {
 
     @NotNull
     private final String databaseName;
-
 
     @NotNull
     private final String tableName;
@@ -25,11 +24,6 @@ public final class DatabaseTableReferenceImpl implements DatabaseTableReference 
         return tableName;
     }
 
-    @NotNull
-    @Override
-    public String getSchemaName() {
-        return "";
-    }
 
     @NotNull
     @Override
@@ -39,14 +33,6 @@ public final class DatabaseTableReferenceImpl implements DatabaseTableReference 
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(databaseName);
-        if (!this.getSchemaName().isEmpty()) {
-            sb.append(".");
-            sb.append(this.getSchemaName());
-        }
-        sb.append(".");
-        sb.append(tableName);
-        return sb.toString();
+        return databaseName + "." + tableName;
     }
 }

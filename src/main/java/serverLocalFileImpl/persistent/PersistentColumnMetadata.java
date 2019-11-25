@@ -63,7 +63,7 @@ public final class PersistentColumnMetadata implements Serializable {
                 return;
             }
         }
-        throw new WrongValueTypeException("dbo", table.getTableName(), columnName,
+        throw new WrongValueTypeException(table.getTableName(), columnName,
                 this.getAllowedJavaTypes(), value.getClass());
     }
 

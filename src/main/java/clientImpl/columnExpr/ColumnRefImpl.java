@@ -3,7 +3,7 @@ package clientImpl.columnExpr;
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
-public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
+final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
     @NotNull
     private final String schemaName;
@@ -14,20 +14,20 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
     @NotNull
     private final String columnName;
 
-    public ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
-                         @NotNull String columnName, String alias) {
+    ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
+                  @NotNull String columnName, String alias) {
         super(ExprType.COLUMN_REF, alias);
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
     }
 
-    public ColumnRefImpl(@NotNull String tableName,
-                         @NotNull String columnName, String alias) {
+    ColumnRefImpl(@NotNull String tableName,
+                  @NotNull String columnName, String alias) {
         this("", tableName, columnName, alias);
     }
 
-    public ColumnRefImpl(@NotNull String columnName, String alias) {
+    ColumnRefImpl(@NotNull String columnName, String alias) {
         this("", "", columnName, alias);
     }
 
@@ -44,11 +44,6 @@ public final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
         return tableName;
     }
 
-    @NotNull
-    @Override
-    public String getSchemaName() {
-        return schemaName;
-    }
 
     @NotNull
     @Override

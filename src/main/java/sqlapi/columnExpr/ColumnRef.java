@@ -8,8 +8,6 @@ public interface ColumnRef extends ColumnExpression {
 
     String getTableName();
 
-    String getSchemaName();
-
     @NotNull
     @Override
     default String getAlias() {

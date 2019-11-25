@@ -3,15 +3,16 @@ package clientImpl.predicates;
 import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class PredicateImpl implements Predicate {
+abstract class PredicateImpl implements Predicate {
 
     @NotNull
-    public final Type type;
+    private final Type type;
 
-    public PredicateImpl(@NotNull Type type) {
+    PredicateImpl(@NotNull Type type) {
         this.type = type;
     }
 
+    @NotNull
     @Override
     public Type getType() {
         return type;
@@ -26,9 +27,9 @@ public abstract class PredicateImpl implements Predicate {
     public Predicate or(Predicate predicate) {
         return new CombinedPredicateImpl(Type.OR, this, predicate);
     }
-    
 
-    protected String getOperatorString() {
+
+    String getOperatorString() {
         switch (type) {
             case IN:
                 return "IN";

@@ -1,8 +1,12 @@
 package clientImpl.predicates;
 
-public final class EmptyPredicateImpl extends PredicateImpl {
+final class EmptyPredicateImpl extends PredicateImpl {
 
-    public EmptyPredicateImpl() {
+    EmptyPredicateImpl() {
         super(Type.EMPTY);
+    }
+
+    @Override public String toString() {
+        return "";
     }
 }
