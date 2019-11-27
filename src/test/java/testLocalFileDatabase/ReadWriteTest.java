@@ -17,7 +17,7 @@ import java.util.Collections;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class ReadWriteTest extends AbstractServerLocalFileTest {
+public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
     @Test
     public void test1() {
@@ -79,8 +79,8 @@ public class ReadWriteTest extends AbstractServerLocalFileTest {
 
 
             // save databases
-//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-            String tempDir = System.getProperty("java.io.tmpdir");
+            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
+//            String tempDir = System.getProperty("java.io.tmpdir");
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
 

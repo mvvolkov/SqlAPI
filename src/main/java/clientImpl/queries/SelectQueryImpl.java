@@ -3,7 +3,7 @@ package clientImpl.queries;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.SelectedItem;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.SelectQuery;
 import sqlapi.tables.DatabaseTableReference;

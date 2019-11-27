@@ -31,7 +31,7 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class DeleteTest extends AbstractServerLocalFileTest {
+public class DeleteTest extends AbstractLocalFileDatabaseTest {
 
     /**
      * DELETE FROM DB1.table1;

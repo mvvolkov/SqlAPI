@@ -2,8 +2,8 @@ package clientImpl.queries;
 
 import clientImpl.predicates.PredicateFactory;
 import org.jetbrains.annotations.NotNull;
-import sqlapi.assignment.AssignmentOperation;
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.AssignmentOperation;
+import sqlapi.misc.SelectedItem;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.predicates.Predicate;

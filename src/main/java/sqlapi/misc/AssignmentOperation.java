@@ -1,4 +1,4 @@
-package sqlapi.assignment;
+package sqlapi.misc;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;

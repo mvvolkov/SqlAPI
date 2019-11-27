@@ -37,7 +37,7 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class InsertTest extends AbstractServerLocalFileTest {
+public class InsertTest extends AbstractLocalFileDatabaseTest {
 
 
     /**

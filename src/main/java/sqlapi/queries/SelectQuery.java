@@ -2,7 +2,7 @@ package sqlapi.queries;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.SelectedItem;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
 

@@ -11,7 +11,7 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.SelectedItem;
 import sqlapi.queries.*;
 import sqlapi.queryResult.ResultSet;
 import sqlapi.server.SqlServer;

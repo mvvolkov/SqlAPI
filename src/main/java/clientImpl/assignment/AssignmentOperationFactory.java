@@ -2,7 +2,7 @@ package clientImpl.assignment;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.assignment.AssignmentOperation;
+import sqlapi.misc.AssignmentOperation;
 
 public class AssignmentOperationFactory {
 

@@ -1,7 +1,7 @@
 package sqlapi.tables;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.SelectedItem;
 
 public interface DatabaseTableReference extends TableReference, SelectedItem {
 

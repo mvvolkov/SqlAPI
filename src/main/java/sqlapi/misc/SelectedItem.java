@@ -1,4 +1,4 @@
-package sqlapi.assignment;
+package sqlapi.misc;
 
 public interface SelectedItem {
 }

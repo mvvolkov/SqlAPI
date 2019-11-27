@@ -6,7 +6,7 @@ import LocalFileDatabase.server.intermediateResult.DataSet;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
-import sqlapi.assignment.AssignmentOperation;
+import sqlapi.misc.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateQuery;
 

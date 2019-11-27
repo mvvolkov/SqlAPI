@@ -35,7 +35,7 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class UpdateTest extends AbstractServerLocalFileTest {
+public class UpdateTest extends AbstractLocalFileDatabaseTest {
 
     /**
      * UPDATE DB1.table1 SET column4='updtd';

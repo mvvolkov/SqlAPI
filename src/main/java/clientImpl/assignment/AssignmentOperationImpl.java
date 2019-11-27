@@ -1,7 +1,7 @@
 package clientImpl.assignment;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.assignment.AssignmentOperation;
+import sqlapi.misc.AssignmentOperation;
 import sqlapi.columnExpr.ColumnExpression;
 
 final class AssignmentOperationImpl implements AssignmentOperation {

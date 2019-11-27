@@ -1,7 +1,7 @@
 package sqlapi.queries;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.assignment.AssignmentOperation;
+import sqlapi.misc.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 
 import java.util.Collection;

@@ -42,7 +42,7 @@ import static org.junit.Assert.fail;
  * test3, cc, 41
  * ccc, t43, 38
  */
-public class SelectTest extends AbstractServerLocalFileTest {
+public class SelectTest extends AbstractLocalFileDatabaseTest {
 
     @Override
     public void setUp() {

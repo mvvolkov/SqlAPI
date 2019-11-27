@@ -1,6 +1,6 @@
 package sqlapi.columnExpr;
 
-import sqlapi.assignment.SelectedItem;
+import sqlapi.misc.SelectedItem;
 import org.jetbrains.annotations.NotNull;
 
 public interface ColumnExpression extends SelectedItem {
