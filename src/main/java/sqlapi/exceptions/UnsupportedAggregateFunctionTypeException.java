@@ -15,6 +15,6 @@ public class UnsupportedAggregateFunctionTypeException extends SqlException {
 
     @Override
     public String getMessage() {
-        return "Unsupported predicate type: " + className;
+        return "Unsupported aggregate function type: " + className;
     }
 }

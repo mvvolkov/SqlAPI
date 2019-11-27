@@ -6,7 +6,7 @@ import sqlapi.predicates.Predicate;
 
 import java.util.Collection;
 
-public interface UpdateQuery extends SqlTableQuery {
+public interface UpdateQuery extends TableActionQuery {
 
     @NotNull Collection<AssignmentOperation> getAssignmentOperations();
 

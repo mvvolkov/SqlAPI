@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.DeleteQuery;
 import sqlapi.predicates.Predicate;
 
-final class DeleteQueryImpl extends AbstractSqlTableQueryImpl
+final class DeleteQueryImpl extends TableActionQueryImpl
         implements DeleteQuery {
 
 

@@ -15,6 +15,6 @@ public class UnsupportedTableReferenceTypeException extends SqlException {
 
     @Override
     public String getMessage() {
-        return "Unsupported predicate type: " + className;
+        return "Unsupported table reference type: " + className;
     }
 }

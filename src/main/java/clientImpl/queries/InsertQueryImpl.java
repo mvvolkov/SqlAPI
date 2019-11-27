@@ -6,7 +6,7 @@ import sqlapi.queries.InsertQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class InsertQueryImpl extends AbstractSqlTableQueryImpl implements InsertQuery {
+final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery {
 
     @NotNull
     private final List<String> columns;

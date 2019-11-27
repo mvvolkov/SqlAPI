@@ -6,7 +6,7 @@ import sqlapi.queries.SelectQuery;
 
 import java.util.List;
 
-final class InsertFromSelectQueryImpl extends AbstractSqlTableQueryImpl implements
+final class InsertFromSelectQueryImpl extends TableActionQueryImpl implements
         InsertFromSelectQuery {
 
     @NotNull
