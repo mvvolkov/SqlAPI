@@ -227,42 +227,42 @@ final class SqlServerImpl implements SqlServerLocalFile {
 
                         @Override
                         public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @Override
                         public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
-                            return null;
+                            throw new UnsupportedOperationException();
                         }
 
                         @NotNull
