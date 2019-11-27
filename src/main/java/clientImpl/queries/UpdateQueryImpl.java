@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.misc.AssignmentOperation;
+import sqlapi.assignment.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateQuery;
 

@@ -1,12 +1,14 @@
 package clientImpl.predicates;
 
-final class EmptyPredicateImpl extends PredicateImpl {
+import sqlapi.predicates.EmptyPredicate;
+
+final class EmptyPredicateImpl extends PredicateImpl implements EmptyPredicate {
 
     EmptyPredicateImpl() {
-        super(Type.EMPTY);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "";
     }
 }

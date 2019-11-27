@@ -1,6 +1,7 @@
 package serverLocalFileImpl.queryResult;
 
-import sqlapi.selectResult.ResultRow;
+import org.jetbrains.annotations.NotNull;
+import sqlapi.queryResult.ResultRow;
 
 import java.util.List;
 
@@ -14,10 +15,11 @@ public final class ResultRowImpl implements ResultRow {
 
 
     @Override
-    public Object getObject(int index) {
+    public Object getValue(int index) {
         return values.get(index);
     }
 
+    @NotNull
     @Override public List<Object> getValues() {
         return values;
     }

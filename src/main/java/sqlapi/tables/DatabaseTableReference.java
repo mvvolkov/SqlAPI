@@ -1,15 +1,12 @@
 package sqlapi.tables;
 
-import sqlapi.misc.SelectedItem;
+import org.jetbrains.annotations.NotNull;
+import sqlapi.assignment.SelectedItem;
 
 public interface DatabaseTableReference extends TableReference, SelectedItem {
 
-    String getDatabaseName();
+    @NotNull String getDatabaseName();
 
-    String getTableName();
+    @NotNull String getTableName();
 
-    @Override
-    default TableRefType getTableRefType() {
-        return TableRefType.DATABASE_TABLE;
-    }
 }

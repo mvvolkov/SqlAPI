@@ -1,6 +1,10 @@
 package sqlapi.predicates;
 
-public interface CombinedPredicate extends Predicate{
-    Predicate getLeftPredicate();
-    Predicate getRightPredicate();
+import org.jetbrains.annotations.NotNull;
+
+public interface CombinedPredicate extends Predicate {
+
+    @NotNull Predicate getLeftPredicate();
+
+    @NotNull Predicate getRightPredicate();
 }

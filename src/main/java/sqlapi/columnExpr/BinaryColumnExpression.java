@@ -1,8 +1,10 @@
 package sqlapi.columnExpr;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface BinaryColumnExpression extends ColumnExpression {
 
-    ColumnExpression getLeftOperand();
+    @NotNull ColumnExpression getLeftOperand();
 
-    ColumnExpression getRightOperand();
+    @NotNull ColumnExpression getRightOperand();
 }

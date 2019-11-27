@@ -1,5 +1,6 @@
 package sqlapi.predicates;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.columnExpr.ColumnValue;
 
@@ -8,13 +9,8 @@ import java.util.List;
 public interface ColumnInPredicate extends Predicate {
 
 
-    ColumnRef getColumnRef();
+    @NotNull ColumnRef getColumnRef();
 
-    List<ColumnValue> getColumnValues();
-
-    @Override
-    default Type getType() {
-        return Type.IN;
-    }
+    @NotNull List<ColumnValue> getColumnValues();
 
 }

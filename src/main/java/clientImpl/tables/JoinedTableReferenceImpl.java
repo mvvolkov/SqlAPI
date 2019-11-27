@@ -1,4 +1,4 @@
-package clientImpl.tableRef;
+package clientImpl.tables;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.tables.DatabaseTableReference;
@@ -6,10 +6,8 @@ import sqlapi.tables.JoinedTableReference;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
 
-final class JoinedTableReferenceImpl implements JoinedTableReference {
+abstract class JoinedTableReferenceImpl implements JoinedTableReference {
 
-    @NotNull
-    private final TableRefType joinType;
 
     @NotNull
     private final TableReference left;
@@ -21,10 +19,9 @@ final class JoinedTableReferenceImpl implements JoinedTableReference {
     private final Predicate predicate;
 
 
-    JoinedTableReferenceImpl(@NotNull TableRefType joinType, @NotNull TableReference left,
+    JoinedTableReferenceImpl(@NotNull TableReference left,
                              @NotNull TableReference right,
                              @NotNull Predicate predicate) {
-        this.joinType = joinType;
         this.left = left;
         this.right = right;
         this.predicate = predicate;
@@ -48,27 +45,11 @@ final class JoinedTableReferenceImpl implements JoinedTableReference {
         return predicate;
     }
 
-    @NotNull
-    @Override
-    public TableRefType getTableRefType() {
-        return joinType;
-    }
+    protected abstract String getJoinName();
 
-    @Override public String toString() {
-        String operator;
-        switch (joinType) {
-            case INNER_JOIN:
-                operator = "INNER JOIN";
-                break;
-            case LEFT_OUTER_JOIN:
-                operator = "LEFT OUTER JOIN";
-                break;
-            case RIGHT_OUTER_JOIN:
-                operator = "RIGHT OUTER JOIN";
-                break;
-            default:
-                operator = "";
-        }
+
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         boolean leftRefIsDbTable = left instanceof DatabaseTableReference;
         boolean rightRefIsDbTable = right instanceof DatabaseTableReference;
@@ -80,7 +61,7 @@ final class JoinedTableReferenceImpl implements JoinedTableReference {
             sb.append(")");
         }
         sb.append(" ");
-        sb.append(operator);
+        sb.append(this.getJoinName());
         sb.append(" ");
         if (!rightRefIsDbTable) {
             sb.append("(");

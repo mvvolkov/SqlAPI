@@ -2,13 +2,13 @@ package testServerLocalFileImpl;
 
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.SqlQueryFactory;
-import clientImpl.tableRef.TableRefFactory;
+import clientImpl.tables.TableRefFactory;
 import org.junit.Before;
 import serverLocalFileImpl.SqlLocalFileServerFactory;
 import serverLocalFileImpl.SqlServerLocalFile;
 import sqlapi.exceptions.SqlException;
-import sqlapi.selectResult.ResultRow;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultRow;
+import sqlapi.queryResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,7 +125,7 @@ public abstract class AbstractServerLocalFileTest {
             boolean rowMatch = true;
             for (int i = 0; i < resultSet.getHeaders().size(); i++) {
                 Object value = values[i];
-                Object resultValue = row.getObject(i);
+                Object resultValue = row.getValue(i);
 
                 if (value == null) {
                     if (resultValue != null) {

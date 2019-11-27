@@ -4,11 +4,10 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
-import clientImpl.tableRef.TableRefFactory;
+import clientImpl.tables.TableRefFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.misc.SelectedItem;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -176,7 +175,7 @@ public class SelectTest extends AbstractServerLocalFileTest {
                     TableRefFactory.dbTable("DB1", "table1"),
                     Arrays.asList(ColumnExprFactory.value(15, "N15"),
                             ColumnExprFactory.sumWithAlias("column2", "column1", "sum1"),
-                            ColumnExprFactory.diff("column2", ColumnExprFactory.value(11))
+                            ColumnExprFactory.columnRef("column2").subtract(ColumnExprFactory.value(11))
                     ),
                     PredicateFactory.isNotNull("column2")
             ));
@@ -215,8 +214,7 @@ public class SelectTest extends AbstractServerLocalFileTest {
                     Arrays.asList(TableRefFactory.dbTable("DB1", "table1"),
                             TableRefFactory.dbTable("DB1", "table2")
                     ),
-                    Arrays.asList(
-                            (SelectedItem) TableRefFactory.dbTable("DB1", "table2"),
+                    Arrays.asList(TableRefFactory.dbTable("DB1", "table2"),
                             ColumnExprFactory.columnRef("column2"),
                             ColumnExprFactory.columnRef("table1", "column3"),
                             ColumnExprFactory.columnRef("column1")
@@ -639,11 +637,11 @@ public class SelectTest extends AbstractServerLocalFileTest {
                     TableRefFactory.dbTable("DB1", "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.groupSumWithAlias("column1", "SUM1"),
-                            ColumnExprFactory.groupMaxWithAlias("column1", "MAX1"),
-                            ColumnExprFactory.groupMinWithAlias("column1", "MIN1"),
+                            ColumnExprFactory.maxWithAlias("column1", "MAX1"),
+                            ColumnExprFactory.minWithAlias("column1", "MIN1"),
                             ColumnExprFactory.groupSumWithAlias("column2", "SUM2"),
-                            ColumnExprFactory.groupMaxWithAlias("column2", "MAX2"),
-                            ColumnExprFactory.groupMinWithAlias("column2", "MIN2")),
+                            ColumnExprFactory.maxWithAlias("column2", "MAX2"),
+                            ColumnExprFactory.minWithAlias("column2", "MIN2")),
 
                     PredicateFactory.isNotNull("column1")
                             .and(PredicateFactory.isNotNull("column2")),

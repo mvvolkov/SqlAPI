@@ -1,4 +1,4 @@
-package clientImpl.tableRef;
+package clientImpl.tables;
 
 import sqlapi.tables.DatabaseTableReference;
 import org.jetbrains.annotations.NotNull;

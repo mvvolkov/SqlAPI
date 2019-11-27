@@ -4,7 +4,7 @@ import sqlapi.columnExpr.BinaryColumnExpression;
 import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
-final class BinaryColumnExprImpl extends ColumnExprImpl
+abstract class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {
 
     @NotNull
@@ -13,10 +13,9 @@ final class BinaryColumnExprImpl extends ColumnExprImpl
     @NotNull
     private final ColumnExpression rightOperand;
 
-    BinaryColumnExprImpl(@NotNull ExprType exprType,
-                         @NotNull ColumnExpression leftOperand,
+    BinaryColumnExprImpl(@NotNull ColumnExpression leftOperand,
                          @NotNull ColumnExpression rightOperand, @NotNull String alias) {
-        super(exprType, alias);
+        super(alias);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }
@@ -51,19 +50,6 @@ final class BinaryColumnExprImpl extends ColumnExprImpl
         return sb.toString();
     }
 
-    private String getOperatorString() {
-        switch (exprType) {
-            case SUM:
-                return "+";
-            case DIFF:
-                return "-";
-            case PRODUCT:
-                return "*";
-            case DIVIDE:
-                return "/";
-            default:
-                return "";
-        }
-    }
+    protected abstract String getOperatorString();
 }
 

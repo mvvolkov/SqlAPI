@@ -4,9 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ColumnRef extends ColumnExpression {
 
-    String getColumnName();
+    @NotNull String getColumnName();
 
-    String getTableName();
+    @NotNull String getTableName();
+
+    @NotNull String getDatabaseName();
 
     @NotNull
     @Override
@@ -14,8 +16,4 @@ public interface ColumnRef extends ColumnExpression {
         return getColumnName();
     }
 
-    @Override
-    default ExprType getExprType() {
-        return ExprType.COLUMN_REF;
-    }
 }

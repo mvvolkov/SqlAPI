@@ -1,21 +1,8 @@
 package sqlapi.columnExpr;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface AggregateFunction extends ColumnExpression {
 
-    enum Type {
-        COUNT,
-        SUM,
-        AVG,
-        MAX,
-        MIN
-    }
-
-    @Override
-    default ExprType getExprType() {
-        return ExprType.AGGR_FUNC;
-    }
-
-    ColumnRef getColumnRef();
-
-    Type getType();
+    @NotNull ColumnRef getColumnRef();
 }

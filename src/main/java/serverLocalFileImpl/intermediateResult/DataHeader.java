@@ -10,6 +10,10 @@ public final class DataHeader {
 
 
     @NotNull
+    private final String databaseName;
+
+
+    @NotNull
     private final String tableName;
 
     @NotNull
@@ -20,20 +24,24 @@ public final class DataHeader {
 
 
     public DataHeader(SqlType sqlType,
-               @NotNull String tableName,
-               @NotNull String columnName) {
+                      @NotNull String databaseName,
+                      @NotNull String tableName,
+                      @NotNull String columnName) {
+        this.sqlType = sqlType;
+        this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
-        this.sqlType = sqlType;
+
     }
 
 
     public DataHeader(@NotNull String columnName) {
-        this(null, "", columnName);
+        this(null, "", "", columnName);
     }
 
 
     public DataHeader(@NotNull ColumnRef columnRef) {
+        this.databaseName = columnRef.getDatabaseName();
         this.tableName = columnRef.getTableName();
         this.columnName = columnRef.getColumnName();
     }
@@ -53,6 +61,11 @@ public final class DataHeader {
         return sqlType;
     }
 
+    @NotNull
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -61,18 +74,23 @@ public final class DataHeader {
             return false;
         }
         DataHeader cr = (DataHeader) obj;
-        return Objects.equals(tableName, cr.tableName)
+        return Objects.equals(databaseName, cr.databaseName)
+                && Objects.equals(tableName, cr.tableName)
                 && Objects.equals(columnName, cr.columnName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tableName, columnName);
+        return Objects.hash(databaseName, tableName, columnName);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(columnName);
+        if (!databaseName.isEmpty()) {
+            sb.insert(0, ".");
+            sb.insert(0, databaseName);
+        }
         if (!tableName.isEmpty()) {
             sb.insert(0, ".");
             sb.insert(0, tableName);

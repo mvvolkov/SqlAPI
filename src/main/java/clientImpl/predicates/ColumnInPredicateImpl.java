@@ -19,7 +19,6 @@ final class ColumnInPredicateImpl extends PredicateImpl
 
     ColumnInPredicateImpl(@NotNull ColumnRef columnRef,
                           @NotNull List<ColumnValue> values) {
-        super(Type.IN);
         this.columnRef = columnRef;
         this.values = values;
     }

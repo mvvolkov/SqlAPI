@@ -1,13 +1,10 @@
 package sqlapi.predicates;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnRef;
 
 public interface ColumnIsNotNullPredicate extends Predicate {
 
-    ColumnRef getColumnRef();
+    @NotNull ColumnRef getColumnRef();
 
-    @Override
-    default Type getType() {
-        return Type.IS_NOT_NULL;
-    }
 }

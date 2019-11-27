@@ -9,13 +9,10 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
-import sqlapi.misc.SelectedItem;
+import sqlapi.assignment.SelectedItem;
 import sqlapi.queries.*;
-import sqlapi.selectResult.ResultSet;
-import sqlapi.tables.DatabaseTableReference;
-import sqlapi.tables.JoinedTableReference;
-import sqlapi.tables.TableFromSelectReference;
-import sqlapi.tables.TableReference;
+import sqlapi.queryResult.ResultSet;
+import sqlapi.tables.*;
 
 import java.io.*;
 import java.util.*;
@@ -115,12 +112,14 @@ final class SqlServerImpl implements SqlServerLocalFile {
         return DataUtil.createResultSet(this.getInternalQueryResult(selectQuery));
     }
 
-    @Override public @NotNull Collection<String> getDatabases() {
+    @Override
+    public @NotNull Collection<String> getDatabases() {
         return databases.stream().map(PersistentDatabase::getName)
                 .collect(Collectors.toList());
     }
 
-    @Override public @NotNull Collection<TableMetadata> getTables(String databaseName)
+    @Override
+    public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
             throws NoSuchDatabaseException {
         return this.getDatabase(databaseName).getTables();
     }
@@ -218,6 +217,7 @@ final class SqlServerImpl implements SqlServerLocalFile {
         List<ColumnExpression> columnExpressions = new ArrayList<>();
         for (SelectedItem selectedItem : selectedItems) {
             if (selectedItem instanceof DatabaseTableReference) {
+                String databaseName = ((DatabaseTableReference) selectedItem).getDatabaseName();
                 String tableName =
                         ((DatabaseTableReference) selectedItem).getTableName();
                 List<PersistentColumnMetadata> columns =
@@ -226,13 +226,60 @@ final class SqlServerImpl implements SqlServerLocalFile {
                     columnExpressions.add(new ColumnRef() {
 
                         @Override
+                        public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression) {
+                            return null;
+                        }
+
+                        @Override
+                        public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                            return null;
+                        }
+
+                        @NotNull
+                        @Override
                         public String getColumnName() {
                             return column.getColumnName();
                         }
 
+                        @NotNull
                         @Override
                         public String getTableName() {
                             return tableName;
+                        }
+
+                        @Override
+                        public @NotNull String getDatabaseName() {
+                            return databaseName;
                         }
 
                     });
@@ -279,16 +326,17 @@ final class SqlServerImpl implements SqlServerLocalFile {
                 this.getDataFromTableRef(tableReference.getLeftTableReference());
         DataSet right =
                 this.getDataFromTableRef(tableReference.getRightTableReference());
-        switch (tableReference.getTableRefType()) {
-            case INNER_JOIN:
-                return DataUtil.innerJoin(left, right, tableReference.getPredicate());
-            case LEFT_OUTER_JOIN:
-                return DataUtil.leftOuterJoin(left, right, tableReference.getPredicate());
-            case RIGHT_OUTER_JOIN:
-                return DataUtil
-                        .rightOuterJoin(left, right, tableReference.getPredicate());
+        if (tableReference instanceof InnerJoinTableReference) {
+            return DataUtil.innerJoin(left, right, tableReference.getPredicate());
         }
-        throw new InvalidQueryException("Invalid type of join table reference");
+        if (tableReference instanceof LeftOuterJoinTableReference) {
+            return DataUtil.leftOuterJoin(left, right, tableReference.getPredicate());
+        }
+        if (tableReference instanceof RightOuterJoinTableReference) {
+            return DataUtil
+                    .rightOuterJoin(left, right, tableReference.getPredicate());
+        }
+        throw new UnsupportedTableReferenceTypeException(tableReference.getClass().getSimpleName());
     }
 
     private DataSet getSubqueryResult(TableFromSelectReference tr)
@@ -305,7 +353,7 @@ final class SqlServerImpl implements SqlServerLocalFile {
         // second, replace table name with the alias everythere in the result data.
         List<DataHeader> newColumns = new ArrayList<>();
         for (DataHeader cr : dataSet.getColumns()) {
-            newColumns.add(new DataHeader(cr.getSqlType(), alias,
+            newColumns.add(new DataHeader(cr.getSqlType(), "", alias,
                     cr.getColumnName()));
         }
         List<DataRow> newRows = new ArrayList<>();
@@ -313,7 +361,7 @@ final class SqlServerImpl implements SqlServerLocalFile {
             Map<DataHeader, Object> values = new HashMap<>();
             for (Map.Entry<DataHeader, Object> entry : row.getCells()
                     .entrySet()) {
-                values.put(new DataHeader(entry.getKey().getSqlType(), alias,
+                values.put(new DataHeader(entry.getKey().getSqlType(), "", alias,
                                 entry.getKey().getColumnName()),
                         entry.getValue());
             }
@@ -327,20 +375,18 @@ final class SqlServerImpl implements SqlServerLocalFile {
             TableReference tableReference) throws
             SqlException {
 
-        switch (tableReference.getTableRefType()) {
-            case DATABASE_TABLE:
-                return this.getDataFromPersistentTable(
-                        (DatabaseTableReference) tableReference);
-            case INNER_JOIN:
-            case LEFT_OUTER_JOIN:
-            case RIGHT_OUTER_JOIN:
-                return this.getDataFromJoinedTable((JoinedTableReference) tableReference);
-            case SELECT_SUBQUERY:
-                return this.getSubqueryResult(
-                        (TableFromSelectReference) tableReference);
-
+        if (tableReference instanceof DatabaseTableReference) {
+            return this.getDataFromPersistentTable(
+                    (DatabaseTableReference) tableReference);
         }
-        throw new IllegalArgumentException("Invalid type of table reference.");
+        if (tableReference instanceof JoinedTableReference) {
+            return this.getDataFromJoinedTable((JoinedTableReference) tableReference);
+        }
+        if (tableReference instanceof TableFromSelectReference) {
+            return this.getSubqueryResult(
+                    (TableFromSelectReference) tableReference);
+        }
+        throw new UnsupportedTableReferenceTypeException(tableReference.getClass().getSimpleName());
     }
 
     @NotNull

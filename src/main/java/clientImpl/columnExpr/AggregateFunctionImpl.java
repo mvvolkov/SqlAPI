@@ -5,11 +5,9 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
-final class AggregateFunctionImpl extends ColumnExprImpl
+abstract class AggregateFunctionImpl extends ColumnExprImpl
         implements AggregateFunction {
 
-    @NotNull
-    private final Type type;
 
     @NotNull
     private final ColumnRef column;
@@ -17,14 +15,14 @@ final class AggregateFunctionImpl extends ColumnExprImpl
     @NotNull
     private final String alias;
 
-    AggregateFunctionImpl(@NotNull Type type, @NotNull ColumnExpression column,
+    AggregateFunctionImpl(@NotNull ColumnExpression column,
                           @NotNull String alias) {
-        super(ExprType.AGGR_FUNC, alias);
-        this.type = type;
+        super(alias);
         this.column = (ColumnRef) column;
         this.alias = alias;
     }
 
+    @NotNull
     @Override
     public ColumnRef getColumnRef() {
         return column;
@@ -36,32 +34,13 @@ final class AggregateFunctionImpl extends ColumnExprImpl
         return alias;
     }
 
-    @NotNull
-    @Override
-    public Type getType() {
-        return type;
-    }
+    protected abstract String getFunctionName();
+
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        switch (type) {
-            case COUNT:
-                sb.append("COUNT");
-                break;
-            case SUM:
-                sb.append("SUM");
-                break;
-            case AVG:
-                sb.append("AVG");
-                break;
-            case MAX:
-                sb.append("MAX");
-                break;
-            case MIN:
-                sb.append("MIN");
-                break;
-        }
+        sb.append(this.getFunctionName());
         sb.append("(");
         if (column.getColumnName().isEmpty()) {
             sb.append("*");

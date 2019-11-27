@@ -7,7 +7,7 @@ import sqlapi.metadata.ColumnConstraintType;
 import java.util.Collections;
 import java.util.List;
 
-class ColumnConstraintImpl implements ColumnConstraint {
+final class ColumnConstraintImpl implements ColumnConstraint {
 
     @NotNull
     private final ColumnConstraintType type;

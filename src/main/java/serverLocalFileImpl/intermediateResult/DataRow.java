@@ -1,13 +1,7 @@
 package serverLocalFileImpl.intermediateResult;
 
-import sqlapi.columnExpr.BinaryColumnExpression;
-import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.ColumnRef;
-import sqlapi.columnExpr.ColumnValue;
-import sqlapi.exceptions.AmbiguousColumnNameException;
-import sqlapi.exceptions.InvalidQueryException;
-import sqlapi.exceptions.NoSuchColumnException;
-import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.columnExpr.*;
+import sqlapi.exceptions.*;
 import sqlapi.predicates.*;
 
 import java.util.ArrayList;
@@ -27,49 +21,43 @@ public final class DataRow {
     }
 
     public boolean evaluatePredicate(Predicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
+            throws SqlException {
 
-        switch (predicate.getType()) {
-            case EMPTY:
-                return true;
-            case IN:
-                return this.evaluateInPredicate((ColumnInPredicate) predicate);
-            case IS_NULL:
-                return this.evaluateIsNullPredicate((ColumnIsNullPredicate) predicate);
-            case IS_NOT_NULL:
-                return this
-                        .evaluateIsNotNullPredicate((ColumnIsNotNullPredicate) predicate);
-            case AND:
-            case OR:
-                return this.evaluateCombinedPredicate((CombinedPredicate) predicate);
-            case EQUALS:
-            case NOT_EQUALS:
-            case GREATER_THAN:
-            case GREATER_THAN_OR_EQUALS:
-            case LESS_THAN:
-            case LESS_THAN_OR_EQUALS:
-                return this.evaluatePredicate((BinaryPredicate) predicate);
+        if (predicate instanceof EmptyPredicate) {
+            return true;
         }
-        return false;
+        if (predicate instanceof ColumnInPredicate) {
+            return this.evaluateInPredicate((ColumnInPredicate) predicate);
+        }
+        if (predicate instanceof ColumnIsNullPredicate) {
+            return this.evaluateIsNullPredicate((ColumnIsNullPredicate) predicate);
+        }
+        if (predicate instanceof ColumnIsNotNullPredicate) {
+            return this.evaluateIsNotNullPredicate((ColumnIsNotNullPredicate) predicate);
+        }
+        if (predicate instanceof CombinedPredicate) {
+            return this.evaluateCombinedPredicate((CombinedPredicate) predicate);
+        }
+        if (predicate instanceof BinaryPredicate) {
+            return this.evaluateBinaryPredicate((BinaryPredicate) predicate);
+        }
+        throw new UnsupportedPredicateTypeException(predicate.getClass().getSimpleName());
     }
 
     private boolean evaluateCombinedPredicate(CombinedPredicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
-        if (predicate.getType() == Predicate.Type.AND) {
+            throws SqlException {
+        if (predicate instanceof AndPredicate) {
             return this.evaluatePredicate(predicate.getLeftPredicate()) &&
                     this.evaluatePredicate(predicate.getRightPredicate());
-        } else if (predicate.getType() == Predicate.Type.OR) {
+        } else if (predicate instanceof OrPredicate) {
             return this.evaluatePredicate(predicate.getLeftPredicate()) ||
                     this.evaluatePredicate(predicate.getRightPredicate());
         }
         return false;
     }
 
-    private boolean evaluatePredicate(BinaryPredicate predicate)
-            throws NoSuchColumnException,
-            AmbiguousColumnNameException, InvalidQueryException {
+    private boolean evaluateBinaryPredicate(BinaryPredicate predicate)
+            throws SqlException {
 
 
         Comparable leftValue =
@@ -86,33 +74,32 @@ public final class DataRow {
             throw new InvalidQueryException("Objects of different classes are used in " +
                     "the predicate: " + predicate.toString());
         }
-
-
         int compResult = leftValue.compareTo(rightValue);
-        switch (predicate.getType()) {
-            case EQUALS:
-                return compResult == 0;
-            case NOT_EQUALS:
-                return compResult != 0;
-            case GREATER_THAN:
-                return compResult > 0;
-            case GREATER_THAN_OR_EQUALS:
-                return compResult >= 0;
-            case LESS_THAN:
-                return compResult < 0;
-            case LESS_THAN_OR_EQUALS:
-                return compResult <= 0;
-            default:
-                return false;
+        if (predicate instanceof EqualsPredicate) {
+            return compResult == 0;
         }
+        if (predicate instanceof NotEqualsPredicate) {
+            return compResult != 0;
+        }
+        if (predicate instanceof GreaterThanPredicate) {
+            return compResult > 0;
+        }
+        if (predicate instanceof GreaterThanOrEqualsPredicate) {
+            return compResult >= 0;
+        }
+        if (predicate instanceof LessThanPredicate) {
+            return compResult < 0;
+        }
+        if (predicate instanceof LessThanOrEqualsPredicate) {
+            return compResult <= 0;
+        }
+        return false;
     }
 
     private boolean evaluateInPredicate(ColumnInPredicate predicate)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
-        Comparable leftValue =
-                (Comparable) evaluateColumnExpr(predicate.getColumnRef());
+        Comparable leftValue = (Comparable) evaluateColumnExpr(predicate.getColumnRef());
 
         for (ColumnValue columnValue : predicate.getColumnValues()) {
             Comparable rightValue = (Comparable) columnValue.getValue();
@@ -125,24 +112,41 @@ public final class DataRow {
     }
 
     private boolean evaluateIsNullPredicate(ColumnIsNullPredicate predicate)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
         Object leftValue = evaluateColumnExpr(predicate.getColumnRef());
         return leftValue == null;
     }
 
     private boolean evaluateIsNotNullPredicate(ColumnIsNotNullPredicate predicate)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
         Object leftValue = evaluateColumnExpr(predicate.getColumnRef());
         return leftValue != null;
     }
 
+    private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+            throws SqlException {
+        Object leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
+        Object rightValue = this.evaluateColumnExpr(bce.getRightOperand());
+
+        if (bce instanceof SumColumnExpression) {
+            return evaluateSumColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof DiffColumnExpression) {
+            return evaluateDiffColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof ProductColumnExpression) {
+            return evaluateProductColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof DivisionColumnExpression) {
+            return evaluateDivisionColumnExpr(leftValue, rightValue);
+        }
+        throw new InvalidQueryException("Unknown arithmetical operation");
+    }
+
     public Object evaluateColumnExpr(ColumnExpression ce)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
         if (ce instanceof BinaryColumnExpression) {
             return evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
@@ -156,9 +160,7 @@ public final class DataRow {
         return null;
     }
 
-    static Object evaluateBinaryColumnExpr(Object leftValue, Object rightValue,
-                                           ColumnExpression.ExprType type)
-            throws InvalidQueryException {
+    static private void checkArithmeticalOperands(Object leftValue, Object rightValue) throws InvalidQueryException {
         if (leftValue == null || rightValue == null) {
             throw new InvalidQueryException(
                     "Null values can not be used in arithmetical expressions");
@@ -167,33 +169,44 @@ public final class DataRow {
             throw new InvalidQueryException("Only numerical types can be used in " +
                     "arithmetical expressions");
         }
-        Integer i1 = (Integer) leftValue;
-        Integer i2 = (Integer) rightValue;
-        switch (type) {
-            case SUM:
-                return i1 + i2;
-            case DIFF:
-                return i1 - i2;
-            case PRODUCT:
-                return i1 * i2;
-            case DIVIDE:
-                if (i2 == 0) {
-                    throw new InvalidQueryException("Here we need another type of " +
-                            "exception :(");
-                }
-                return i1 / i2;
-            default:
-                throw new InvalidQueryException("Unknown arithmetical operation");
-        }
     }
 
-    private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
-        Object leftValue = evaluateColumnExpr(bce.getLeftOperand());
-        Object rightValue = evaluateColumnExpr(bce.getRightOperand());
-        return evaluateBinaryColumnExpr(leftValue, rightValue, bce.getExprType());
+    static Object evaluateSumColumnExpr(Object leftValue, Object rightValue)
+            throws InvalidQueryException {
+        checkArithmeticalOperands(leftValue, rightValue);
+        Integer i1 = (Integer) leftValue;
+        Integer i2 = (Integer) rightValue;
+        return i1 + i2;
     }
+
+    static Object evaluateDiffColumnExpr(Object leftValue, Object rightValue)
+            throws InvalidQueryException {
+        checkArithmeticalOperands(leftValue, rightValue);
+        Integer i1 = (Integer) leftValue;
+        Integer i2 = (Integer) rightValue;
+        return i1 - i2;
+    }
+
+    static Object evaluateProductColumnExpr(Object leftValue, Object rightValue)
+            throws InvalidQueryException {
+        checkArithmeticalOperands(leftValue, rightValue);
+        Integer i1 = (Integer) leftValue;
+        Integer i2 = (Integer) rightValue;
+        return i1 * i2;
+    }
+
+    static Object evaluateDivisionColumnExpr(Object leftValue, Object rightValue)
+            throws InvalidQueryException {
+        checkArithmeticalOperands(leftValue, rightValue);
+        Integer i1 = (Integer) leftValue;
+        Integer i2 = (Integer) rightValue;
+        if (i2 == 0) {
+            throw new InvalidQueryException("Here we need another type of " +
+                    "exception :(");
+        }
+        return i1 / i2;
+    }
+
 
     public Object evaluateColumnRef(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
@@ -201,6 +214,10 @@ public final class DataRow {
         List<DataHeader> matchingHeaders = new ArrayList<>();
 
         for (DataHeader key : values.keySet()) {
+            if (!cr.getDatabaseName().isEmpty() &&
+                    !cr.getDatabaseName().equals(key.getDatabaseName())) {
+                continue;
+            }
             if (!cr.getTableName().isEmpty() &&
                     !cr.getTableName().equals(key.getTableName())) {
                 continue;

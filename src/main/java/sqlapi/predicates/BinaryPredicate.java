@@ -1,10 +1,11 @@
 package sqlapi.predicates;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 
 public interface BinaryPredicate extends Predicate {
 
-    ColumnExpression getLeftOperand();
+    @NotNull ColumnExpression getLeftOperand();
 
-    ColumnExpression getRightOperand();
+    @NotNull ColumnExpression getRightOperand();
 }

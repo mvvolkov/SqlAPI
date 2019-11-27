@@ -12,7 +12,6 @@ final class ColumnIsNotNullPredicateImpl extends PredicateImpl
 
 
     ColumnIsNotNullPredicateImpl(@NotNull ColumnRef columnRef) {
-        super(Type.IS_NOT_NULL);
         this.columnRef = columnRef;
     }
 

@@ -1,5 +1,6 @@
 package clientImpl.columnExpr;
 
+import org.jetbrains.annotations.Nullable;
 import sqlapi.columnExpr.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,389 +9,531 @@ public class ColumnExprFactory {
     private ColumnExprFactory() {
     }
 
-    public static ColumnValue value(Object value, String alias) {
+    // *************************** ColumnValue **********************************
+
+    public static @NotNull ColumnValue value(@Nullable Object value, @NotNull String alias) {
         return new ColumnValueImpl(value, alias);
     }
 
-    public static ColumnValue value(Object value) {
-        return new ColumnValueImpl(value, "");
+    public static @NotNull ColumnValue value(@Nullable Object value) {
+        return value(value, "");
     }
 
-    public static ColumnRef columnRefWithAlias(@NotNull String schemaName,
+    // *************************** ColumnRef **********************************
+
+    public static @NotNull ColumnRef columnRefWithAlias(@NotNull String databaseName,
+                                                        @NotNull String tableName,
+                                                        @NotNull String columnName,
+                                                        @NotNull String alias) {
+        return new ColumnRefImpl(databaseName, tableName, columnName, alias);
+    }
+
+    public static @NotNull ColumnRef columnRefWithAlias(@NotNull String tableName,
+                                                        String columnName,
+                                                        @NotNull String alias) {
+        return columnRefWithAlias("", tableName, columnName, alias);
+    }
+
+    public static @NotNull ColumnRef columnRefWithAlias(@NotNull String columnName,
+                                                        @NotNull String alias) {
+        return columnRefWithAlias("", columnName, alias);
+    }
+
+    public static @NotNull ColumnRef columnRef(@NotNull String databaseName,
                                                @NotNull String tableName,
-                                               @NotNull String columnName,
-                                               @NotNull String alias) {
-        return new ColumnRefImpl(schemaName, tableName, columnName, alias);
+                                               @NotNull String columnName) {
+        return columnRefWithAlias(databaseName, tableName, columnName, "");
     }
 
-    public static ColumnRef columnRefWithAlias(@NotNull String tableName,
-                                               String columnName,
-                                               @NotNull String alias) {
-        return new ColumnRefImpl(tableName, columnName, alias);
+    public static @NotNull ColumnRef columnRef(@NotNull String tableName,
+                                               @NotNull String columnName) {
+        return columnRef("", tableName, columnName);
     }
 
-    public static ColumnRef columnRefWithAlias(@NotNull String columnName,
-                                               @NotNull String alias) {
-        return new ColumnRefImpl(columnName, alias);
+    public static @NotNull ColumnRef columnRef(@NotNull String columnName) {
+        return columnRef("", columnName);
     }
 
-    public static ColumnRef columnRef(@NotNull String schemaName,
-                                      @NotNull String tableName,
-                                      @NotNull String columnName) {
-        return new ColumnRefImpl(schemaName, tableName, columnName, "");
-    }
+    // *************************** SumColumnExpression **********************************
 
-    public static ColumnRef columnRef(@NotNull String tableName,
-                                      @NotNull String columnName) {
-        return new ColumnRefImpl(tableName, columnName, "");
-    }
-
-    public static ColumnRef columnRef(@NotNull String columnName) {
-        return new ColumnRefImpl(columnName, "");
-    }
-
-
-    public static ColumnExpression sumWithAlias(ColumnExpression leftOperand,
-                                                ColumnExpression rightOperand,
-                                                String alias) {
-        return new BinaryColumnExprImpl(ColumnExpression.ExprType.SUM, leftOperand,
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull ColumnExpression leftOperand,
+                                                            @NotNull ColumnExpression rightOperand,
+                                                            @NotNull String alias) {
+        return new SumColumnExpressionImpl(leftOperand,
                 rightOperand, alias);
     }
 
-    public static ColumnExpression sumWithAlias(ColumnExpression leftOperand,
-                                                String columnName,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull ColumnExpression leftOperand,
+                                                            @NotNull String columnName,
+                                                            @NotNull String alias) {
         return sumWithAlias(leftOperand, columnRef(columnName), alias);
     }
 
-    public static ColumnExpression sumWithAlias(ColumnExpression leftOperand,
-                                                String tableName,
-                                                String columnName,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull ColumnExpression leftOperand,
+                                                            @NotNull String tableName,
+                                                            @NotNull String columnName,
+                                                            @NotNull String alias) {
         return sumWithAlias(leftOperand, columnRef(tableName, columnName), alias);
     }
 
-    public static ColumnExpression sumWithAlias(String columnName,
-                                                ColumnExpression rightOperand,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull String columnName,
+                                                            @NotNull ColumnExpression rightOperand,
+                                                            @NotNull String alias) {
         return sumWithAlias(columnRef(columnName), rightOperand, alias);
     }
 
-    public static ColumnExpression sumWithAlias(String tableName, String columnName,
-                                                ColumnExpression rightOperand,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull String tableName, @NotNull String columnName,
+                                                            @NotNull ColumnExpression rightOperand,
+                                                            @NotNull String alias) {
         return sumWithAlias(columnRef(tableName, columnName), rightOperand, alias);
     }
 
-    public static ColumnExpression sumWithAlias(String columnName1,
-                                                String columnName2,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull String columnName1,
+                                                            @NotNull String columnName2,
+                                                            @NotNull String alias) {
         return sumWithAlias(columnRef(columnName1), columnRef(columnName2), alias);
     }
 
-    public static ColumnExpression sumWithAlias(String tableName1, String columnName1,
-                                                String tableName2, String columnName2,
-                                                String alias) {
+    public static @NotNull SumColumnExpression sumWithAlias(@NotNull String tableName1, @NotNull String columnName1,
+                                                            @NotNull String tableName2, @NotNull String columnName2,
+                                                            @NotNull String alias) {
         return sumWithAlias(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2), alias);
     }
 
-
-    public static ColumnExpression sum(ColumnExpression leftOperand,
-                                       ColumnExpression rightOperand) {
+    public static @NotNull SumColumnExpression sum(@NotNull ColumnExpression leftOperand,
+                                                   @NotNull ColumnExpression rightOperand) {
         return sumWithAlias(leftOperand, rightOperand, "");
     }
 
-    public static ColumnExpression sum(ColumnExpression leftOperand,
-                                       String columnName) {
+    public static @NotNull SumColumnExpression sum(@NotNull ColumnExpression leftOperand,
+                                                   @NotNull String columnName) {
         return sum(leftOperand, columnRef(columnName));
     }
 
-    public static ColumnExpression sum(ColumnExpression leftOperand, String tableName,
-                                       String columnName) {
+    public static @NotNull SumColumnExpression sum(@NotNull ColumnExpression leftOperand,
+                                                   @NotNull String tableName,
+                                                   @NotNull String columnName) {
         return sum(leftOperand, columnRef(tableName, columnName));
     }
 
-    public static ColumnExpression sum(String columnName, ColumnExpression rightOperand) {
+    public static @NotNull SumColumnExpression sum(@NotNull String columnName,
+                                                   @NotNull ColumnExpression rightOperand) {
         return sum(columnRef(columnName), rightOperand);
     }
 
-    public static ColumnExpression sum(String tableName, String columnName, ColumnExpression rightOperand) {
+    public static @NotNull SumColumnExpression sum(@NotNull String tableName,
+                                                   @NotNull String columnName,
+                                                   @NotNull ColumnExpression rightOperand) {
         return sum(columnRef(tableName, columnName), rightOperand);
     }
 
-    public static ColumnExpression sum(String columnName1, String columnName2) {
+    public static @NotNull SumColumnExpression sum(@NotNull String columnName1,
+                                                   @NotNull String columnName2) {
         return sum(columnRef(columnName1), columnRef(columnName2));
     }
 
-    public static ColumnExpression sum(String tableName1, String columnName1,
-                                       String tableName2, String columnName2) {
+    public static @NotNull SumColumnExpression sum(@NotNull String tableName1,
+                                                   @NotNull String columnName1,
+                                                   @NotNull String tableName2,
+                                                   @NotNull String columnName2) {
         return sum(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2));
     }
 
+    // *************************** DiffColumnExpression **********************************
 
-    public static ColumnExpression diffWithAlias(ColumnExpression leftOperand,
-                                        ColumnExpression rightOperand,
-                                        String alias) {
-        return new BinaryColumnExprImpl(ColumnExpression.ExprType.DIFF, leftOperand,
-                rightOperand, alias);
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull ColumnExpression leftOperand,
+                                                              @NotNull ColumnExpression rightOperand,
+                                                              @NotNull String alias) {
+        return new DiffColumnExpressionImpl(leftOperand, rightOperand, alias);
     }
 
-    public static ColumnExpression diffWithAlias(ColumnExpression leftOperand,
-                                                String columnName,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull ColumnExpression leftOperand,
+                                                              @NotNull String columnName,
+                                                              @NotNull String alias) {
         return diffWithAlias(leftOperand, columnRef(columnName), alias);
     }
 
-    public static ColumnExpression diffWithAlias(ColumnExpression leftOperand,
-                                                String tableName,
-                                                String columnName,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull ColumnExpression leftOperand,
+                                                              @NotNull String tableName,
+                                                              @NotNull String columnName,
+                                                              @NotNull String alias) {
         return diffWithAlias(leftOperand, columnRef(tableName, columnName), alias);
     }
 
-    public static ColumnExpression diffWithAlias(String columnName,
-                                                ColumnExpression rightOperand,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull String columnName,
+                                                              @NotNull ColumnExpression rightOperand,
+                                                              @NotNull String alias) {
         return diffWithAlias(columnRef(columnName), rightOperand, alias);
     }
 
-    public static ColumnExpression diffWithAlias(String tableName, String columnName,
-                                                ColumnExpression rightOperand,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull String tableName, @NotNull String columnName,
+                                                              @NotNull ColumnExpression rightOperand,
+                                                              @NotNull String alias) {
         return diffWithAlias(columnRef(tableName, columnName), rightOperand, alias);
     }
 
-    public static ColumnExpression diffWithAlias(String columnName1,
-                                                String columnName2,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull String columnName1,
+                                                              @NotNull String columnName2,
+                                                              @NotNull String alias) {
         return diffWithAlias(columnRef(columnName1), columnRef(columnName2), alias);
     }
 
-    public static ColumnExpression diffWithAlias(String tableName1, String columnName1,
-                                                String tableName2, String columnName2,
-                                                String alias) {
+    public static @NotNull DiffColumnExpression diffWithAlias(@NotNull String tableName1, @NotNull String columnName1,
+                                                              @NotNull String tableName2, @NotNull String columnName2,
+                                                              @NotNull String alias) {
         return diffWithAlias(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2), alias);
     }
 
-    public static ColumnExpression diff(ColumnExpression leftOperand,
-                                        ColumnExpression rightOperand) {
+    public static @NotNull DiffColumnExpression diff(@NotNull ColumnExpression leftOperand,
+                                                     @NotNull ColumnExpression rightOperand) {
         return diffWithAlias(leftOperand, rightOperand, "");
     }
 
-    public static ColumnExpression diff(ColumnExpression leftOperand,
-                                       String columnName) {
+    public static @NotNull DiffColumnExpression diff(@NotNull ColumnExpression leftOperand,
+                                                     @NotNull String columnName) {
         return diff(leftOperand, columnRef(columnName));
     }
 
-    public static ColumnExpression diff(ColumnExpression leftOperand, String tableName,
-                                       String columnName) {
+    public static @NotNull DiffColumnExpression diff(@NotNull ColumnExpression leftOperand,
+                                                     @NotNull String tableName,
+                                                     @NotNull String columnName) {
         return diff(leftOperand, columnRef(tableName, columnName));
     }
 
-    public static ColumnExpression diff(String columnName, ColumnExpression rightOperand) {
+    public static @NotNull DiffColumnExpression diff(@NotNull String columnName,
+                                                     @NotNull ColumnExpression rightOperand) {
         return diff(columnRef(columnName), rightOperand);
     }
 
-    public static ColumnExpression diff(String tableName, String columnName, ColumnExpression rightOperand) {
+    public static @NotNull DiffColumnExpression diff(@NotNull String tableName,
+                                                     @NotNull String columnName,
+                                                     @NotNull ColumnExpression rightOperand) {
         return diff(columnRef(tableName, columnName), rightOperand);
     }
 
-    public static ColumnExpression diff(String columnName1, String columnName2) {
+    public static @NotNull DiffColumnExpression diff(@NotNull String columnName1,
+                                                     @NotNull String columnName2) {
         return diff(columnRef(columnName1), columnRef(columnName2));
     }
 
-    public static ColumnExpression diff(String tableName1, String columnName1,
-                                       String tableName2, String columnName2) {
+    public static @NotNull DiffColumnExpression diff(@NotNull String tableName1,
+                                                     @NotNull String columnName1,
+                                                     @NotNull String tableName2,
+                                                     @NotNull String columnName2) {
         return diff(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2));
     }
 
-    public static ColumnExpression product(ColumnExpression leftOperand,
-                                           ColumnExpression rightOperand,
-                                           String alias) {
-        return new BinaryColumnExprImpl(ColumnExpression.ExprType.PRODUCT, leftOperand,
-                rightOperand, alias);
+
+    // *************************** ProductColumnExpression **********************************
+
+
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                    @NotNull ColumnExpression rightOperand,
+                                                                    @NotNull String alias) {
+        return new ProductColumnExpressionImpl(leftOperand, rightOperand, alias);
     }
 
-    public static ColumnExpression product(ColumnExpression leftOperand,
-                                           ColumnExpression rightOperand) {
-        return product(leftOperand, rightOperand, "");
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                    @NotNull String columnName,
+                                                                    @NotNull String alias) {
+        return productWithAlias(leftOperand, columnRef(columnName), alias);
     }
 
-
-    public static ColumnExpression divide(ColumnExpression leftOperand,
-                                          ColumnExpression rightOperand,
-                                          String alias) {
-        return new BinaryColumnExprImpl(ColumnExpression.ExprType.DIVIDE, leftOperand,
-                rightOperand, alias);
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                    @NotNull String tableName,
+                                                                    @NotNull String columnName,
+                                                                    @NotNull String alias) {
+        return productWithAlias(leftOperand, columnRef(tableName, columnName), alias);
     }
 
-    public static ColumnExpression divide(ColumnExpression leftOperand,
-                                          ColumnExpression rightOperand) {
-        return divide(leftOperand, rightOperand, "");
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull String columnName,
+                                                                    @NotNull ColumnExpression rightOperand,
+                                                                    @NotNull String alias) {
+        return productWithAlias(columnRef(columnName), rightOperand, alias);
     }
 
-    public static AggregateFunction countAll(String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.COUNT, "", alias);
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull String tableName, @NotNull String columnName,
+                                                                    @NotNull ColumnExpression rightOperand,
+                                                                    @NotNull String alias) {
+        return productWithAlias(columnRef(tableName, columnName), rightOperand, alias);
     }
 
-    public static AggregateFunction countAll() {
-        return aggregateFunction(AggregateFunction.Type.COUNT, "");
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull String columnName1,
+                                                                    @NotNull String columnName2,
+                                                                    @NotNull String alias) {
+        return productWithAlias(columnRef(columnName1), columnRef(columnName2), alias);
     }
 
-    public static AggregateFunction countWithAlias(String columnName, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.COUNT, columnName, alias);
+    public static @NotNull ProductColumnExpression productWithAlias(@NotNull String tableName1, @NotNull String columnName1,
+                                                                    @NotNull String tableName2, @NotNull String columnName2,
+                                                                    @NotNull String alias) {
+        return productWithAlias(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2), alias);
     }
 
-    public static AggregateFunction countWithAlias(String tableName, String columnName, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.COUNT, tableName, columnName, alias);
+    public static @NotNull ProductColumnExpression product(@NotNull ColumnExpression leftOperand,
+                                                           @NotNull ColumnExpression rightOperand) {
+        return productWithAlias(leftOperand, rightOperand, "");
     }
 
-    public static AggregateFunction count(String columnName) {
-        return aggregateFunction(AggregateFunction.Type.COUNT, columnName);
+    public static @NotNull ProductColumnExpression product(@NotNull ColumnExpression leftOperand,
+                                                           @NotNull String columnName) {
+        return product(leftOperand, columnRef(columnName));
     }
 
-    public static AggregateFunction count(String tableName, String columnName) {
-        return aggregateFunction(AggregateFunction.Type.COUNT, tableName, columnName);
+    public static @NotNull ProductColumnExpression product(@NotNull ColumnExpression leftOperand,
+                                                           @NotNull String tableName,
+                                                           @NotNull String columnName) {
+        return product(leftOperand, columnRef(tableName, columnName));
     }
 
-    public static AggregateFunction countWithAlias(ColumnRef columnRef, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.COUNT, columnRef, alias);
+    public static @NotNull ProductColumnExpression product(@NotNull String columnName,
+                                                           @NotNull ColumnExpression rightOperand) {
+        return product(columnRef(columnName), rightOperand);
     }
 
-    public static AggregateFunction count(ColumnRef columnRef) {
-        return aggregateFunction(AggregateFunction.Type.COUNT, columnRef);
+    public static @NotNull ProductColumnExpression product(@NotNull String tableName,
+                                                           @NotNull String columnName,
+                                                           @NotNull ColumnExpression rightOperand) {
+        return product(columnRef(tableName, columnName), rightOperand);
     }
 
-    public static AggregateFunction groupSumWithAlias(ColumnExpression columnExpression, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.SUM, columnExpression, alias);
+    public static @NotNull ProductColumnExpression product(@NotNull String columnName1,
+                                                           @NotNull String columnName2) {
+        return product(columnRef(columnName1), columnRef(columnName2));
     }
 
-    public static AggregateFunction groupSumWithAlias(String columnName, String alias) {
-        return groupSumWithAlias(columnRef(columnName), alias);
+    public static @NotNull ProductColumnExpression product(@NotNull String tableName1,
+                                                           @NotNull String columnName1,
+                                                           @NotNull String tableName2,
+                                                           @NotNull String columnName2) {
+        return product(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2));
     }
 
-    public static AggregateFunction groupSumWithAlias(String tableName, String columnName, String alias) {
+    // *************************** DivisionColumnExpression **********************************
+
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                      @NotNull ColumnExpression rightOperand,
+                                                                      @NotNull String alias) {
+        return new DivisionColumnExpressionImpl(leftOperand, rightOperand, alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                      @NotNull String columnName,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(leftOperand, columnRef(columnName), alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull ColumnExpression leftOperand,
+                                                                      @NotNull String tableName,
+                                                                      @NotNull String columnName,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(leftOperand, columnRef(tableName, columnName), alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull String columnName,
+                                                                      @NotNull ColumnExpression rightOperand,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(columnRef(columnName), rightOperand, alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull String tableName, @NotNull String columnName,
+                                                                      @NotNull ColumnExpression rightOperand,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(columnRef(tableName, columnName), rightOperand, alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull String columnName1,
+                                                                      @NotNull String columnName2,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(columnRef(columnName1), columnRef(columnName2), alias);
+    }
+
+    public static @NotNull DivisionColumnExpression divisionWithAlias(@NotNull String tableName1, @NotNull String columnName1,
+                                                                      @NotNull String tableName2, @NotNull String columnName2,
+                                                                      @NotNull String alias) {
+        return divisionWithAlias(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2), alias);
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull ColumnExpression leftOperand,
+                                                             @NotNull ColumnExpression rightOperand) {
+        return divisionWithAlias(leftOperand, rightOperand, "");
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull ColumnExpression leftOperand,
+                                                             @NotNull String columnName) {
+        return division(leftOperand, columnRef(columnName));
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull ColumnExpression leftOperand,
+                                                             @NotNull String tableName,
+                                                             @NotNull String columnName) {
+        return division(leftOperand, columnRef(tableName, columnName));
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull String columnName,
+                                                             @NotNull ColumnExpression rightOperand) {
+        return division(columnRef(columnName), rightOperand);
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull String tableName,
+                                                             @NotNull String columnName,
+                                                             @NotNull ColumnExpression rightOperand) {
+        return division(columnRef(tableName, columnName), rightOperand);
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull String columnName1,
+                                                             @NotNull String columnName2) {
+        return division(columnRef(columnName1), columnRef(columnName2));
+    }
+
+    public static @NotNull DivisionColumnExpression division(@NotNull String tableName1,
+                                                             @NotNull String columnName1,
+                                                             @NotNull String tableName2,
+                                                             @NotNull String columnName2) {
+        return division(columnRef(tableName1, columnName1), columnRef(tableName2, columnName2));
+    }
+
+    // *************************** CountAggregateFunction **********************************
+
+    public static @NotNull CountAggregateFunction countWithAlias(@NotNull ColumnRef columnRef, @NotNull String alias) {
+        return new CountAggregateFunctionImpl(columnRef, alias);
+    }
+
+    public static @NotNull CountAggregateFunction countWithAlias(@NotNull String tableName, @NotNull String columnName, @NotNull String alias) {
+        return countWithAlias(columnRef(tableName, columnName), alias);
+    }
+
+    public static @NotNull CountAggregateFunction countWithAlias(@NotNull String columnName, @NotNull String alias) {
+        return countWithAlias(columnRef(columnName), alias);
+    }
+
+    public static @NotNull CountAggregateFunction countAllWithAlias(@NotNull String alias) {
+        return countWithAlias("", alias);
+    }
+
+    public static @NotNull CountAggregateFunction count(@NotNull ColumnRef columnRef) {
+        return countWithAlias(columnRef, "");
+    }
+
+    public static @NotNull CountAggregateFunction count(@NotNull String tableName, @NotNull String columnName) {
+        return count(columnRef(tableName, columnName));
+    }
+
+    public static @NotNull CountAggregateFunction count(@NotNull String columnName) {
+        return count(columnRef(columnName));
+    }
+
+    public static @NotNull CountAggregateFunction countAll() {
+        return count("");
+    }
+
+    // *************************** SumAggregateFunction **********************************
+
+    public static @NotNull SumAggregateFunction groupSumWithAlias(@NotNull ColumnRef columnRef, @NotNull String alias) {
+        return new SumAggregateFunctionImpl(columnRef, alias);
+    }
+
+    public static @NotNull SumAggregateFunction groupSumWithAlias(@NotNull String tableName, @NotNull String columnName, @NotNull String alias) {
         return groupSumWithAlias(columnRef(tableName, columnName), alias);
     }
 
-    public static AggregateFunction groupSum(ColumnExpression columnExpression) {
-        return groupSumWithAlias(columnExpression, "");
+    public static @NotNull SumAggregateFunction groupSumWithAlias(@NotNull String columnName, @NotNull String alias) {
+        return groupSumWithAlias(columnRef(columnName), alias);
     }
 
-    public static AggregateFunction groupSum(String columnName) {
-        return groupSum(columnRef(columnName));
+
+    public static @NotNull SumAggregateFunction groupSum(@NotNull ColumnRef columnRef) {
+        return groupSumWithAlias(columnRef, "");
     }
 
-    public static AggregateFunction groupSum(String tableName, String columnName) {
+    public static @NotNull SumAggregateFunction groupSum(@NotNull String tableName, @NotNull String columnName) {
         return groupSum(columnRef(tableName, columnName));
     }
 
-    public static AggregateFunction groupAvgWithAlias(ColumnExpression columnExpression, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.AVG, columnExpression, alias);
+    public static @NotNull SumAggregateFunction groupSum(@NotNull String columnName) {
+        return groupSum(columnRef(columnName));
     }
 
-    public static AggregateFunction groupAvgWithAlias(String columnName, String alias) {
-        return groupAvgWithAlias(columnRef(columnName), alias);
+    // *************************** MaxAggregateFunction **********************************
+
+    public static @NotNull MaxAggregateFunction maxWithAlias(@NotNull ColumnRef columnRef, @NotNull String alias) {
+        return new MaxAggregateFunctionImpl(columnRef, alias);
     }
 
-    public static AggregateFunction groupAvgWithAlias(String tableName, String columnName, String alias) {
-        return groupAvgWithAlias(columnRef(tableName, columnName), alias);
+    public static @NotNull MaxAggregateFunction maxWithAlias(@NotNull String tableName, @NotNull String columnName, @NotNull String alias) {
+        return maxWithAlias(columnRef(tableName, columnName), alias);
     }
 
-    public static AggregateFunction groupAvg(ColumnExpression columnExpression) {
-        return groupAvgWithAlias(columnExpression, "");
-    }
-
-    public static AggregateFunction groupAvg(String columnName) {
-        return groupAvg(columnRef(columnName));
-    }
-
-    public static AggregateFunction groupAvg(String tableName, String columnName) {
-        return groupAvg(columnRef(tableName, columnName));
-    }
-
-    public static AggregateFunction groupMaxWithAlias(ColumnExpression columnExpression, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.MAX, columnExpression, alias);
-    }
-
-    public static AggregateFunction groupMaxWithAlias(String columnName, String alias) {
-        return groupMaxWithAlias(columnRef(columnName), alias);
-    }
-
-    public static AggregateFunction groupMaxWithAlias(String tableName, String columnName, String alias) {
-        return groupMaxWithAlias(columnRef(tableName, columnName), alias);
-    }
-
-    public static AggregateFunction groupMax(ColumnExpression columnExpression) {
-        return groupMaxWithAlias(columnExpression, "");
-    }
-
-    public static AggregateFunction groupMax(String columnName) {
-        return groupMax(columnRef(columnName));
-    }
-
-    public static AggregateFunction groupMax(String tableName, String columnName) {
-        return groupMax(columnRef(tableName, columnName));
-    }
-
-    public static AggregateFunction groupMinWithAlias(ColumnExpression columnExpression, String alias) {
-        return aggregateFunctionWithAlias(AggregateFunction.Type.MIN, columnExpression, alias);
-    }
-
-    public static AggregateFunction groupMinWithAlias(String columnName, String alias) {
-        return groupMinWithAlias(columnRef(columnName), alias);
-    }
-
-    public static AggregateFunction groupMinWithAlias(String tableName, String columnName, String alias) {
-        return groupMinWithAlias(columnRef(tableName, columnName), alias);
-    }
-
-    public static AggregateFunction groupMin(ColumnExpression columnExpression) {
-        return groupMinWithAlias(columnExpression, "");
-    }
-
-    public static AggregateFunction groupMin(String columnName) {
-        return groupMin(columnRef(columnName));
-    }
-
-    public static AggregateFunction groupMin(String tableName, String columnName) {
-        return groupMin(columnRef(tableName, columnName));
+    public static @NotNull MaxAggregateFunction maxWithAlias(@NotNull String columnName, @NotNull String alias) {
+        return maxWithAlias(columnRef(columnName), alias);
     }
 
 
-    private static AggregateFunction aggregateFunctionWithAlias(AggregateFunction.Type type,
-                                                                ColumnExpression columnExpr,
-                                                                String alias) {
-        return new AggregateFunctionImpl(type, columnExpr, alias);
+    public static @NotNull MaxAggregateFunction max(@NotNull ColumnRef columnRef) {
+        return maxWithAlias(columnRef, "");
     }
 
-    private static AggregateFunction aggregateFunctionWithAlias(AggregateFunction.Type type,
-                                                                String columnName,
-                                                                String alias) {
-        return new AggregateFunctionImpl(type, columnRef(columnName), alias);
+    public static @NotNull MaxAggregateFunction max(@NotNull String tableName, @NotNull String columnName) {
+        return max(columnRef(tableName, columnName));
     }
 
-    private static AggregateFunction aggregateFunctionWithAlias(AggregateFunction.Type type,
-                                                                String tableName,
-                                                                String columnName,
-                                                                String alias) {
-        return new AggregateFunctionImpl(type, columnRef(tableName, columnName), alias);
+    public static @NotNull MaxAggregateFunction max(@NotNull String columnName) {
+        return max(columnRef(columnName));
     }
 
-    private static AggregateFunction aggregateFunction(AggregateFunction.Type type,
-                                                       ColumnExpression columnExpr) {
-        return aggregateFunctionWithAlias(type, columnExpr, "");
+    // *************************** MinAggregateFunction **********************************
+
+    public static @NotNull MinAggregateFunction minWithAlias(@NotNull ColumnRef columnRef, @NotNull String alias) {
+        return new MinAggregateFunctionImpl(columnRef, alias);
     }
 
-    private static AggregateFunction aggregateFunction(AggregateFunction.Type type,
-                                                       String columnName) {
-        return aggregateFunction(type, columnRef(columnName));
+    public static @NotNull MinAggregateFunction minWithAlias(@NotNull String tableName, @NotNull String columnName, @NotNull String alias) {
+        return minWithAlias(columnRef(tableName, columnName), alias);
     }
 
-    private static AggregateFunction aggregateFunction(AggregateFunction.Type type,
-                                                       String tableName,
-                                                       String columnName) {
-        return aggregateFunction(type, columnRef(tableName, columnName));
+    public static @NotNull MinAggregateFunction minWithAlias(@NotNull String columnName, @NotNull String alias) {
+        return minWithAlias(columnRef(columnName), alias);
+    }
+
+
+    public static @NotNull MinAggregateFunction min(@NotNull ColumnRef columnRef) {
+        return minWithAlias(columnRef, "");
+    }
+
+    public static @NotNull MinAggregateFunction min(@NotNull String tableName, @NotNull String columnName) {
+        return min(columnRef(tableName, columnName));
+    }
+
+    public static @NotNull MinAggregateFunction min(@NotNull String columnName) {
+        return min(columnRef(columnName));
+    }
+
+    // *************************** AvgAggregateFunction **********************************
+
+    public static @NotNull AvgAggregateFunction avgWithAlias(@NotNull ColumnRef columnRef, @NotNull String alias) {
+        return new AvgAggregateFunctionImpl(columnRef, alias);
+    }
+
+    public static @NotNull AvgAggregateFunction avgWithAlias(@NotNull String tableName, @NotNull String columnName, @NotNull String alias) {
+        return avgWithAlias(columnRef(tableName, columnName), alias);
+    }
+
+    public static @NotNull AvgAggregateFunction avgWithAlias(@NotNull String columnName, @NotNull String alias) {
+        return avgWithAlias(columnRef(columnName), alias);
+    }
+
+
+    public static @NotNull AvgAggregateFunction avg(@NotNull ColumnRef columnRef) {
+        return avgWithAlias(columnRef, "");
+    }
+
+    public static @NotNull AvgAggregateFunction avg(@NotNull String tableName, @NotNull String columnName) {
+        return avg(columnRef(tableName, columnName));
+    }
+
+    public static @NotNull AvgAggregateFunction avg(@NotNull String columnName) {
+        return avg(columnRef(columnName));
     }
 
 

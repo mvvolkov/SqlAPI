@@ -6,12 +6,10 @@ import org.jetbrains.annotations.NotNull;
 abstract class ColumnExprImpl implements ColumnExpression {
 
 
-    @NotNull final ExprType exprType;
+    @NotNull
+    final String alias;
 
-    @NotNull final String alias;
-
-    ColumnExprImpl(@NotNull ExprType exprType, @NotNull String alias) {
-        this.exprType = exprType;
+    ColumnExprImpl(@NotNull String alias) {
         this.alias = alias;
     }
 
@@ -21,10 +19,43 @@ abstract class ColumnExprImpl implements ColumnExpression {
         return alias;
     }
 
-    @NotNull
     @Override
-    public ExprType getExprType() {
-        return exprType;
+    public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+        return new SumColumnExpressionImpl(this, otherExpression, alias);
     }
 
+    @Override
+    public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression) {
+        return this.add(otherExpression, "");
+    }
+
+    @Override
+    public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+        return new DiffColumnExpressionImpl(this, otherExpression, alias);
+    }
+
+    @Override
+    public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression) {
+        return this.subtract(otherExpression, "");
+    }
+
+    @Override
+    public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+        return new ProductColumnExpressionImpl(this, otherExpression, alias);
+    }
+
+    @Override
+    public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression) {
+        return multiply(otherExpression, "");
+    }
+
+    @Override
+    public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+        return new DivisionColumnExpressionImpl(this, otherExpression, alias);
+    }
+
+    @Override
+    public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression) {
+        return divide(otherExpression, "");
+    }
 }

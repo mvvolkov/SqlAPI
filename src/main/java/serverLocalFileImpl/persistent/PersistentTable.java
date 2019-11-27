@@ -5,7 +5,7 @@ import serverLocalFileImpl.intermediateResult.DataRow;
 import serverLocalFileImpl.intermediateResult.DataSet;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
-import sqlapi.misc.AssignmentOperation;
+import sqlapi.assignment.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateQuery;
 
@@ -209,7 +209,7 @@ public final class PersistentTable implements Serializable {
 
     private DataHeader createColumnRef(String columnName,
                                        SqlType sqlType) {
-        return new DataHeader(sqlType, tableName, columnName);
+        return new DataHeader(sqlType, databaseName, tableName, columnName);
     }
 
     void validate(TableMetadata tableMetadata)

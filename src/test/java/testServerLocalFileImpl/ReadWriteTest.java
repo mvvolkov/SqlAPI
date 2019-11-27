@@ -2,13 +2,13 @@ package testServerLocalFileImpl;
 
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.SqlQueryFactory;
-import clientImpl.tableRef.TableRefFactory;
+import clientImpl.tables.TableRefFactory;
 import org.junit.Test;
 import serverLocalFileImpl.SqlLocalFileServerFactory;
 import serverLocalFileImpl.SqlServerLocalFile;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultSet;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -79,8 +79,8 @@ public class ReadWriteTest extends AbstractServerLocalFileTest {
 
 
             // save databases
-            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-            //System.getProperty("java.io.tmpdir");
+//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
+            String tempDir = System.getProperty("java.io.tmpdir");
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.saveDatabase("DB1", fileName);
 

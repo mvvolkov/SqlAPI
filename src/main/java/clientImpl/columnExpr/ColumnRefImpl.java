@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
 
     @NotNull
-    private final String schemaName;
+    private final String databaseName;
 
     @NotNull
     private final String tableName;
@@ -14,21 +14,12 @@ final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
     @NotNull
     private final String columnName;
 
-    ColumnRefImpl(@NotNull String schemaName, @NotNull String tableName,
+    ColumnRefImpl(@NotNull String databaseName, @NotNull String tableName,
                   @NotNull String columnName, String alias) {
-        super(ExprType.COLUMN_REF, alias);
-        this.schemaName = schemaName;
+        super(alias);
+        this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
-    }
-
-    ColumnRefImpl(@NotNull String tableName,
-                  @NotNull String columnName, String alias) {
-        this("", tableName, columnName, alias);
-    }
-
-    ColumnRefImpl(@NotNull String columnName, String alias) {
-        this("", "", columnName, alias);
     }
 
 
@@ -42,6 +33,11 @@ final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
     @Override
     public String getTableName() {
         return tableName;
+    }
+
+    @Override
+    public @NotNull String getDatabaseName() {
+        return databaseName;
     }
 
 
@@ -58,9 +54,9 @@ final class ColumnRefImpl extends ColumnExprImpl implements ColumnRef {
             sb.insert(0, ".");
             sb.insert(0, tableName);
         }
-        if (!schemaName.isEmpty()) {
+        if (!databaseName.isEmpty()) {
             sb.insert(0, ".");
-            sb.insert(0, schemaName);
+            sb.insert(0, databaseName);
         }
         return sb.toString();
     }

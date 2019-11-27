@@ -4,7 +4,7 @@ import sqlapi.predicates.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
-final class CombinedPredicateImpl extends PredicateImpl
+abstract class CombinedPredicateImpl extends PredicateImpl
         implements CombinedPredicate {
 
 
@@ -15,9 +15,8 @@ final class CombinedPredicateImpl extends PredicateImpl
     private final Predicate rightPredicate;
 
 
-    CombinedPredicateImpl(@NotNull Type type, @NotNull Predicate leftPredicate,
+    CombinedPredicateImpl(@NotNull Predicate leftPredicate,
                           @NotNull Predicate rightPredicate) {
-        super(type);
         this.leftPredicate = leftPredicate;
         this.rightPredicate = rightPredicate;
     }
@@ -39,4 +38,6 @@ final class CombinedPredicateImpl extends PredicateImpl
         return "(" + leftPredicate + ") " + this.getOperatorString() + " (" +
                 rightPredicate + ")";
     }
+
+    abstract protected String getOperatorString();
 }

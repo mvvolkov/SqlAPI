@@ -1,9 +1,7 @@
 package serverLocalFileImpl.intermediateResult;
 
 import sqlapi.columnExpr.*;
-import sqlapi.exceptions.AmbiguousColumnNameException;
-import sqlapi.exceptions.InvalidQueryException;
-import sqlapi.exceptions.NoSuchColumnException;
+import sqlapi.exceptions.*;
 
 import java.util.*;
 
@@ -22,8 +20,7 @@ public final class DataGroup {
     }
 
     public Object evaluateColumnExpr(ColumnExpression ce)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
         if (ce instanceof BinaryColumnExpression) {
             return evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
@@ -42,18 +39,28 @@ public final class DataGroup {
 
 
     private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
         Object leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
-        Object rightValue =
-                this.evaluateColumnExpr(bce.getRightOperand());
-        return DataRow.evaluateBinaryColumnExpr(leftValue, rightValue, bce.getExprType());
+        Object rightValue = this.evaluateColumnExpr(bce.getRightOperand());
+
+        if (bce instanceof SumColumnExpression) {
+            return DataRow.evaluateSumColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof DiffColumnExpression) {
+            return DataRow.evaluateDiffColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof ProductColumnExpression) {
+            return DataRow.evaluateProductColumnExpr(leftValue, rightValue);
+        }
+        if (bce instanceof DivisionColumnExpression) {
+            return DataRow.evaluateDivisionColumnExpr(leftValue, rightValue);
+        }
+        throw new InvalidQueryException("Unknown arithmetical operation");
     }
 
 
     private Object evaluateColumnRef(ColumnRef cr)
-            throws InvalidQueryException, NoSuchColumnException,
-            AmbiguousColumnNameException {
+            throws SqlException {
 
         if (!groupedByColumns.contains(new DataHeader(cr))) {
             throw new InvalidQueryException("Column can not be used outside aggregate " +
@@ -65,21 +72,21 @@ public final class DataGroup {
     }
 
     private Object evaluateAggregateFunction(AggregateFunction af)
-            throws InvalidQueryException, NoSuchColumnException,
-            AmbiguousColumnNameException {
+            throws SqlException {
 
-        switch (af.getType()) {
-            case COUNT:
-                return this.getCount(af.getColumnRef());
-            case SUM:
-                return this.getSum(af.getColumnRef());
-            case MAX:
-                return this.getMax(af.getColumnRef());
-            case MIN:
-                return this.getMin(af.getColumnRef());
+        if (af instanceof CountAggregateFunction) {
+            return this.getCount(af.getColumnRef());
         }
-        throw new InvalidQueryException("Unknown type of aggregate function.");
-
+        if (af instanceof SumAggregateFunction) {
+            return this.getSum(af.getColumnRef());
+        }
+        if (af instanceof MaxAggregateFunction) {
+            return this.getMax(af.getColumnRef());
+        }
+        if (af instanceof MinAggregateFunction) {
+            return this.getMin(af.getColumnRef());
+        }
+        throw new UnsupportedAggregateFunctionTypeException(af.getClass().getSimpleName());
     }
 
     private Integer getCount(ColumnRef cr)

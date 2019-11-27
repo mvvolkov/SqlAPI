@@ -1,5 +1,6 @@
-package clientImpl.tableRef;
+package clientImpl.tables;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.SelectQuery;
 import sqlapi.tables.TableFromSelectReference;
 
@@ -15,11 +16,13 @@ final class TableFromSelectReferenceImpl implements TableFromSelectReference {
         this.alias = alias;
     }
 
+    @NotNull
     @Override
     public String getAlias() {
         return alias;
     }
 
+    @NotNull
     @Override
     public SelectQuery getSelectQuery() {
         return selectQuery;

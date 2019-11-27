@@ -1,29 +1,14 @@
 package sqlapi.predicates;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface Predicate {
 
-    enum Type {
-        EMPTY,
-        EQUALS,
-        NOT_EQUALS,
-        GREATER_THAN,
-        GREATER_THAN_OR_EQUALS,
-        LESS_THAN,
-        LESS_THAN_OR_EQUALS,
-        AND,
-        OR,
-        IN,
-        IS_NULL,
-        IS_NOT_NULL
-    }
+    @NotNull Predicate and(@NotNull Predicate predicate);
 
-    Type getType();
+    @NotNull Predicate or(@NotNull Predicate predicate);
 
     default boolean isEmpty() {
-        return this.getType() == Type.EMPTY;
+        return false;
     }
-
-    Predicate and(Predicate predicate);
-
-    Predicate or(Predicate predicate);
 }

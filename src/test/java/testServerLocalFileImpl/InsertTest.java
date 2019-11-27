@@ -3,11 +3,11 @@ package testServerLocalFileImpl;
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
-import clientImpl.tableRef.TableRefFactory;
+import clientImpl.tables.TableRefFactory;
 import org.junit.Test;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.ColumnConstraintType;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

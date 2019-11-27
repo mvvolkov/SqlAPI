@@ -1,12 +1,13 @@
 package sqlapi.tables;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.predicates.Predicate;
 
 public interface JoinedTableReference extends TableReference {
 
-    TableReference getLeftTableReference();
+    @NotNull TableReference getLeftTableReference();
 
-    TableReference getRightTableReference();
+    @NotNull TableReference getRightTableReference();
 
-    Predicate getPredicate();
+    @NotNull Predicate getPredicate();
 }

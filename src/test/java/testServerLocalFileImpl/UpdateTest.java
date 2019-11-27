@@ -1,12 +1,12 @@
 package testServerLocalFileImpl;
 
 import clientImpl.columnExpr.ColumnExprFactory;
-import clientImpl.misc.AssignmentOperationFactory;
+import clientImpl.assignment.AssignmentOperationFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultSet;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -173,9 +173,7 @@ public class UpdateTest extends AbstractServerLocalFileTest {
 
             sqlServer.executeQuery(SqlQueryFactory.update("DB1", "table1",
                     Collections.singletonList(AssignmentOperationFactory
-                            .assign("column1",
-                                    ColumnExprFactory.sum(ColumnExprFactory.sum("column1", "column2"),
-                                            ColumnExprFactory.value(11)))),
+                            .assign("column1", ColumnExprFactory.sum("column1", "column2").add(ColumnExprFactory.value(11)))),
                     PredicateFactory.isNotNull("column2").and(PredicateFactory.isNotNull("column1")
                     )));
 

@@ -1,5 +1,6 @@
 package clientImpl.metadata;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.*;
 
 import java.util.ArrayList;
@@ -9,45 +10,45 @@ import java.util.List;
 
 public class MetadataFactory {
 
-    public static ColumnConstraint notNull() {
+    public static @NotNull ColumnConstraint notNull() {
         return new ColumnConstraintImpl(ColumnConstraintType.NOT_NULL);
     }
 
-    public static ColumnConstraint primaryKey() {
+    public static @NotNull ColumnConstraint primaryKey() {
         return new ColumnConstraintImpl(ColumnConstraintType.PRIMARY_KEY);
     }
 
-    public static ColumnConstraint unique() {
+    public static @NotNull ColumnConstraint unique() {
         return new ColumnConstraintImpl(ColumnConstraintType.UNIQUE);
     }
 
-    public static ColumnConstraint defaultVal(Object value) {
+    public static @NotNull ColumnConstraint defaultVal(Object value) {
         return new ColumnConstraintImpl(ColumnConstraintType.DEFAULT_VALUE,
                 Collections.singletonList(value));
     }
 
-    public static ColumnConstraint maxSize(int size) {
+    public static @NotNull ColumnConstraint maxSize(int size) {
         return new ColumnConstraintImpl(ColumnConstraintType.MAX_SIZE,
                 Collections.singletonList(size));
     }
 
-    public static ColumnMetadata integer(String columnName) {
+    public static @NotNull ColumnMetadata integer(@NotNull String columnName) {
         return new ColumnMetadataImpl(columnName, SqlType.INTEGER,
                 Collections.emptyList());
     }
 
-    public static ColumnMetadata integer(String columnName,
-                                         Collection<ColumnConstraint> constraints) {
+    public static @NotNull ColumnMetadata integer(@NotNull String columnName,
+                                                  @NotNull Collection<ColumnConstraint> constraints) {
         return new ColumnMetadataImpl(columnName, SqlType.INTEGER, constraints);
     }
 
-    public static ColumnMetadata varchar(String columnName, int size) {
+    public static @NotNull ColumnMetadata varchar(@NotNull String columnName, int size) {
         return new ColumnMetadataImpl(columnName, SqlType.VARCHAR,
                 Collections.singleton(maxSize(size)));
     }
 
-    public static ColumnMetadata varchar(String columnName, int size,
-                                         Collection<ColumnConstraint> constraints) {
+    public static @NotNull ColumnMetadata varchar(@NotNull String columnName, int size,
+                                                  Collection<ColumnConstraint> constraints) {
         Collection<ColumnConstraint> constraints1 = new ArrayList<>(constraints);
         constraints1.add(maxSize(size));
         return new ColumnMetadataImpl(columnName, SqlType.VARCHAR, constraints1);

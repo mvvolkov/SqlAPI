@@ -8,8 +8,4 @@ public interface ColumnValue extends ColumnExpression {
     @Nullable
     Object getValue();
 
-    @Override
-    default ExprType getExprType() {
-        return ExprType.COLUMN_VALUE;
-    }
 }

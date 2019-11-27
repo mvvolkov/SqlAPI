@@ -1,15 +1,12 @@
 package sqlapi.tables;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.SelectQuery;
 
 public interface TableFromSelectReference extends TableReference {
 
-    String getAlias();
+    @NotNull String getAlias();
 
-    SelectQuery getSelectQuery();
+    @NotNull SelectQuery getSelectQuery();
 
-    @Override
-    default TableRefType getTableRefType() {
-        return TableRefType.SELECT_SUBQUERY;
-    }
 }

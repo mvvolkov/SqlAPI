@@ -4,7 +4,7 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.predicates.BinaryPredicate;
 import org.jetbrains.annotations.NotNull;
 
-final class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate {
+abstract class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate {
 
     @NotNull
     private final ColumnExpression leftOperand;
@@ -12,9 +12,8 @@ final class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate
     @NotNull
     private final ColumnExpression rightOperand;
 
-    BinaryPredicateImpl(@NotNull Type type, @NotNull ColumnExpression leftOperand,
+    BinaryPredicateImpl(@NotNull ColumnExpression leftOperand,
                         @NotNull ColumnExpression rightOperand) {
-        super(type);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
     }
@@ -36,5 +35,5 @@ final class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate
         return leftOperand + " " + this.getOperatorString() + " " + rightOperand;
     }
 
-
+    protected abstract @NotNull String getOperatorString();
 }

@@ -59,6 +59,4 @@ final class ColumnMetadataImpl implements ColumnMetadata {
 
         return columnName + " " + sqlType + sb.toString();
     }
-
-
 }

@@ -4,7 +4,7 @@ import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.SqlQueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

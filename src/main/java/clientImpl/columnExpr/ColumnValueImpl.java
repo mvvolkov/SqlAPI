@@ -11,7 +11,7 @@ final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {
 
 
     ColumnValueImpl(@Nullable Object value, @NotNull String alias) {
-        super(ExprType.COLUMN_VALUE, alias);
+        super(alias);
         this.value = value;
     }
 

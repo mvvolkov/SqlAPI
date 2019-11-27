@@ -3,8 +3,8 @@ package serverLocalFileImpl.persistent;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
-import sqlapi.selectResult.ResultRow;
-import sqlapi.selectResult.ResultSet;
+import sqlapi.queryResult.ResultRow;
+import sqlapi.queryResult.ResultSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;

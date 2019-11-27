@@ -4,12 +4,9 @@ import serverLocalFileImpl.queryResult.ResultRowImpl;
 import serverLocalFileImpl.queryResult.ResultSetImpl;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.exceptions.AmbiguousColumnNameException;
-import sqlapi.exceptions.InvalidQueryException;
-import sqlapi.exceptions.NoSuchColumnException;
-import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.exceptions.*;
 import sqlapi.predicates.Predicate;
-import sqlapi.selectResult.ResultRow;
+import sqlapi.queryResult.ResultRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +21,7 @@ public class DataUtil {
 
     public static DataSet getFilteredResult(DataSet resultSet,
                                             Predicate predicate)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
+            throws SqlException {
         List<DataHeader> columns = new ArrayList<>(resultSet.getColumns());
         List<DataRow> rows = new ArrayList<>();
         for (DataRow row : resultSet.getRows()) {
@@ -38,8 +34,7 @@ public class DataUtil {
 
     public static DataSet innerJoin(DataSet left,
                                     DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
+            throws SqlException {
 
         DataSet dataSet = left.joinWith(right);
         return getFilteredResult(dataSet, sc);
@@ -47,8 +42,7 @@ public class DataUtil {
 
     public static DataSet leftOuterJoin(DataSet left,
                                         DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
+            throws SqlException {
 
         List<DataHeader> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -77,8 +71,7 @@ public class DataUtil {
 
     public static DataSet rightOuterJoin(DataSet left,
                                          DataSet right, Predicate sc)
-            throws NoSuchColumnException, WrongValueTypeException,
-            AmbiguousColumnNameException, InvalidQueryException {
+            throws SqlException {
 
         List<DataHeader> columns = new ArrayList<>();
         columns.addAll(left.getColumns());
@@ -141,8 +134,7 @@ public class DataUtil {
     public static List<DataRow> getSelectedValues(
             DataSet dataSet, List<DataHeader> columns,
             List<ColumnExpression> columnExpressions)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            InvalidQueryException {
+            throws SqlException {
 
         List<DataRow> resultRows = new ArrayList<>();
         for (DataRow row : dataSet.getRows()) {
