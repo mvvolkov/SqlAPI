@@ -1,7 +1,7 @@
-package LocalFileDatabase.server.intermediateResult;
+package localFileDatabase.server.intermediateResult;
 
-import LocalFileDatabase.server.queryResult.ResultRowImpl;
-import LocalFileDatabase.server.queryResult.ResultSetImpl;
+import localFileDatabase.server.queryResult.ResultRowImpl;
+import localFileDatabase.server.queryResult.ResultSetImpl;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.*;

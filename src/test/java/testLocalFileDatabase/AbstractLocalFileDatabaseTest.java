@@ -3,8 +3,9 @@ package testLocalFileDatabase;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
+import mySqlJdbcServer.MySqlJdbcServer;
 import org.junit.Before;
-import LocalFileDatabase.server.LocalFileDatabaseServerFactory;
+import localFileDatabase.server.LocalFileDatabaseServerFactory;
 import sqlapi.exceptions.SqlException;
 import sqlapi.queryResult.ResultRow;
 import sqlapi.queryResult.ResultSet;
@@ -22,17 +23,20 @@ public abstract class AbstractLocalFileDatabaseTest {
 
     SqlServer sqlServer;
 
+    protected String databaseName = "logiweb";
+
     @Before
     public void setUp() {
         System.out.println("===== SET UP =====");
-        sqlServer = LocalFileDatabaseServerFactory.getServer();
+//        sqlServer = LocalFileDatabaseServerFactory.getServer();
+        sqlServer = new MySqlJdbcServer();
         try {
             // Create a database
-            sqlServer.executeQuery(QueryFactory.createDatabase("DB1"));
+//            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
 
             // Create a table
             sqlServer.executeQuery(QueryFactory
-                    .createTable("DB1",
+                    .createTable(databaseName,
                             MetadataFactory.tableMetadata("table1", Arrays.asList(
                                     MetadataFactory.integer("column1",
                                             Collections.singletonList(
@@ -47,37 +51,43 @@ public abstract class AbstractLocalFileDatabaseTest {
                             ))));
 
             // Fill table1
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(10, 30, "test1", "t21")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(11, 31, "test2", null)));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(12, 32, "test3", "t43")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(13, 33, "test2", "t653")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(15, 34, "test1", null)));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(16, null, "test1", null)));
 
             // Create a table
             sqlServer.executeQuery(
                     QueryFactory
-                            .createTable("DB1", MetadataFactory.tableMetadata("table2",
-                                    Arrays.asList(
-                                            MetadataFactory.integer("column5", Collections
-                                                    .singletonList(MetadataFactory
-                                                            .primaryKey())),
-                                            MetadataFactory.varchar("column3", 15)
-                                    ))));
+                            .createTable(databaseName,
+                                    MetadataFactory.tableMetadata("table2",
+                                            Arrays.asList(
+                                                    MetadataFactory.integer("column5",
+                                                            Collections
+                                                                    .singletonList(
+                                                                            MetadataFactory
+                                                                                    .primaryKey())),
+                                                    MetadataFactory.varchar("column3", 15)
+                                            ))));
 
             // Fill table2
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(22, "test3")));
+                    QueryFactory
+                            .insert(databaseName, "table2", Arrays.asList(22, "test3")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(23, "test2")));
+                    QueryFactory
+                            .insert(databaseName, "table2", Arrays.asList(23, "test2")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(25, "test4")));
+                    QueryFactory
+                            .insert(databaseName, "table2", Arrays.asList(25, "test4")));
 
             System.out.println("===== END OF SET UP =====");
 

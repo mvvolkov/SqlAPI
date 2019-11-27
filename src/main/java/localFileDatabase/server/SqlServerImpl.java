@@ -1,12 +1,12 @@
-package LocalFileDatabase.server;
+package localFileDatabase.server;
 
-import LocalFileDatabase.client.api.ReadDatabaseFromFileQuery;
-import LocalFileDatabase.client.api.SaveDatabaseToFileQuery;
+import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
+import localFileDatabase.client.api.SaveDatabaseToFileQuery;
 import org.jetbrains.annotations.NotNull;
-import LocalFileDatabase.server.intermediateResult.*;
-import LocalFileDatabase.server.persistent.PersistentColumnMetadata;
-import LocalFileDatabase.server.persistent.PersistentDatabase;
-import LocalFileDatabase.server.persistent.PersistentTable;
+import localFileDatabase.server.intermediateResult.*;
+import localFileDatabase.server.persistent.PersistentColumnMetadata;
+import localFileDatabase.server.persistent.PersistentDatabase;
+import localFileDatabase.server.persistent.PersistentTable;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.*;

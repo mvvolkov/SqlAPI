@@ -1,7 +1,7 @@
-package LocalFileDatabase.client.impl;
+package localFileDatabase.client.impl;
 
 import org.jetbrains.annotations.NotNull;
-import LocalFileDatabase.client.api.ReadDatabaseFromFileQuery;
+import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import sqlapi.metadata.TableMetadata;
 
 import java.util.Collection;

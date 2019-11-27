@@ -1,7 +1,7 @@
-package LocalFileDatabase.client.impl;
+package localFileDatabase.client.impl;
 
 import org.jetbrains.annotations.NotNull;
-import LocalFileDatabase.client.api.SaveDatabaseToFileQuery;
+import localFileDatabase.client.api.SaveDatabaseToFileQuery;
 
 final class SaveDatabaseToFileQueryImpl implements SaveDatabaseToFileQuery {
 

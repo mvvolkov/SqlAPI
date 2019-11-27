@@ -49,7 +49,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testPrimaryKeyConstraint() {
         System.out.println("testPrimaryKeyConstraint:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList(10, 42, "test")));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());

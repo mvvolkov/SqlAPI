@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This is a trivial implementation of the SQL API. The queries are simply printed out.
+ */
 public class SqlServerLoggerImpl implements SqlServer {
 
 
@@ -42,7 +45,8 @@ public class SqlServerLoggerImpl implements SqlServer {
         return Collections.emptyList();
     }
 
-    @Override public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName) {
+    @Override
+    public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName) {
         return Collections.emptyList();
     }
 }

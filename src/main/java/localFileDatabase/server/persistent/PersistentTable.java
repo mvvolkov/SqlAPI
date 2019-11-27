@@ -1,8 +1,8 @@
-package LocalFileDatabase.server.persistent;
+package localFileDatabase.server.persistent;
 
-import LocalFileDatabase.server.intermediateResult.DataHeader;
-import LocalFileDatabase.server.intermediateResult.DataRow;
-import LocalFileDatabase.server.intermediateResult.DataSet;
+import localFileDatabase.server.intermediateResult.DataHeader;
+import localFileDatabase.server.intermediateResult.DataRow;
+import localFileDatabase.server.intermediateResult.DataSet;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;

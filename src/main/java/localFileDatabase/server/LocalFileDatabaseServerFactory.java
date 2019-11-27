@@ -1,4 +1,4 @@
-package LocalFileDatabase.server;
+package localFileDatabase.server;
 
 import sqlapi.server.SqlServer;
 

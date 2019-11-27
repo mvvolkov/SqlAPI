@@ -1,7 +1,7 @@
 package testLocalFileDatabase;
 
-import LocalFileDatabase.client.impl.FileQueryFactory;
-import LocalFileDatabase.server.LocalFileDatabaseServerFactory;
+import localFileDatabase.client.impl.FileQueryFactory;
+import localFileDatabase.server.LocalFileDatabaseServerFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
@@ -17,10 +17,32 @@ import java.util.Collections;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+
+/**
+ * Before each test we have two tables:
+ * <p>
+ * SELECT * FROM DB1.table1;
+ * <p>
+ * column1, column2, column3, column4
+ * 10, 30, test1, t21
+ * 11, 31, test2, null
+ * 12, 32, test3, t43
+ * 13, 33, test2, t653
+ * 15, 34, test1, null
+ * 16, null, test1, null
+ * <p>
+ * <p>
+ * SELECT * FROM DB1.table2;
+ * <p>
+ * column5, column3
+ * 22, test3
+ * 23, test2
+ * 25, test4
+ */
 public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
     @Test
-    public void test1() {
+    public void testReadAndWrite() {
         SqlServer sqlServer = LocalFileDatabaseServerFactory.getServer();
         SqlServer sqlServer1 = LocalFileDatabaseServerFactory.getServer();
 
@@ -84,7 +106,8 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
 
-            sqlServer1.executeQuery(FileQueryFactory.readDatabase(fileName, "DB1", Arrays.asList(tm1, tm2)));
+            sqlServer1.executeQuery(FileQueryFactory
+                    .readDatabase(fileName, "DB1", Arrays.asList(tm1, tm2)));
 
             ResultSet resultSet = sqlServer1.getQueryResult(
                     QueryFactory.select(TableRefFactory.dbTable("DB1", "table1")));
@@ -105,6 +128,5 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
             System.out.println(se.getMessage());
             fail();
         }
-
     }
 }

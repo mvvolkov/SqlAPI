@@ -1,4 +1,4 @@
-package LocalFileDatabase.server.persistent;
+package localFileDatabase.server.persistent;
 
 import java.io.Serializable;
 import java.util.Map;

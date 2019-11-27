@@ -1,4 +1,4 @@
-package LocalFileDatabase.client.api;
+package localFileDatabase.client.api;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.SqlQuery;

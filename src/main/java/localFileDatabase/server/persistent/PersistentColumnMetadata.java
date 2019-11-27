@@ -1,4 +1,4 @@
-package LocalFileDatabase.server.persistent;
+package localFileDatabase.server.persistent;
 
 import sqlapi.exceptions.NoSuchColumnException;
 import sqlapi.exceptions.WrongValueTypeException;

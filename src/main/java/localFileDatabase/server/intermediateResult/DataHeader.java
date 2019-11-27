@@ -1,4 +1,4 @@
-package LocalFileDatabase.server.intermediateResult;
+package localFileDatabase.server.intermediateResult;
 
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;

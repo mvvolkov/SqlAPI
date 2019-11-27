@@ -1,4 +1,4 @@
-package LocalFileDatabase.server.intermediateResult;
+package localFileDatabase.server.intermediateResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
