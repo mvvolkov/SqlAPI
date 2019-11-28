@@ -1,5 +1,6 @@
 package testLocalFileDatabase;
 
+import clientImpl.columnExpr.ColumnExprFactory;
 import localFileDatabase.client.impl.FileQueryFactory;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
 import clientImpl.metadata.MetadataFactory;
@@ -68,17 +69,17 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
             // Fill table1
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(10, 30, "test1", "t21")));
+                    ColumnExprFactory.values(10, 30, "test1", "t21")));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(11, 31, "test2", null)));
+                    ColumnExprFactory.values(11, 31, "test2", null)));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(12, 32, "test3", "t43")));
+                    ColumnExprFactory.values(12, 32, "test3", "t43")));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(13, 33, "test2", "t653")));
+                    ColumnExprFactory.values(13, 33, "test2", "t653")));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(15, 34, "test1", null)));
+                    ColumnExprFactory.values(15, 34, "test1", null)));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(16, null, "test1", null)));
+                    ColumnExprFactory.values(16, null, "test1", null)));
 
             TableMetadata tm2 = MetadataFactory.tableMetadata("table2",
                     Arrays.asList(
@@ -93,16 +94,16 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
             // Fill table2
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(22, "test3")));
+                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(22, "test3")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(23, "test2")));
+                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(23, "test2")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", Arrays.asList(25, "test4")));
+                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(25, "test4")));
 
 
             // save databases
-            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-//            String tempDir = System.getProperty("java.io.tmpdir");
+//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
+            String tempDir = System.getProperty("java.io.tmpdir");
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
 

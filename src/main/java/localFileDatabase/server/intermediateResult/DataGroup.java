@@ -86,7 +86,7 @@ public final class DataGroup {
         if (af instanceof MinAggregateFunction) {
             return this.getMin(af.getColumnRef());
         }
-        throw new UnsupportedAggregateFunctionTypeException(af.getClass().getSimpleName());
+        throw new UnsupportedAggregateFunctionTypeException(af);
     }
 
     private Integer getCount(ColumnRef cr)

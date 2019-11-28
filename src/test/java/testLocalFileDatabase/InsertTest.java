@@ -50,7 +50,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testPrimaryKeyConstraint:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(10, 42, "test")));
+                    ColumnExprFactory.values(10, 42, "test")));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column1", ce.getColumnName());
@@ -72,7 +72,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testNotNullConstraint:");
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(21, 43, null)));
+                    ColumnExprFactory.values(21, 43, null)));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column3", ce.getColumnName());
@@ -104,7 +104,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
                     Arrays.asList("column2", "column3", "column1"),
-                    Arrays.asList(35, "test15", 17)));
+                    ColumnExprFactory.values(35, "test15", 17)));
             ResultSet resultSet = this.getTableData("DB1", "table1");
             checkRowExists(resultSet, 17, 35, "test15", null);
         } catch (SqlException se) {
@@ -123,7 +123,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testInsertWrongType:");
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    Arrays.asList(17, 35, 39, null)));
+                    ColumnExprFactory.values(17, 35, 39, null)));
         } catch (WrongValueTypeException wvte) {
             System.out.println(wvte.getMessage());
             assertEquals("table1", wvte.getTableName());
@@ -150,7 +150,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
                     Arrays.asList("column2", "column3", "column1"),
-                    Arrays.asList("test15", 17)));
+                    ColumnExprFactory.values("test15", 17)));
 
         } catch (InvalidQueryException iqe) {
             System.out.println(iqe.getMessage());
@@ -187,7 +187,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
                     Arrays.asList("column3", "column1"),
-                    Arrays.asList("test15", 17)));
+                    ColumnExprFactory.values("test15", 17)));
 
             ResultSet resultSet = this.getTableData("DB1", "table1");
             checkRowExists(resultSet, 17, 15, "test15", null);
@@ -209,7 +209,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         try {
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
                     Arrays.asList("column3", "column1", "column4"),
-                    Arrays.asList("test15", 17, "t12345")));
+                    ColumnExprFactory.values("test15", 17, "t12345")));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column4", ce.getColumnName());

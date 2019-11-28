@@ -13,8 +13,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class MySqlJdbcServer implements SqlServer {
 
@@ -44,14 +46,15 @@ public class MySqlJdbcServer implements SqlServer {
         System.out.println("Connecting to database...");
         try {
             connection = DriverManager.getConnection(DB_URL, USER, PASS);
+            System.out.println("Connected.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("Connected.");
     }
 
 
-    @Override public void executeQuery(@NotNull SqlQuery query) throws SqlException {
+    @Override
+    public void executeQuery(@NotNull SqlQuery query) throws SqlException {
 
         System.out.println(query);
 
@@ -79,7 +82,8 @@ public class MySqlJdbcServer implements SqlServer {
 
     }
 
-    @Override public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
+    @Override
+    public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
 
         System.out.println(selectQuery);
@@ -93,8 +97,22 @@ public class MySqlJdbcServer implements SqlServer {
         return null;
     }
 
-    @Override public @NotNull Collection<String> getDatabases() {
-        return Collections.emptyList();
+    @Override
+    public @NotNull Collection<String> getDatabases() throws SqlException {
+        List<String> databases = new ArrayList<>();
+
+        try {
+            //Creating a Statement object
+            Statement stmt = connection.createStatement();
+            //Retrieving the data
+            java.sql.ResultSet rs = stmt.executeQuery("Show Databases");
+            while (rs.next()) {
+                databases.add(rs.getString(1));
+            }
+        } catch (SQLException ex) {
+            throw new WrappedException(ex);
+        }
+        return databases;
     }
 
     @Override

@@ -1,11 +1,11 @@
 package testLocalFileDatabase;
 
+import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
-import mySqlJdbcServer.MySqlJdbcServer;
-import org.junit.Before;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
+import org.junit.Before;
 import sqlapi.exceptions.SqlException;
 import sqlapi.queryResult.ResultRow;
 import sqlapi.queryResult.ResultSet;
@@ -23,16 +23,17 @@ public abstract class AbstractLocalFileDatabaseTest {
 
     SqlServer sqlServer;
 
-    protected String databaseName = "logiweb";
+    //    String databaseName = "logiweb";
+    String databaseName = "DB1";
 
     @Before
     public void setUp() {
         System.out.println("===== SET UP =====");
-//        sqlServer = LocalFileDatabaseServerFactory.getServer();
-        sqlServer = new MySqlJdbcServer();
+        sqlServer = LocalFileDatabaseServerFactory.getServer();
+//        sqlServer = new MySqlJdbcServer();
         try {
             // Create a database
-//            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
+            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
 
             // Create a table
             sqlServer.executeQuery(QueryFactory
@@ -52,17 +53,17 @@ public abstract class AbstractLocalFileDatabaseTest {
 
             // Fill table1
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(10, 30, "test1", "t21")));
+                    ColumnExprFactory.values(10, 30, "test1", "t21")));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(11, 31, "test2", null)));
+                    ColumnExprFactory.values(11, 31, "test2", null)));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(12, 32, "test3", "t43")));
+                    ColumnExprFactory.values(12, 32, "test3", "t43")));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(13, 33, "test2", "t653")));
+                    ColumnExprFactory.values(13, 33, "test2", "t653")));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(15, 34, "test1", null)));
+                    ColumnExprFactory.values(15, 34, "test1", null)));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList(16, null, "test1", null)));
+                    ColumnExprFactory.values(16, null, "test1", null)));
 
             // Create a table
             sqlServer.executeQuery(
@@ -81,13 +82,13 @@ public abstract class AbstractLocalFileDatabaseTest {
             // Fill table2
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", Arrays.asList(22, "test3")));
+                            .insert(databaseName, "table2", ColumnExprFactory.values(22, "test3")));
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", Arrays.asList(23, "test2")));
+                            .insert(databaseName, "table2", ColumnExprFactory.values(23, "test2")));
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", Arrays.asList(25, "test4")));
+                            .insert(databaseName, "table2", ColumnExprFactory.values(25, "test4")));
 
             System.out.println("===== END OF SET UP =====");
 

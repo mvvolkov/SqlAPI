@@ -2,6 +2,7 @@ package clientImpl.queries;
 
 import clientImpl.predicates.PredicateFactory;
 import org.jetbrains.annotations.NotNull;
+import sqlapi.columnExpr.ColumnValue;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.misc.SelectedItem;
 import sqlapi.columnExpr.ColumnRef;
@@ -36,13 +37,13 @@ public class QueryFactory {
     public static @NotNull InsertQuery insert(@NotNull String databaseName,
                                               @NotNull String tableName,
                                               @NotNull List<String> columns,
-                                              @NotNull List<Object> values) {
+                                              @NotNull List<ColumnValue> values) {
         return new @NotNull InsertQueryImpl(databaseName, tableName, columns, values);
     }
 
     public static @NotNull InsertQuery insert(@NotNull String databaseName,
                                               @NotNull String tableName,
-                                              @NotNull List<Object> values) {
+                                              @NotNull List<ColumnValue> values) {
         return insert(databaseName, tableName, Collections.emptyList(), values);
     }
 

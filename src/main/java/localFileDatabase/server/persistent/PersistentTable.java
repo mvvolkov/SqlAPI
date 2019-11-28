@@ -4,6 +4,7 @@ import localFileDatabase.server.intermediateResult.DataHeader;
 import localFileDatabase.server.intermediateResult.DataRow;
 import localFileDatabase.server.intermediateResult.DataSet;
 import org.jetbrains.annotations.NotNull;
+import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
 import sqlapi.misc.AssignmentOperation;
@@ -58,7 +59,7 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    public void insert(List<String> columnNames, List<Object> values)
+    public void insert(List<String> columnNames, List<ColumnValue> values)
             throws WrongValueTypeException, ConstraintViolationException,
             InvalidQueryException {
 
@@ -67,7 +68,7 @@ public final class PersistentTable implements Serializable {
         if (columnNames.isEmpty()) {
             for (int i = 0; i < columns.size(); i++) {
                 PersistentColumnMetadata columnMetadata = columns.get(i);
-                Object value = values.size() > i ? values.get(i) : null;
+                Object value = values.size() > i ? values.get(i).getValue() : null;
                 this.checkConstraints(columnMetadata, value);
                 resultMap.put(columnMetadata.getColumnName(), value);
             }
@@ -78,7 +79,7 @@ public final class PersistentTable implements Serializable {
             }
             Map<String, Object> insertMap = new HashMap<>();
             for (int i = 0; i < columnNames.size(); i++) {
-                insertMap.put(columnNames.get(i), values.get(i));
+                insertMap.put(columnNames.get(i), values.get(i).getValue());
             }
 
             for (PersistentColumnMetadata columnMetadata : columns) {

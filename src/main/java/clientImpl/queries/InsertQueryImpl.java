@@ -1,6 +1,7 @@
 package clientImpl.queries;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.columnExpr.ColumnValue;
 import sqlapi.queries.InsertQuery;
 
 import java.util.List;
@@ -12,27 +13,30 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
     private final List<String> columns;
 
     @NotNull
-    private final List<Object> values;
+    private final List<ColumnValue> values;
 
     InsertQueryImpl(@NotNull String databaseName, @NotNull String tableName,
-                    @NotNull List<String> columns, @NotNull List<Object> values) {
+                    @NotNull List<String> columns, @NotNull List<ColumnValue> values) {
         super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
     }
 
 
-    @NotNull @Override
-    public List<Object> getValues() {
+    @NotNull
+    @Override
+    public List<ColumnValue> getValues() {
         return values;
     }
 
-    @NotNull @Override
+    @NotNull
+    @Override
     public List<String> getColumns() {
         return columns;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder("INSERT INTO ");
         sb.append(this.getDatabaseName());
         sb.append(".");
@@ -50,10 +54,12 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
         return sb.toString();
     }
 
-    private String getStringFromValue(Object value) {
+    private String getStringFromValue(ColumnValue columnValue) {
+        Object value = columnValue.getValue();
         if (value instanceof String) {
             return '\'' + (String) value + '\'';
-        } else if (value == null) {
+        }
+        if (value == null) {
             return "NULL";
         }
         return String.valueOf(value);

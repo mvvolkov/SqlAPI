@@ -1,5 +1,7 @@
 package localFileDatabase.server.persistent;
 
+import clientImpl.columnExpr.ColumnExprFactory;
+import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
@@ -9,6 +11,7 @@ import sqlapi.queryResult.ResultSet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PersistentDatabase implements Serializable {
@@ -64,8 +67,12 @@ public class PersistentDatabase implements Serializable {
     public void insert(InsertFromSelectQuery query, ResultSet resultSet)
             throws SqlException {
         for (ResultRow row : resultSet.getRows()) {
+            List<ColumnValue> values = new ArrayList<>();
+            for (Object value : row.getValues()) {
+                values.add(ColumnExprFactory.value(value));
+            }
             this.getTable(query.getTableName())
-                    .insert(query.getColumns(), row.getValues());
+                    .insert(query.getColumns(), values);
         }
     }
 

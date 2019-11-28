@@ -41,7 +41,7 @@ public final class DataRow {
         if (predicate instanceof BinaryPredicate) {
             return this.evaluateBinaryPredicate((BinaryPredicate) predicate);
         }
-        throw new UnsupportedPredicateTypeException(predicate.getClass().getSimpleName());
+        throw new UnsupportedPredicateTypeException(predicate);
     }
 
     private boolean evaluateCombinedPredicate(CombinedPredicate predicate)

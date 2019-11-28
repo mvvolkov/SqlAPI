@@ -2,6 +2,7 @@ package localFileDatabase.server;
 
 import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import localFileDatabase.client.api.SaveDatabaseToFileQuery;
+import mySqlJdbcServer.QueryStringUtil;
 import org.jetbrains.annotations.NotNull;
 import localFileDatabase.server.intermediateResult.*;
 import localFileDatabase.server.persistent.PersistentColumnMetadata;
@@ -33,7 +34,11 @@ final class SqlServerImpl implements SqlServer {
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
         System.out.println(query);
-
+        try {
+            QueryStringUtil.printQuery(query);
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+        }
         if (query instanceof CreateDatabaseQuery) {
             this.createDatabase((CreateDatabaseQuery) query);
             return;
@@ -84,6 +89,11 @@ final class SqlServerImpl implements SqlServer {
     public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
         System.out.println(selectQuery);
+        try {
+            QueryStringUtil.printSelectQuery(selectQuery);
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+        }
         return DataUtil.createResultSet(this.getInternalQueryResult(selectQuery));
     }
 
@@ -350,7 +360,7 @@ final class SqlServerImpl implements SqlServer {
             return DataUtil
                     .rightOuterJoin(left, right, tableReference.getPredicate());
         }
-        throw new UnsupportedTableReferenceTypeException(tableReference.getClass().getSimpleName());
+        throw new UnsupportedTableReferenceTypeException(tableReference);
     }
 
     private DataSet getSubqueryResult(TableFromSelectReference tr)
@@ -400,7 +410,7 @@ final class SqlServerImpl implements SqlServer {
             return this.getSubqueryResult(
                     (TableFromSelectReference) tableReference);
         }
-        throw new UnsupportedTableReferenceTypeException(tableReference.getClass().getSimpleName());
+        throw new UnsupportedTableReferenceTypeException(tableReference);
     }
 
     @NotNull

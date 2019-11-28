@@ -1,8 +1,11 @@
 package clientImpl.columnExpr;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.columnExpr.*;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColumnExprFactory {
 
@@ -17,6 +20,14 @@ public class ColumnExprFactory {
 
     public static @NotNull ColumnValue value(@Nullable Object value) {
         return value(value, "");
+    }
+
+    public static @NotNull List<ColumnValue> values(Object... objects) {
+        List<ColumnValue> columnValues = new ArrayList<>();
+        for (Object obj : objects) {
+            columnValues.add(value(obj));
+        }
+        return columnValues;
     }
 
     // *************************** ColumnRef **********************************

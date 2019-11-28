@@ -65,9 +65,9 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
 
             // Fill table3
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table3",
-                    Arrays.asList("test3", "cc", 41)));
+                    ColumnExprFactory.values("test3", "cc", 41)));
             sqlServer.executeQuery(QueryFactory.insert("DB1", "table3",
-                    Arrays.asList("ccc", "t43", 38)));
+                    ColumnExprFactory.values("ccc", "t43", 38)));
 
             getTableData("DB1", "table3");
 

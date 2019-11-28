@@ -1,20 +1,22 @@
 package sqlapi.exceptions;
 
+import sqlapi.tables.TableReference;
+
 public class UnsupportedTableReferenceTypeException extends SqlException {
 
-    private final String className;
+    private final TableReference tableReference;
 
 
-    public UnsupportedTableReferenceTypeException(String className) {
-        this.className = className;
+    public UnsupportedTableReferenceTypeException(TableReference tableReference) {
+        this.tableReference = tableReference;
     }
 
-    public String getClassName() {
-        return className;
+    public TableReference getTableReference() {
+        return tableReference;
     }
 
     @Override
     public String getMessage() {
-        return "Unsupported table reference type: " + className;
+        return "Unsupported table reference type: " + tableReference;
     }
 }

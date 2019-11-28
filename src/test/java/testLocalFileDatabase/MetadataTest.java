@@ -1,7 +1,7 @@
 package testLocalFileDatabase;
 
 import org.junit.Test;
-import sqlapi.exceptions.NoSuchDatabaseException;
+import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.*;
 
 import java.util.Collection;
@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 public class MetadataTest extends AbstractLocalFileDatabaseTest {
 
     @Test
-    public void testDatabases() {
+    public void testDatabases() throws SqlException {
         Collection<String> databases = sqlServer.getDatabases();
         assertEquals(1, databases.size());
         assertEquals("DB1", databases.iterator().next());
@@ -59,7 +59,7 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
             checkTable2(table2);
 
 
-        } catch (NoSuchDatabaseException e) {
+        } catch (SqlException e) {
             System.out.println(e.getMessage());
             fail();
         }

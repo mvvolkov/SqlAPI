@@ -23,6 +23,12 @@ final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {
 
     @Override
     public String toString() {
-        return (value instanceof String) ? "'" + value + "'" : String.valueOf(value);
+        if (value instanceof String) {
+            return '\'' + (String) value + '\'';
+        }
+        if (value == null) {
+            return "NULL";
+        }
+        return String.valueOf(value);
     }
 }
