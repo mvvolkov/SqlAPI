@@ -6,13 +6,11 @@ import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.WrappedException;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
+import sqlapi.queryResult.QueryResultRow;
 import sqlapi.server.SqlServer;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,18 +81,33 @@ public class MySqlJdbcServer implements SqlServer {
     }
 
     @Override
-    public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
+    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
 
         System.out.println(selectQuery);
         try {
             Statement statement = connection.createStatement();
-            java.sql.ResultSet resultSet = statement.executeQuery(selectQuery.toString());
+            ResultSet resultSet = statement.executeQuery(selectQuery.toString());
+
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+
+            List<String> columns = new ArrayList<>();
+            for (int i = 1; i <= columnsNumber; i++) {
+                columns.add(rsmd.getColumnName(i));
+            }
+            List<QueryResultRow> rows = new ArrayList<>();
+            while (resultSet.next()) {
+                List<Object> values = new ArrayList<>();
+                for (int i = 1; i <= columnsNumber; i++) {
+                    values.add(resultSet.getObject(i));
+                }
+                rows.add(new QueryResultRowImpl(values));
+            }
+            return new QueryResultImpl(rows, columns);
         } catch (SQLException e) {
             throw new WrappedException(e);
         }
-
-        return null;
     }
 
     @Override

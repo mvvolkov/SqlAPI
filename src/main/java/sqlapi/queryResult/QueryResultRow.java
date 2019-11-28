@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ResultRow {
+public interface QueryResultRow {
 
 
     @Nullable Object getValue(int index);

@@ -1,10 +1,13 @@
 package testLocalFileDatabase;
 
+import clientImpl.metadata.MetadataFactory;
+import clientImpl.queries.QueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.*;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -35,13 +38,13 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
     public void testDatabases() throws SqlException {
         Collection<String> databases = sqlServer.getDatabases();
         assertEquals(1, databases.size());
-        assertEquals("DB1", databases.iterator().next());
+        assertEquals(databaseName, databases.iterator().next());
     }
 
     @Test
     public void testTables() {
         try {
-            Collection<TableMetadata> tables = sqlServer.getTables("DB1");
+            Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
             assertEquals(tables.size(), 2);
             TableMetadata table1 = null;
             TableMetadata table2 = null;
@@ -57,8 +60,6 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
             assertNotNull(table2);
             checkTable1(table1);
             checkTable2(table2);
-
-
         } catch (SqlException e) {
             System.out.println(e.getMessage());
             fail();
@@ -163,5 +164,71 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
             }
         }
         return null;
+    }
+
+    @Test
+    public void testDropTable() throws SqlException {
+
+        try {
+            sqlServer.executeQuery(QueryFactory.createTable(databaseName,
+                    MetadataFactory.tableMetadata("table4",
+                            Collections.singletonList(MetadataFactory.integer("id")))));
+
+            Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
+            assertEquals(tables.size(), 3);
+            TableMetadata table1 = null;
+            TableMetadata table2 = null;
+            TableMetadata table3 = null;
+            for (TableMetadata table : tables) {
+                if (table.getTableName().equals("table1")) {
+                    table1 = table;
+                }
+                if (table.getTableName().equals("table2")) {
+                    table2 = table;
+                }
+                if (table.getTableName().equals("table4")) {
+                    table3 = table;
+                }
+            }
+            assertNotNull(table1);
+            assertNotNull(table2);
+            assertNotNull(table3);
+
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table2"));
+            tables = sqlServer.getTables(databaseName);
+            assertEquals(tables.size(), 2);
+            table1 = null;
+            table2 = null;
+            for (TableMetadata table : tables) {
+                if (table.getTableName().equals("table1")) {
+                    table1 = table;
+                }
+                if (table.getTableName().equals("table4")) {
+                    table2 = table;
+                }
+            }
+            assertNotNull(table1);
+            assertNotNull(table2);
+
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table4"));
+            tables = sqlServer.getTables(databaseName);
+            assertEquals(tables.size(), 1);
+            table1 = null;
+            for (TableMetadata table : tables) {
+                if (table.getTableName().equals("table1")) {
+                    table1 = table;
+                }
+            }
+            assertNotNull(table1);
+
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table1"));
+            tables = sqlServer.getTables(databaseName);
+            assertEquals(tables.size(), 0);
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+            fail();
+        }
+
+
     }
 }

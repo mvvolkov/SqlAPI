@@ -5,8 +5,8 @@ import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
-import sqlapi.queryResult.ResultRow;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResultRow;
+import sqlapi.queryResult.QueryResult;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,6 +42,11 @@ public class PersistentDatabase implements Serializable {
         tables.add(new PersistentTable(name, tableMetadata));
     }
 
+    public void dropTable(String tableName) throws NoSuchTableException {
+        PersistentTable table = this.getTable(tableName);
+        tables.remove(table);
+    }
+
     public void executeQuery(TableActionQuery query) throws SqlException {
         if (query instanceof InsertQuery) {
             this.insert((InsertQuery) query);
@@ -64,9 +69,9 @@ public class PersistentDatabase implements Serializable {
         this.getTable(query.getTableName()).insert(query.getColumns(), query.getValues());
     }
 
-    public void insert(InsertFromSelectQuery query, ResultSet resultSet)
+    public void insert(InsertFromSelectQuery query, QueryResult queryResult)
             throws SqlException {
-        for (ResultRow row : resultSet.getRows()) {
+        for (QueryResultRow row : queryResult.getRows()) {
             List<ColumnValue> values = new ArrayList<>();
             for (Object value : row.getValues()) {
                 values.add(ColumnExprFactory.value(value));
@@ -116,6 +121,7 @@ public class PersistentDatabase implements Serializable {
     }
 
     public Collection<TableMetadata> getTables() {
-        return tables.stream().map(PersistentTable::getTableMetadata).collect(Collectors.toList());
+        return tables.stream().map(PersistentTable::getTableMetadata)
+                .collect(Collectors.toList());
     }
 }

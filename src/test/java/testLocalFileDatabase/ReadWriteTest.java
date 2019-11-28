@@ -9,7 +9,7 @@ import clientImpl.tables.TableRefFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
@@ -102,28 +102,28 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
 
             // save databases
-//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-            String tempDir = System.getProperty("java.io.tmpdir");
+            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
+//            String tempDir = System.getProperty("java.io.tmpdir");
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
 
             sqlServer1.executeQuery(FileQueryFactory
                     .readDatabase(fileName, "DB1", Arrays.asList(tm1, tm2)));
 
-            ResultSet resultSet = sqlServer1.getQueryResult(
+            QueryResult queryResult = sqlServer1.getQueryResult(
                     QueryFactory.select(TableRefFactory.dbTable("DB1", "table1")));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column1", "column2", "column3",
+            checkHeaders(queryResult.getHeaders(), "column1", "column2", "column3",
                     "column4");
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 10, 30, "test1", "t21");
-            checkRowExists(resultSet, 11, 31, "test2", null);
-            checkRowExists(resultSet, 12, 32, "test3", "t43");
-            checkRowExists(resultSet, 13, 33, "test2", "t653");
-            checkRowExists(resultSet, 15, 34, "test1", null);
-            checkRowExists(resultSet, 16, null, "test1", null);
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 10, 30, "test1", "t21");
+            checkRowExists(queryResult, 11, 31, "test2", null);
+            checkRowExists(queryResult, 12, 32, "test3", "t43");
+            checkRowExists(queryResult, 13, 33, "test2", "t653");
+            checkRowExists(queryResult, 15, 34, "test1", null);
+            checkRowExists(queryResult, 16, null, "test1", null);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

@@ -1,15 +1,15 @@
-package localFileDatabase.server.queryResult;
+package mySqlJdbcServer;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.queryResult.ResultRow;
+import sqlapi.queryResult.QueryResultRow;
 
 import java.util.List;
 
-public final class ResultRowImpl implements ResultRow {
+public final class QueryResultRowImpl implements QueryResultRow {
 
     private final List<Object> values;
 
-    public ResultRowImpl(List<Object> values) {
+    public QueryResultRowImpl(List<Object> values) {
         this.values = values;
     }
 

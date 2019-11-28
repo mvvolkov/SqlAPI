@@ -5,9 +5,11 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,6 +46,7 @@ import static org.junit.Assert.fail;
  */
 public class SelectTest extends AbstractLocalFileDatabaseTest {
 
+    @Before
     @Override
     public void setUp() {
         super.setUp();
@@ -51,7 +54,7 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
         try {
             // Create one more table
             sqlServer.executeQuery(QueryFactory
-                    .createTable("DB1",
+                    .createTable(databaseName,
                             MetadataFactory.tableMetadata("table3", Arrays.asList(
                                     MetadataFactory.varchar("column11", 20, Collections
                                             .singletonList(MetadataFactory.primaryKey())),
@@ -64,18 +67,26 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             ))));
 
             // Fill table3
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table3",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table3",
                     ColumnExprFactory.values("test3", "cc", 41)));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table3",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table3",
                     ColumnExprFactory.values("ccc", "t43", 38)));
-
             getTableData("DB1", "table3");
-
-
             System.out.println("===== END OF SET UP =====");
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    @After
+    @Override
+    public void tearDown() {
+        super.tearDown();
+        try {
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table3"));
+        } catch (SqlException e) {
+            e.printStackTrace();
         }
     }
 
@@ -94,20 +105,20 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     public void testSelectAll() {
         System.out.println("testSelectAll:");
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(
-                    QueryFactory.select(TableRefFactory.dbTable("DB1", "table1")));
+            QueryResult queryResult = sqlServer.getQueryResult(
+                    QueryFactory.select(TableRefFactory.dbTable(databaseName, "table1")));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column1", "column2", "column3",
+            checkHeaders(queryResult.getHeaders(), "column1", "column2", "column3",
                     "column4");
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 10, 30, "test1", "t21");
-            checkRowExists(resultSet, 11, 31, "test2", null);
-            checkRowExists(resultSet, 12, 32, "test3", "t43");
-            checkRowExists(resultSet, 13, 33, "test2", "t653");
-            checkRowExists(resultSet, 15, 34, "test1", null);
-            checkRowExists(resultSet, 16, null, "test1", null);
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 10, 30, "test1", "t21");
+            checkRowExists(queryResult, 11, 31, "test2", null);
+            checkRowExists(queryResult, 12, 32, "test3", "t43");
+            checkRowExists(queryResult, 13, 33, "test2", "t653");
+            checkRowExists(queryResult, 15, 34, "test1", null);
+            checkRowExists(queryResult, 16, null, "test1", null);
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
@@ -130,22 +141,22 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     public void testSelectColumns() {
         System.out.println("testSelectColumns:");
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.dbTable("DB1", "table1"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column2"),
                             ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.columnRef("column1"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column2", "column3", "column1");
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 30, "test1", 10);
-            checkRowExists(resultSet, 31, "test2", 11);
-            checkRowExists(resultSet, 32, "test3", 12);
-            checkRowExists(resultSet, 33, "test2", 13);
-            checkRowExists(resultSet, 34, "test1", 15);
-            checkRowExists(resultSet, null, "test1", 16);
+            checkHeaders(queryResult.getHeaders(), "column2", "column3", "column1");
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 30, "test1", 10);
+            checkRowExists(queryResult, 31, "test2", 11);
+            checkRowExists(queryResult, 32, "test3", 12);
+            checkRowExists(queryResult, 33, "test2", 13);
+            checkRowExists(queryResult, 34, "test1", 15);
+            checkRowExists(queryResult, null, "test1", 16);
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
@@ -171,24 +182,25 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     public void testSelectColumnsExpressions() {
         System.out.println("testSelectColumnsExpressions:");
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.dbTable("DB1", "table1"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.value(15, "N15"),
                             ColumnExprFactory.sumWithAlias("column2", "column1", "sum1"),
-                            ColumnExprFactory.columnRef("column2").subtract(ColumnExprFactory.value(11))
+                            ColumnExprFactory.columnRef("column2")
+                                    .subtract(ColumnExprFactory.value(11))
                     ),
                     PredicateFactory.isNotNull("column2")
             ));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "N15", "sum1", "(column2 - 11)");
-            assertEquals(5, resultSet.getRows().size());
-            checkRowExists(resultSet, 15, 40, 19);
-            checkRowExists(resultSet, 15, 42, 20);
-            checkRowExists(resultSet, 15, 44, 21);
-            checkRowExists(resultSet, 15, 46, 22);
-            checkRowExists(resultSet, 15, 49, 23);
+            checkHeaders(queryResult.getHeaders(), "N15", "sum1", "(column2 - 11)");
+            assertEquals(5, queryResult.getRows().size());
+            checkRowExists(queryResult, 15, 40, 19);
+            checkRowExists(queryResult, 15, 42, 20);
+            checkRowExists(queryResult, 15, 44, 21);
+            checkRowExists(queryResult, 15, 46, 22);
+            checkRowExists(queryResult, 15, 49, 23);
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
@@ -210,11 +222,11 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     public void testSelectTableAndColumns() {
         System.out.println("testSelectAll:");
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    Arrays.asList(TableRefFactory.dbTable("DB1", "table1"),
-                            TableRefFactory.dbTable("DB1", "table2")
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    Arrays.asList(TableRefFactory.dbTable(databaseName, "table1"),
+                            TableRefFactory.dbTable(databaseName, "table2")
                     ),
-                    Arrays.asList(TableRefFactory.dbTable("DB1", "table2"),
+                    Arrays.asList(TableRefFactory.dbTable(databaseName, "table2"),
                             ColumnExprFactory.columnRef("column2"),
                             ColumnExprFactory.columnRef("table1", "column3"),
                             ColumnExprFactory.columnRef("column1")
@@ -224,12 +236,12 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                                     .equals("column1", ColumnExprFactory.value(13)))
             ));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column2",
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column2",
                     "column3", "column1");
-            assertEquals(1, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 33, "test2", 13);
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", 33, "test2", 13);
 
         } catch (SqlException e) {
             System.out.println(e.getMessage());
@@ -256,10 +268,10 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testSelectFromTwoTablesSameColumnNameExists1:");
 
         try {
-            ResultSet resultSet =
+            QueryResult queryResult =
                     sqlServer.getQueryResult(QueryFactory.select(Arrays.asList(
-                            TableRefFactory.dbTable("DB1", "table2"),
-                            TableRefFactory.dbTable("DB1", "table1")),
+                            TableRefFactory.dbTable(databaseName, "table2"),
+                            TableRefFactory.dbTable(databaseName, "table1")),
                             Arrays.asList(
                                     ColumnExprFactory.columnRef("column2"),
                                     ColumnExprFactory.columnRef("column1"),
@@ -272,13 +284,13 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                                     .equals("table2", "column3", "table1", "column3")
                                     .and(PredicateFactory.isNotNull("column4"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column2", "column1", "column3",
+            checkHeaders(queryResult.getHeaders(), "column2", "column1", "column3",
                     "column4", "column5", "column3");
-            assertEquals(2, resultSet.getRows().size());
-            checkRowExists(resultSet, 32, 12, "test3", "t43", 22, "test3");
-            checkRowExists(resultSet, 33, 13, "test2", "t653", 23, "test2");
+            assertEquals(2, queryResult.getRows().size());
+            checkRowExists(queryResult, 32, 12, "test3", "t43", 22, "test3");
+            checkRowExists(queryResult, 33, 13, "test2", "t653", 23, "test2");
 
 
         } catch (SqlException se) {
@@ -304,8 +316,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
         try {
 
             sqlServer.getQueryResult(QueryFactory.select(Arrays.asList(
-                    TableRefFactory.dbTable("DB1", "table2"),
-                    TableRefFactory.dbTable("DB1", "table1")),
+                    TableRefFactory.dbTable(databaseName, "table2"),
+                    TableRefFactory.dbTable(databaseName, "table1")),
                     Arrays.asList(
                             ColumnExprFactory.columnRef("column2"),
                             ColumnExprFactory.columnRef("column1"),
@@ -366,26 +378,30 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
         try {
 
             // 1.
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
-                            PredicateFactory
-                                    .equals("table2", "column3", "table1", "column3"))));
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory
+                            .innerJoin(databaseName, "table2", databaseName, "table1",
+                                    PredicateFactory
+                                            .equals("table2", "column3", "table1",
+                                                    "column3"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column1",
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column1",
                     "column2", "column3", "column4");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 12, 32, "test3", "t43");
-            checkRowExists(resultSet, 23, "test2", 11, 31, "test2", null);
-            checkRowExists(resultSet, 23, "test2", 13, 33, "test2", "t653");
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", 12, 32, "test3", "t43");
+            checkRowExists(queryResult, 23, "test2", 11, 31, "test2", null);
+            checkRowExists(queryResult, 23, "test2", 13, 33, "test2", "t653");
 
 
             // 2.
-            resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
-                            PredicateFactory
-                                    .equals("table2", "column3", "table1", "column3")),
+            queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory
+                            .innerJoin(databaseName, "table2", databaseName, "table1",
+                                    PredicateFactory
+                                            .equals("table2", "column3", "table1",
+                                                    "column3")),
                     Arrays.asList(
                             ColumnExprFactory.columnRef("column5"),
                             ColumnExprFactory.columnRef("column1"),
@@ -394,54 +410,59 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                     ,
                     PredicateFactory.equals("column4", ColumnExprFactory.value("t653"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column1", "column2",
+            checkHeaders(queryResult.getHeaders(), "column5", "column1", "column2",
                     "column4");
-            assertEquals(1, resultSet.getRows().size());
-            checkRowExists(resultSet, 23, 13, 33, "t653");
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 23, 13, 33, "t653");
 
             // 3.
-            resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
-                            PredicateFactory.isNotNull("column2").and(
-                                    PredicateFactory.equals("column5",
-                                            ColumnExprFactory.diff("column2",
-                                                    ColumnExprFactory.value(9))
-                                    )))));
-
-            printResultSet(resultSet);
-
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column1",
-                    "column2", "column3", "column4");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 11, 31, "test2", null);
-            checkRowExists(resultSet, 23, "test2", 12, 32, "test3", "t43");
-            checkRowExists(resultSet, 25, "test4", 15, 34, "test1", null);
-
-            // 4.
-            resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.innerJoin(
-                            TableRefFactory.innerJoin("DB1", "table2", "DB1", "table1",
+            queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory
+                            .innerJoin(databaseName, "table2", databaseName, "table1",
                                     PredicateFactory.isNotNull("column2").and(
                                             PredicateFactory.equals("column5",
                                                     ColumnExprFactory.diff("column2",
                                                             ColumnExprFactory.value(9))
-                                            ))),
-                            "DB1", "table3",
+                                            )))));
+
+            printResultSet(queryResult);
+
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column1",
+                    "column2", "column3", "column4");
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", 11, 31, "test2", null);
+            checkRowExists(queryResult, 23, "test2", 12, 32, "test3", "t43");
+            checkRowExists(queryResult, 25, "test4", 15, 34, "test1", null);
+
+            // 4.
+            queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.innerJoin(
+                            TableRefFactory
+                                    .innerJoin(databaseName, "table2", databaseName,
+                                            "table1",
+                                            PredicateFactory.isNotNull("column2").and(
+                                                    PredicateFactory.equals("column5",
+                                                            ColumnExprFactory
+                                                                    .diff("column2",
+                                                                            ColumnExprFactory
+                                                                                    .value(9))
+                                                    ))),
+                            databaseName, "table3",
                             PredicateFactory
                                     .equals("table2", "column3", "table3", "column11").or(
                                     PredicateFactory.equals("column4", "column12")
                             )
                     )));
 
-            printResultSet(resultSet);
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column1",
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column1",
                     "column2", "column3", "column4", "column11", "column12", "column13");
-            assertEquals(2, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 11, 31, "test2", null, "test3", "cc",
+            assertEquals(2, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", 11, 31, "test2", null, "test3", "cc",
                     41);
-            checkRowExists(resultSet, 23, "test2", 12, 32, "test3", "t43", "ccc", "t43",
+            checkRowExists(queryResult, 23, "test2", 12, 32, "test3", "t43", "ccc", "t43",
                     38);
 
         } catch (SqlException se) {
@@ -461,19 +482,21 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     @Test
     public void testLeftOuterJoin() {
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.leftOuterJoin("DB1", "table2", "DB1", "table3",
-                            PredicateFactory
-                                    .equals("table2", "column3", "table3", "column11"))));
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory
+                            .leftOuterJoin(databaseName, "table2", databaseName, "table3",
+                                    PredicateFactory
+                                            .equals("table2", "column3", "table3",
+                                                    "column11"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column11",
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column11",
                     "column12", "column13");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", "test3", "cc", 41);
-            checkRowExists(resultSet, 23, "test2", null, null, null);
-            checkRowExists(resultSet, 25, "test4", null, null, null);
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", "test3", "cc", 41);
+            checkRowExists(queryResult, 23, "test2", null, null, null);
+            checkRowExists(queryResult, 25, "test4", null, null, null);
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();
@@ -490,19 +513,20 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     @Test
     public void testRightOuterJoin() {
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.rightOuterJoin("DB1", "table1", "DB1", "table3",
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.rightOuterJoin(databaseName, "table1", databaseName,
+                            "table3",
                             PredicateFactory
                                     .equals("table1", "column4", "table3", "column12"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column1", "column2", "column3",
+            checkHeaders(queryResult.getHeaders(), "column1", "column2", "column3",
                     "column4",
                     "column11", "column12", "column13");
-            assertEquals(2, resultSet.getRows().size());
-            checkRowExists(resultSet, null, null, null, null, "test3", "cc", 41);
-            checkRowExists(resultSet, 12, 32, "test3", "t43", "ccc", "t43", 38);
+            assertEquals(2, queryResult.getRows().size());
+            checkRowExists(queryResult, null, null, null, null, "test3", "cc", 41);
+            checkRowExists(queryResult, 12, 32, "test3", "t43", "ccc", "t43", 38);
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();
@@ -522,10 +546,10 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     public void testSelectFromSubquery() {
 
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.select(
-                    Arrays.asList(TableRefFactory.dbTable("DB1", "table2"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    Arrays.asList(TableRefFactory.dbTable(databaseName, "table2"),
                             TableRefFactory.tableFromSelect(QueryFactory.select(
-                                    TableRefFactory.dbTable("DB1", "table1"),
+                                    TableRefFactory.dbTable(databaseName, "table1"),
                                     Arrays.asList(
                                             ColumnExprFactory.columnRef("column2"),
                                             ColumnExprFactory.columnRef("column3")
@@ -535,14 +559,14 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             .equals(ColumnExprFactory.columnRef("table2", "column3"),
                                     ColumnExprFactory.columnRef("t1", "column3"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
-            checkHeaders(resultSet.getHeaders(), "column5", "column3", "column2",
+            checkHeaders(queryResult.getHeaders(), "column5", "column3", "column2",
                     "column3");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, 22, "test3", 32, "test3");
-            checkRowExists(resultSet, 23, "test2", 31, "test2");
-            checkRowExists(resultSet, 23, "test2", 33, "test2");
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, 22, "test3", 32, "test3");
+            checkRowExists(queryResult, 23, "test2", 31, "test2");
+            checkRowExists(queryResult, 23, "test2", 33, "test2");
 
 
         } catch (SqlException se) {
@@ -566,8 +590,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
 
 
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.selectGrouped(
-                    TableRefFactory.dbTable("DB1", "table1"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.selectGrouped(
+                    TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.sumWithAlias(ColumnExprFactory.countAll(),
                                     ColumnExprFactory.value(1), "COUNT ALL + 1"),
@@ -575,13 +599,13 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                     Collections
                             .singletonList(ColumnExprFactory.columnRef("column3"))));
 
-            printResultSet(resultSet);
-            checkHeaders(resultSet.getHeaders(), "column3", "COUNT ALL + 1",
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "column3", "COUNT ALL + 1",
                     "COUNT column2");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, "test3", 2, 1);
-            checkRowExists(resultSet, "test1", 4, 2);
-            checkRowExists(resultSet, "test2", 3, 2);
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, "test3", 2, 1);
+            checkRowExists(queryResult, "test1", 4, 2);
+            checkRowExists(queryResult, "test2", 3, 2);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -602,8 +626,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     @Test
     public void testGroupBySum() {
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.selectGrouped(
-                    TableRefFactory.dbTable("DB1", "table1"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.selectGrouped(
+                    TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.groupSum("column1"),
                             ColumnExprFactory.groupSumWithAlias("column2", "S2")),
@@ -611,7 +635,7 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             .and(PredicateFactory.isNotNull("column2")),
                     Collections.singletonList(ColumnExprFactory.columnRef("column3"))));
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
 
 
         } catch (SqlException se) {
@@ -633,8 +657,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     @Test
     public void testGroupBySumMaxMin() {
         try {
-            ResultSet resultSet = sqlServer.getQueryResult(QueryFactory.selectGrouped(
-                    TableRefFactory.dbTable("DB1", "table1"),
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.selectGrouped(
+                    TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.groupSumWithAlias("column1", "SUM1"),
                             ColumnExprFactory.maxWithAlias("column1", "MAX1"),
@@ -647,15 +671,15 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             .and(PredicateFactory.isNotNull("column2")),
                     Collections.singletonList(ColumnExprFactory.columnRef("column3"))));
 
-            printResultSet(resultSet);
-            checkHeaders(resultSet.getHeaders(), "column3", "SUM1", "MAX1", "MIN1",
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "column3", "SUM1", "MAX1", "MIN1",
                     "SUM2", "MAX2", "MIN2");
-            assertEquals(3, resultSet.getRows().size());
-            checkRowExists(resultSet, "test3", 12, 12, 12, 32, 32, 32);
-            checkRowExists(resultSet, "test1", 25, 15, 10, 64, 34, 30);
-            checkRowExists(resultSet, "test2", 24, 13, 11, 64, 33, 31);
+            assertEquals(3, queryResult.getRows().size());
+            checkRowExists(queryResult, "test3", 12, 12, 12, 32, 32, 32);
+            checkRowExists(queryResult, "test1", 25, 15, 10, 64, 34, 30);
+            checkRowExists(queryResult, "test2", 24, 13, 11, 64, 33, 31);
 
-            printResultSet(resultSet);
+            printResultSet(queryResult);
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();

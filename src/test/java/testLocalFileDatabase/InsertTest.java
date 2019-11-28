@@ -7,7 +7,7 @@ import clientImpl.tables.TableRefFactory;
 import org.junit.Test;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.ColumnConstraintType;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -71,7 +71,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testNotNullConstraint() {
         System.out.println("testNotNullConstraint:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     ColumnExprFactory.values(21, 43, null)));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
@@ -102,11 +102,11 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testInsertColumns() {
         System.out.println("testInsertColumns:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column2", "column3", "column1"),
                     ColumnExprFactory.values(35, "test15", 17)));
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            checkRowExists(resultSet, 17, 35, "test15", null);
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            checkRowExists(queryResult, 17, 35, "test15", null);
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();
@@ -122,7 +122,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testInsertWrongType() {
         System.out.println("testInsertWrongType:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     ColumnExprFactory.values(17, 35, 39, null)));
         } catch (WrongValueTypeException wvte) {
             System.out.println(wvte.getMessage());
@@ -148,7 +148,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testInsertWrongNumberOfValues() {
         System.out.println("testInsertWrongNumberOfValues:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column2", "column3", "column1"),
                     ColumnExprFactory.values("test15", 17)));
 
@@ -185,12 +185,12 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testInsertDefaultValue() {
         System.out.println("testInsertDefaultValue:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column3", "column1"),
                     ColumnExprFactory.values("test15", 17)));
 
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            checkRowExists(resultSet, 17, 15, "test15", null);
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            checkRowExists(queryResult, 17, 15, "test15", null);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -207,7 +207,7 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void insertTooLongVarchar() {
         System.out.println("insertTooLongVarchar:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column3", "column1", "column4"),
                     ColumnExprFactory.values("test15", 17, "t12345")));
         } catch (ConstraintViolationException ce) {
@@ -238,25 +238,25 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
     public void testInsertFromSelect() {
         System.out.println("testInsertFromSelect:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table2",
-                    QueryFactory.select(TableRefFactory.dbTable("DB1", "table1"),
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table2",
+                    QueryFactory.select(TableRefFactory.dbTable(databaseName, "table1"),
                             Arrays.asList(ColumnExprFactory.columnRef("column2"),
                                     ColumnExprFactory.columnRef("column3")),
                             PredicateFactory.isNotNull("column4"))));
 
-            ResultSet resultSet = this.getTableData("DB1", "table2");
-            assertEquals(2, resultSet.getHeaders().size());
-            assertEquals(6, resultSet.getRows().size());
+            QueryResult queryResult = this.getTableData(databaseName, "table2");
+            assertEquals(2, queryResult.getHeaders().size());
+            assertEquals(6, queryResult.getRows().size());
 
             // old values
-            checkRowExists(resultSet, 22, "test3");
-            checkRowExists(resultSet, 23, "test2");
-            checkRowExists(resultSet, 25, "test4");
+            checkRowExists(queryResult, 22, "test3");
+            checkRowExists(queryResult, 23, "test2");
+            checkRowExists(queryResult, 25, "test4");
 
             // inserted values
-            checkRowExists(resultSet, 30, "test1");
-            checkRowExists(resultSet, 32, "test3");
-            checkRowExists(resultSet, 33, "test2");
+            checkRowExists(queryResult, 30, "test1");
+            checkRowExists(queryResult, 32, "test3");
+            checkRowExists(queryResult, 33, "test2");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

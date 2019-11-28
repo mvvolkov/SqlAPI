@@ -4,11 +4,14 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
+import junit.framework.TestCase;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
+import mySqlJdbcServer.MySqlJdbcServer;
+import org.junit.After;
 import org.junit.Before;
 import sqlapi.exceptions.SqlException;
-import sqlapi.queryResult.ResultRow;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResultRow;
+import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
@@ -23,17 +26,18 @@ public abstract class AbstractLocalFileDatabaseTest {
 
     SqlServer sqlServer;
 
-    //    String databaseName = "logiweb";
-    String databaseName = "DB1";
+    String databaseName = "logiweb";
+//    String databaseName = "DB1";
+
 
     @Before
     public void setUp() {
         System.out.println("===== SET UP =====");
         sqlServer = LocalFileDatabaseServerFactory.getServer();
-//        sqlServer = new MySqlJdbcServer();
+        sqlServer = new MySqlJdbcServer();
         try {
             // Create a database
-            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
+//            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
 
             // Create a table
             sqlServer.executeQuery(QueryFactory
@@ -82,13 +86,16 @@ public abstract class AbstractLocalFileDatabaseTest {
             // Fill table2
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", ColumnExprFactory.values(22, "test3")));
+                            .insert(databaseName, "table2",
+                                    ColumnExprFactory.values(22, "test3")));
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", ColumnExprFactory.values(23, "test2")));
+                            .insert(databaseName, "table2",
+                                    ColumnExprFactory.values(23, "test2")));
             sqlServer.executeQuery(
                     QueryFactory
-                            .insert(databaseName, "table2", ColumnExprFactory.values(25, "test4")));
+                            .insert(databaseName, "table2",
+                                    ColumnExprFactory.values(25, "test4")));
 
             System.out.println("===== END OF SET UP =====");
 
@@ -98,22 +105,33 @@ public abstract class AbstractLocalFileDatabaseTest {
         }
     }
 
-    ResultSet getTableData(String dbName, String tableName)
-            throws SqlException {
-        ResultSet resultSet = sqlServer.getQueryResult(
-                QueryFactory.select(TableRefFactory.dbTable(dbName, tableName)));
-        printResultSet(resultSet);
-        return resultSet;
+    @After
+    public void tearDown() {
+        try {
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table1"));
+            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table2"));
+        } catch (SqlException e) {
+            e.printStackTrace();
+        }
     }
 
-    static void printResultSet(ResultSet resultSet) {
+
+    QueryResult getTableData(String dbName, String tableName)
+            throws SqlException {
+        QueryResult queryResult = sqlServer.getQueryResult(
+                QueryFactory.select(TableRefFactory.dbTable(dbName, tableName)));
+        printResultSet(queryResult);
+        return queryResult;
+    }
+
+    static void printResultSet(QueryResult queryResult) {
 
         StringBuilder sb = new StringBuilder();
 
-        String columnsHeaders = String.join(", ", resultSet.getHeaders());
+        String columnsHeaders = String.join(", ", queryResult.getHeaders());
 
         sb.append(columnsHeaders);
-        for (ResultRow row : resultSet.getRows()) {
+        for (QueryResultRow row : queryResult.getRows()) {
             String rowString =
                     row.getValues().stream().map(String::valueOf)
                             .collect(Collectors.joining(
@@ -130,12 +148,12 @@ public abstract class AbstractLocalFileDatabaseTest {
         }
     }
 
-    static void checkRowExists(ResultSet resultSet, Object... values) {
-        assertEquals(resultSet.getHeaders().size(), values.length);
+    static void checkRowExists(QueryResult queryResult, Object... values) {
+        assertEquals(queryResult.getHeaders().size(), values.length);
 
-        for (ResultRow row : resultSet.getRows()) {
+        for (QueryResultRow row : queryResult.getRows()) {
             boolean rowMatch = true;
-            for (int i = 0; i < resultSet.getHeaders().size(); i++) {
+            for (int i = 0; i < queryResult.getHeaders().size(); i++) {
                 Object value = values[i];
                 Object resultValue = row.getValue(i);
 
@@ -159,6 +177,5 @@ public abstract class AbstractLocalFileDatabaseTest {
         fail("Row not found: " +
                 Arrays.stream(values).map(String::valueOf).collect(
                         Collectors.joining(", ", "{", "}")));
-
     }
 }

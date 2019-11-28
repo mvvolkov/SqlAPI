@@ -2,7 +2,7 @@ package localFileDatabase.server;
 
 import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import localFileDatabase.client.api.SaveDatabaseToFileQuery;
-import mySqlJdbcServer.QueryStringUtil;
+import clientImpl.stringUtil.QueryStringUtil;
 import org.jetbrains.annotations.NotNull;
 import localFileDatabase.server.intermediateResult.*;
 import localFileDatabase.server.persistent.PersistentColumnMetadata;
@@ -14,7 +14,7 @@ import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.misc.SelectedItem;
 import sqlapi.queries.*;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 import sqlapi.tables.*;
 
@@ -61,22 +61,24 @@ final class SqlServerImpl implements SqlServer {
             }
             return;
         }
-
-
         if (query instanceof CreateTableQuery) {
             this.createTable((CreateTableQuery) query);
+            return;
+        }
+        if (query instanceof DropTableQuery) {
+            this.dropTable((DropTableQuery) query);
             return;
         }
         if (query instanceof TableActionQuery) {
             if (query instanceof InsertFromSelectQuery) {
                 InsertFromSelectQuery insertFromSelectQuery =
                         (InsertFromSelectQuery) query;
-                ResultSet resultSet = DataUtil.createResultSet(
+                QueryResult queryResult = DataUtil.createResultSet(
                         this.getInternalQueryResult(
                                 (insertFromSelectQuery.getSelectQuery())));
                 this.getDatabase(insertFromSelectQuery.getDatabaseName())
                         .insert(insertFromSelectQuery,
-                                resultSet);
+                                queryResult);
                 return;
             }
             this.executeTableQuery((TableActionQuery) query);
@@ -86,7 +88,7 @@ final class SqlServerImpl implements SqlServer {
     }
 
     @Override
-    public @NotNull ResultSet getQueryResult(@NotNull SelectQuery selectQuery)
+    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
         System.out.println(selectQuery);
         try {
@@ -109,7 +111,8 @@ final class SqlServerImpl implements SqlServer {
         return this.getDatabase(databaseName).getTables();
     }
 
-    private void createDatabase(CreateDatabaseQuery query) throws DatabaseAlreadyExistsException {
+    private void createDatabase(CreateDatabaseQuery query)
+            throws DatabaseAlreadyExistsException {
         String databaseName = query.getDatabaseName();
         PersistentDatabase database = this.getDatabaseOrNull(databaseName);
         if (database != null) {
@@ -167,6 +170,11 @@ final class SqlServerImpl implements SqlServer {
             WrongValueTypeException {
         this.getDatabase(query.getDatabaseName())
                 .createTable(query.getTableMetadata());
+    }
+
+    private void dropTable(DropTableQuery query)
+            throws NoSuchDatabaseException, NoSuchTableException {
+        this.getDatabase(query.getDatabaseName()).dropTable(query.getTableName());
     }
 
     private PersistentDatabase getDatabase(String name) throws NoSuchDatabaseException {
@@ -241,7 +249,8 @@ final class SqlServerImpl implements SqlServer {
         List<ColumnExpression> columnExpressions = new ArrayList<>();
         for (SelectedItem selectedItem : selectedItems) {
             if (selectedItem instanceof DatabaseTableReference) {
-                String databaseName = ((DatabaseTableReference) selectedItem).getDatabaseName();
+                String databaseName =
+                        ((DatabaseTableReference) selectedItem).getDatabaseName();
                 String tableName =
                         ((DatabaseTableReference) selectedItem).getTableName();
                 List<PersistentColumnMetadata> columns =
@@ -250,42 +259,54 @@ final class SqlServerImpl implements SqlServer {
                     columnExpressions.add(new ColumnRef() {
 
                         @Override
-                        public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression) {
+                        public @NotNull ColumnExpression add(
+                                @NotNull ColumnExpression otherExpression) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression add(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                        public @NotNull ColumnExpression add(
+                                @NotNull ColumnExpression otherExpression,
+                                @NotNull String alias) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression) {
+                        public @NotNull ColumnExpression subtract(
+                                @NotNull ColumnExpression otherExpression) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression subtract(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                        public @NotNull ColumnExpression subtract(
+                                @NotNull ColumnExpression otherExpression,
+                                @NotNull String alias) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression) {
+                        public @NotNull ColumnExpression multiply(
+                                @NotNull ColumnExpression otherExpression) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression multiply(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                        public @NotNull ColumnExpression multiply(
+                                @NotNull ColumnExpression otherExpression,
+                                @NotNull String alias) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression) {
+                        public @NotNull ColumnExpression divide(
+                                @NotNull ColumnExpression otherExpression) {
                             throw new UnsupportedOperationException();
                         }
 
                         @Override
-                        public @NotNull ColumnExpression divide(@NotNull ColumnExpression otherExpression, @NotNull String alias) {
+                        public @NotNull ColumnExpression divide(
+                                @NotNull ColumnExpression otherExpression,
+                                @NotNull String alias) {
                             throw new UnsupportedOperationException();
                         }
 

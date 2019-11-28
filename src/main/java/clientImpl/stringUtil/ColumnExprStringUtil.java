@@ -1,4 +1,4 @@
-package mySqlJdbcServer;
+package clientImpl.stringUtil;
 
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.UnsupportedAggregateFunctionTypeException;

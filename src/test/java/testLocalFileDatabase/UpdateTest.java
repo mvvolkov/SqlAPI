@@ -6,7 +6,7 @@ import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.QueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.queryResult.ResultSet;
+import sqlapi.queryResult.QueryResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,19 +54,19 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testUpdateOneColumnNoPredicate:");
         try {
 
-            sqlServer.executeQuery(QueryFactory.update("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
                             .assign("column4", ColumnExprFactory.value("updtd")))));
 
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getHeaders().size());
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 10, 30, "test1", "updtd");
-            checkRowExists(resultSet, 11, 31, "test2", "updtd");
-            checkRowExists(resultSet, 12, 32, "test3", "updtd");
-            checkRowExists(resultSet, 13, 33, "test2", "updtd");
-            checkRowExists(resultSet, 15, 34, "test1", "updtd");
-            checkRowExists(resultSet, 16, null, "test1", "updtd");
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            assertEquals(4, queryResult.getHeaders().size());
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 10, 30, "test1", "updtd");
+            checkRowExists(queryResult, 11, 31, "test2", "updtd");
+            checkRowExists(queryResult, 12, 32, "test3", "updtd");
+            checkRowExists(queryResult, 13, 33, "test2", "updtd");
+            checkRowExists(queryResult, 15, 34, "test1", "updtd");
+            checkRowExists(queryResult, 16, null, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -91,21 +91,21 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testUpdateTwoColumnsNoPredicate:");
         try {
 
-            sqlServer.executeQuery(QueryFactory.update("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
                                     .assign("column4", ColumnExprFactory.value("updtd")),
                             AssignmentOperationFactory
                                     .assign("column2", ColumnExprFactory.value(37)))));
 
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getHeaders().size());
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 10, 37, "test1", "updtd");
-            checkRowExists(resultSet, 11, 37, "test2", "updtd");
-            checkRowExists(resultSet, 12, 37, "test3", "updtd");
-            checkRowExists(resultSet, 13, 37, "test2", "updtd");
-            checkRowExists(resultSet, 15, 37, "test1", "updtd");
-            checkRowExists(resultSet, 16, 37, "test1", "updtd");
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            assertEquals(4, queryResult.getHeaders().size());
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 10, 37, "test1", "updtd");
+            checkRowExists(queryResult, 11, 37, "test2", "updtd");
+            checkRowExists(queryResult, 12, 37, "test3", "updtd");
+            checkRowExists(queryResult, 13, 37, "test2", "updtd");
+            checkRowExists(queryResult, 15, 37, "test1", "updtd");
+            checkRowExists(queryResult, 16, 37, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -130,22 +130,22 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testUpdateTwoColumnsPredicateIsNull:");
         try {
 
-            sqlServer.executeQuery(QueryFactory.update("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
                                     .assign("column4", ColumnExprFactory.value("updtd")),
                             AssignmentOperationFactory
                                     .assign("column2", ColumnExprFactory.value(37))),
                     PredicateFactory.isNull("column4")));
 
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getHeaders().size());
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 10, 30, "test1", "t21");
-            checkRowExists(resultSet, 11, 37, "test2", "updtd");
-            checkRowExists(resultSet, 12, 32, "test3", "t43");
-            checkRowExists(resultSet, 13, 33, "test2", "t653");
-            checkRowExists(resultSet, 15, 37, "test1", "updtd");
-            checkRowExists(resultSet, 16, 37, "test1", "updtd");
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            assertEquals(4, queryResult.getHeaders().size());
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 10, 30, "test1", "t21");
+            checkRowExists(queryResult, 11, 37, "test2", "updtd");
+            checkRowExists(queryResult, 12, 32, "test3", "t43");
+            checkRowExists(queryResult, 13, 33, "test2", "t653");
+            checkRowExists(queryResult, 15, 37, "test1", "updtd");
+            checkRowExists(queryResult, 16, 37, "test1", "updtd");
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -171,21 +171,23 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testUpdateOneColumnNoPredicate:");
         try {
 
-            sqlServer.executeQuery(QueryFactory.update("DB1", "table1",
+            sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
-                            .assign("column1", ColumnExprFactory.sum("column1", "column2").add(ColumnExprFactory.value(11)))),
-                    PredicateFactory.isNotNull("column2").and(PredicateFactory.isNotNull("column1")
-                    )));
+                            .assign("column1", ColumnExprFactory.sum("column1", "column2")
+                                    .add(ColumnExprFactory.value(11)))),
+                    PredicateFactory.isNotNull("column2")
+                            .and(PredicateFactory.isNotNull("column1")
+                            )));
 
-            ResultSet resultSet = this.getTableData("DB1", "table1");
-            assertEquals(4, resultSet.getHeaders().size());
-            assertEquals(6, resultSet.getRows().size());
-            checkRowExists(resultSet, 51, 30, "test1", "t21");
-            checkRowExists(resultSet, 53, 31, "test2", null);
-            checkRowExists(resultSet, 55, 32, "test3", "t43");
-            checkRowExists(resultSet, 57, 33, "test2", "t653");
-            checkRowExists(resultSet, 60, 34, "test1", null);
-            checkRowExists(resultSet, 16, null, "test1", null);
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
+            assertEquals(4, queryResult.getHeaders().size());
+            assertEquals(6, queryResult.getRows().size());
+            checkRowExists(queryResult, 51, 30, "test1", "t21");
+            checkRowExists(queryResult, 53, 31, "test2", null);
+            checkRowExists(queryResult, 55, 32, "test3", "t43");
+            checkRowExists(queryResult, 57, 33, "test2", "t653");
+            checkRowExists(queryResult, 60, 34, "test1", null);
+            checkRowExists(queryResult, 16, null, "test1", null);
 
         } catch (SqlException se) {
             System.out.println(se.getMessage());

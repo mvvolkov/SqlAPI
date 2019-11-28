@@ -4,9 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface ResultSet {
+public interface QueryResult {
 
     @NotNull List<String> getHeaders();
 
-    @NotNull List<ResultRow> getRows();
+    @NotNull List<QueryResultRow> getRows();
 }

@@ -1,12 +1,12 @@
 package localFileDatabase.server.intermediateResult;
 
-import localFileDatabase.server.queryResult.ResultRowImpl;
-import localFileDatabase.server.queryResult.ResultSetImpl;
+import localFileDatabase.server.queryResult.QueryResultRowImpl;
+import localFileDatabase.server.queryResult.QueryResultImpl;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.*;
 import sqlapi.predicates.Predicate;
-import sqlapi.queryResult.ResultRow;
+import sqlapi.queryResult.QueryResultRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,9 +98,9 @@ public class DataUtil {
         return new DataSet(columns, rows);
     }
 
-    public static ResultSetImpl createResultSet(DataSet dataSet) {
+    public static QueryResultImpl createResultSet(DataSet dataSet) {
 
-        List<ResultRow> resultRows = new ArrayList<>();
+        List<QueryResultRow> queryResultRows = new ArrayList<>();
         List<String> resultColumns = dataSet.getColumns().stream()
                 .map(DataHeader::getColumnName).collect(Collectors.toList());
 
@@ -109,9 +109,9 @@ public class DataUtil {
             for (DataHeader cr : dataSet.getColumns()) {
                 values.add(row.getCells().get(cr));
             }
-            resultRows.add(new ResultRowImpl(values));
+            queryResultRows.add(new QueryResultRowImpl(values));
         }
-        return new ResultSetImpl(resultRows, resultColumns);
+        return new QueryResultImpl(queryResultRows, resultColumns);
     }
 
     public static List<DataHeader> getSelectedColumns(

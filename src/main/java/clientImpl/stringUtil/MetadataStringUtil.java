@@ -1,4 +1,4 @@
-package mySqlJdbcServer;
+package clientImpl.stringUtil;
 
 import sqlapi.exceptions.UnsupportedColumnConstraintTypeException;
 import sqlapi.metadata.ColumnConstraint;

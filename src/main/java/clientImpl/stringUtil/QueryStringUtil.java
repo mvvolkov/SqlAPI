@@ -1,4 +1,4 @@
-package mySqlJdbcServer;
+package clientImpl.stringUtil;
 
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.exceptions.*;
