@@ -1,10 +1,11 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.QueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.server.SqlServer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -31,7 +32,11 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class DeleteTest extends AbstractLocalFileDatabaseTest {
+public class DeleteTest extends AbstractTestRunner {
+
+    public DeleteTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     /**
      * DELETE FROM DB1.table1;

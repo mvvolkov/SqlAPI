@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-final class SqlServerImpl implements SqlServer {
+public final class SqlServerImpl implements SqlServer {
 
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
@@ -109,6 +109,14 @@ final class SqlServerImpl implements SqlServer {
     public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
             throws NoSuchDatabaseException {
         return this.getDatabase(databaseName).getTables();
+    }
+
+    @Override public void connect() throws SqlException {
+
+    }
+
+    @Override public void close() throws SqlException {
+
     }
 
     private void createDatabase(CreateDatabaseQuery query)

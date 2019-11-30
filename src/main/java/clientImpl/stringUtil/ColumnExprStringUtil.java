@@ -12,7 +12,8 @@ public class ColumnExprStringUtil {
 
     public static String getColumnExpressionString(ColumnExpression ce)
             throws UnsupportedBinaryExprTypeException,
-            UnsupportedAggregateFunctionTypeException, UnsupportedColumnExprTypeException {
+            UnsupportedAggregateFunctionTypeException,
+            UnsupportedColumnExprTypeException {
 
         if (ce instanceof ColumnRef) {
             return getColumnRefString((ColumnRef) ce);
@@ -43,14 +44,20 @@ public class ColumnExprStringUtil {
     }
 
     public static String getColumnValueString(ColumnValue cv) {
+        StringBuilder sb = new StringBuilder();
         Object value = cv.getValue();
         if (value instanceof String) {
-            return '\'' + (String) value + '\'';
+            sb.append('\'').append(value).append('\'');
+        } else if (value == null) {
+            sb.append("NULL");
+        } else {
+            sb.append(value.toString());
         }
-        if (value == null) {
-            return "NULL";
+        if (!cv.getAlias().isEmpty()) {
+            sb.append(" AS ");
+            sb.append(cv.getAlias());
         }
-        return String.valueOf(value);
+        return sb.toString();
     }
 
     public static String getBinaryColumnExpressionString(BinaryColumnExpression bce)
@@ -88,7 +95,8 @@ public class ColumnExprStringUtil {
         throw new UnsupportedBinaryExprTypeException(bce);
     }
 
-    public static String getAggregateFunctionString(AggregateFunction af) throws UnsupportedAggregateFunctionTypeException {
+    public static String getAggregateFunctionString(AggregateFunction af)
+            throws UnsupportedAggregateFunctionTypeException {
         StringBuilder sb = new StringBuilder();
         sb.append(getAggregateFunctionName(af));
         sb.append("(");
@@ -105,7 +113,8 @@ public class ColumnExprStringUtil {
         return sb.toString();
     }
 
-    private static String getAggregateFunctionName(AggregateFunction af) throws UnsupportedAggregateFunctionTypeException {
+    private static String getAggregateFunctionName(AggregateFunction af)
+            throws UnsupportedAggregateFunctionTypeException {
         if (af instanceof CountAggregateFunction) {
             return "COUNT";
         }

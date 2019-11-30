@@ -1,13 +1,15 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
+import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
 import org.junit.Test;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.ColumnConstraintType;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -37,8 +39,12 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class InsertTest extends AbstractLocalFileDatabaseTest {
+public class InsertTest extends AbstractTestRunner {
 
+
+    public InsertTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     /**
      * INSERT INTO DB1.table1 VALUES (10, 42, 'test');
@@ -50,11 +56,14 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testPrimaryKeyConstraint:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(10, 42, "test")));
+                    ColumnExprFactory.values(10, 42, "test", null)));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column1", ce.getColumnName());
             assertEquals(ColumnConstraintType.PRIMARY_KEY, ce.getConstraintType());
+            return;
+        } catch (WrappedException we) {
+            assertEquals("Duplicate entry '10' for key 'PRIMARY'", we.getMessage());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -72,11 +81,14 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testNotNullConstraint:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(21, 43, null)));
+                    ColumnExprFactory.values(21, 43, null, "")));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column3", ce.getColumnName());
             assertEquals(ColumnConstraintType.NOT_NULL, ce.getConstraintType());
+            return;
+        } catch (WrappedException we) {
+            assertEquals("Column 'column3' cannot be null", we.getMessage());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -123,15 +135,19 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
         System.out.println("testInsertWrongType:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(17, 35, 39, null)));
+                    ColumnExprFactory.values(17, "t35", "39", null)));
         } catch (WrongValueTypeException wvte) {
             System.out.println(wvte.getMessage());
             assertEquals("table1", wvte.getTableName());
-            assertEquals("column3", wvte.getColumnName());
-            assertEquals("String",
+            assertEquals("column2", wvte.getColumnName());
+            assertEquals("Integer",
                     wvte.getAllowedTypes().stream().map(Class::getSimpleName)
                             .collect(Collectors.joining(", ")));
-            assertEquals("Integer", wvte.getActualType().getSimpleName());
+            assertEquals("String", wvte.getActualType().getSimpleName());
+            return;
+        } catch (WrappedException we) {
+            assertEquals("Incorrect integer value: 't35' for column 'column2' at row 1"
+                    , we.getMessage());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -157,6 +173,10 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
             assertEquals(
                     "Invalid insert query. Number of values differs from number of columns",
                     iqe.getMessage());
+            return;
+        } catch (WrappedException ex) {
+            assertEquals("Column count doesn't match value count at row 1",
+                    ex.getMessage());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -215,6 +235,13 @@ public class InsertTest extends AbstractLocalFileDatabaseTest {
             assertEquals("column4", ce.getColumnName());
             assertEquals(ColumnConstraintType.MAX_SIZE, ce.getConstraintType());
             return;
+        } catch (WrappedException ex) {
+            if (ex.getException() instanceof MysqlDataTruncation) {
+                // Unfortunately, MysqlDataTruncation does not have a method retrieving
+                // column name. We will not parse the error message here to get the
+                // column name
+                return;
+            }
         } catch (SqlException se) {
             System.out.println(se.getMessage());
         }

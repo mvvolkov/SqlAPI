@@ -1,5 +1,6 @@
 package clientImpl.stringUtil;
 
+import clientImpl.columnExpr.ColumnExprFactory;
 import sqlapi.exceptions.UnsupportedColumnConstraintTypeException;
 import sqlapi.metadata.ColumnConstraint;
 import sqlapi.metadata.ColumnConstraintType;
@@ -13,7 +14,8 @@ public class MetadataStringUtil {
     private MetadataStringUtil() {
     }
 
-    public static String getTableMetadataString(TableMetadata tm) throws UnsupportedColumnConstraintTypeException {
+    public static String getTableMetadataString(TableMetadata tm)
+            throws UnsupportedColumnConstraintTypeException {
         StringJoiner joiner = new StringJoiner(", ");
         for (ColumnMetadata columnMetadata : tm.getColumnsMetadata()) {
             String columnMetadataString = getColumnMetadataString(columnMetadata);
@@ -23,7 +25,8 @@ public class MetadataStringUtil {
         return tm.getTableName() + "(" + columns + ")";
     }
 
-    private static String getColumnMetadataString(ColumnMetadata cm) throws UnsupportedColumnConstraintTypeException {
+    private static String getColumnMetadataString(ColumnMetadata cm)
+            throws UnsupportedColumnConstraintTypeException {
         StringBuilder sb = new StringBuilder();
         for (ColumnConstraint constraint : cm.getConstraints()) {
             if (constraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
@@ -36,7 +39,8 @@ public class MetadataStringUtil {
         return cm.getColumnName() + " " + cm.getSqlType() + sb.toString();
     }
 
-    private static String getColumnConstraintString(ColumnConstraint constraint) throws UnsupportedColumnConstraintTypeException {
+    private static String getColumnConstraintString(ColumnConstraint constraint)
+            throws UnsupportedColumnConstraintTypeException {
         switch (constraint.getConstraintType()) {
             case MAX_SIZE:
                 return "MAX SIZE (" + constraint.getParameters().get(0) + ")";
@@ -45,9 +49,12 @@ public class MetadataStringUtil {
             case PRIMARY_KEY:
                 return "PRIMARY KEY";
             case DEFAULT_VALUE:
-                return "DEFAULT " + constraint.getParameters().get(0);
+                return "DEFAULT " + ColumnExprStringUtil
+                        .getColumnValueString(ColumnExprFactory
+                                .valueWithAlias(constraint.getParameters().get(0)));
             default:
-                throw new UnsupportedColumnConstraintTypeException(constraint.getConstraintType());
+                throw new UnsupportedColumnConstraintTypeException(
+                        constraint.getConstraintType());
         }
     }
 }

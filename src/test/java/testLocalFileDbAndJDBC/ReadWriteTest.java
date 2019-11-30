@@ -1,4 +1,4 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import localFileDatabase.client.impl.FileQueryFactory;
@@ -40,7 +40,11 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
+public class ReadWriteTest extends AbstractTestRunner {
+
+    public ReadWriteTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     @Test
     public void testReadAndWrite() {
@@ -94,11 +98,14 @@ public class ReadWriteTest extends AbstractLocalFileDatabaseTest {
 
             // Fill table2
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(22, "test3")));
+                    QueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.values(22, "test3")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(23, "test2")));
+                    QueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.values(23, "test2")));
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2", ColumnExprFactory.values(25, "test4")));
+                    QueryFactory.insert("DB1", "table2",
+                            ColumnExprFactory.values(25, "test4")));
 
 
             // save databases

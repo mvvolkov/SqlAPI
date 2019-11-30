@@ -21,4 +21,8 @@ public interface SqlServer {
 
     @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
             throws SqlException;
+
+    public void connect() throws SqlException;
+
+    public void close() throws SqlException;
 }

@@ -1,4 +1,4 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
@@ -9,7 +9,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
+import sqlapi.exceptions.WrappedException;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +46,11 @@ import static org.junit.Assert.fail;
  * test3, cc, 41
  * ccc, t43, 38
  */
-public class SelectTest extends AbstractLocalFileDatabaseTest {
+public class SelectTest extends AbstractTestRunner {
+
+    public SelectTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     @Before
     @Override
@@ -82,12 +88,12 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
     @After
     @Override
     public void tearDown() {
-        super.tearDown();
         try {
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table3"));
         } catch (SqlException e) {
             e.printStackTrace();
         }
+        super.tearDown();
     }
 
     /**
@@ -184,10 +190,10 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
         try {
             QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
                     TableRefFactory.dbTable(databaseName, "table1"),
-                    Arrays.asList(ColumnExprFactory.value(15, "N15"),
+                    Arrays.asList(ColumnExprFactory.valueWithAlias(15, "N15"),
                             ColumnExprFactory.sumWithAlias("column2", "column1", "sum1"),
                             ColumnExprFactory.columnRef("column2")
-                                    .subtract(ColumnExprFactory.value(11))
+                                    .subtract(ColumnExprFactory.valueWithAlias(11))
                     ),
                     PredicateFactory.isNotNull("column2")
             ));
@@ -231,9 +237,11 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             ColumnExprFactory.columnRef("table1", "column3"),
                             ColumnExprFactory.columnRef("column1")
                     ),
-                    PredicateFactory.equals("column5", ColumnExprFactory.value(22))
+                    PredicateFactory
+                            .equals("column5", ColumnExprFactory.valueWithAlias(22))
                             .and(PredicateFactory
-                                    .equals("column1", ColumnExprFactory.value(13)))
+                                    .equals("column1",
+                                            ColumnExprFactory.valueWithAlias(13)))
             ));
 
             printResultSet(queryResult);
@@ -328,6 +336,9 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                     ),
                     PredicateFactory.equals("table2", "column3", "table1", "column3")
                             .and(PredicateFactory.isNotNull("column4"))));
+        } catch (WrappedException we) {
+            assertEquals("Column 'column3' in field list is ambiguous", we.getMessage());
+            return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             assertEquals("Ambiguous column name: column3", se.getMessage());
@@ -408,7 +419,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                             ColumnExprFactory.columnRef("column2"),
                             ColumnExprFactory.columnRef("column4"))
                     ,
-                    PredicateFactory.equals("column4", ColumnExprFactory.value("t653"))));
+                    PredicateFactory.equals("column4",
+                            ColumnExprFactory.valueWithAlias("t653"))));
 
             printResultSet(queryResult);
 
@@ -424,7 +436,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                                     PredicateFactory.isNotNull("column2").and(
                                             PredicateFactory.equals("column5",
                                                     ColumnExprFactory.diff("column2",
-                                                            ColumnExprFactory.value(9))
+                                                            ColumnExprFactory
+                                                                    .valueWithAlias(9))
                                             )))));
 
             printResultSet(queryResult);
@@ -447,7 +460,8 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                                                             ColumnExprFactory
                                                                     .diff("column2",
                                                                             ColumnExprFactory
-                                                                                    .value(9))
+                                                                                    .valueWithAlias(
+                                                                                            9))
                                                     ))),
                             databaseName, "table3",
                             PredicateFactory
@@ -594,14 +608,15 @@ public class SelectTest extends AbstractLocalFileDatabaseTest {
                     TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.sumWithAlias(ColumnExprFactory.countAll(),
-                                    ColumnExprFactory.value(1), "COUNT ALL + 1"),
-                            ColumnExprFactory.countWithAlias("column2", "COUNT column2")),
+                                    ColumnExprFactory.valueWithAlias(1),
+                                    "COUNT_ALL_plus_1"),
+                            ColumnExprFactory.countWithAlias("column2", "COUNT_column2")),
                     Collections
                             .singletonList(ColumnExprFactory.columnRef("column3"))));
 
             printResultSet(queryResult);
-            checkHeaders(queryResult.getHeaders(), "column3", "COUNT ALL + 1",
-                    "COUNT column2");
+            checkHeaders(queryResult.getHeaders(), "column3", "COUNT_ALL_plus_1",
+                    "COUNT_column2");
             assertEquals(3, queryResult.getRows().size());
             checkRowExists(queryResult, "test3", 2, 1);
             checkRowExists(queryResult, "test1", 4, 2);

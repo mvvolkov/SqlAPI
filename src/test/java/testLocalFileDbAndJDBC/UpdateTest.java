@@ -1,4 +1,4 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.assignment.AssignmentOperationFactory;
@@ -7,6 +7,7 @@ import clientImpl.queries.QueryFactory;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +36,11 @@ import static org.junit.Assert.fail;
  * 23, test2
  * 25, test4
  */
-public class UpdateTest extends AbstractLocalFileDatabaseTest {
+public class UpdateTest extends AbstractTestRunner {
+
+    public UpdateTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     /**
      * UPDATE DB1.table1 SET column4='updtd';
@@ -56,7 +61,8 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
 
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
-                            .assign("column4", ColumnExprFactory.value("updtd")))));
+                            .assign("column4",
+                                    ColumnExprFactory.valueWithAlias("updtd")))));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
@@ -93,9 +99,10 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
 
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
-                                    .assign("column4", ColumnExprFactory.value("updtd")),
+                                    .assign("column4", ColumnExprFactory.valueWithAlias("updtd")),
                             AssignmentOperationFactory
-                                    .assign("column2", ColumnExprFactory.value(37)))));
+                                    .assign("column2",
+                                            ColumnExprFactory.valueWithAlias(37)))));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
@@ -132,9 +139,10 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
 
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
-                                    .assign("column4", ColumnExprFactory.value("updtd")),
+                                    .assign("column4", ColumnExprFactory.valueWithAlias("updtd")),
                             AssignmentOperationFactory
-                                    .assign("column2", ColumnExprFactory.value(37))),
+                                    .assign("column2",
+                                            ColumnExprFactory.valueWithAlias(37))),
                     PredicateFactory.isNull("column4")));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
@@ -174,7 +182,7 @@ public class UpdateTest extends AbstractLocalFileDatabaseTest {
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
                             .assign("column1", ColumnExprFactory.sum("column1", "column2")
-                                    .add(ColumnExprFactory.value(11)))),
+                                    .add(ColumnExprFactory.valueWithAlias(11)))),
                     PredicateFactory.isNotNull("column2")
                             .and(PredicateFactory.isNotNull("column1")
                             )));

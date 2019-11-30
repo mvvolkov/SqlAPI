@@ -1,43 +1,69 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
-import junit.framework.TestCase;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
-import mySqlJdbcServer.MySqlJdbcServer;
+import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import sqlapi.exceptions.SqlException;
 import sqlapi.queryResult.QueryResultRow;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public abstract class AbstractLocalFileDatabaseTest {
+@RunWith(Parameterized.class)
+public abstract class AbstractTestRunner {
 
-    SqlServer sqlServer;
+    protected SqlServer sqlServer;
 
-    String databaseName = "logiweb";
-//    String databaseName = "DB1";
+    protected static String databaseName = "logiweb";
+
+    public AbstractTestRunner(SqlServer sqlServer) {
+        this.sqlServer = sqlServer;
+    }
+
+    @Parameterized.Parameters
+    public static Collection getServers() {
+
+        Collection<SqlServer> servers = new ArrayList<>();
+
+        SqlServer localFileDbServer = LocalFileDatabaseServerFactory.getServer();
+        try {
+            localFileDbServer.executeQuery(QueryFactory.createDatabase(databaseName));
+            servers.add(localFileDbServer);
+        } catch (SqlException e) {
+        }
+        SqlServer mySqlServer = new MySQL_JDBC_Server(
+                "jdbc:mysql://localhost:3306/logiweb?useUnicode=true" +
+                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
+                        "=false&serverTimezone=Europe/Moscow",
+                "root", "mpsjetbrains2019");
+        servers.add(mySqlServer);
+        return servers;
+    }
 
 
     @Before
     public void setUp() {
         System.out.println("===== SET UP =====");
-        sqlServer = LocalFileDatabaseServerFactory.getServer();
-        sqlServer = new MySqlJdbcServer();
         try {
-            // Create a database
-//            sqlServer.executeQuery(QueryFactory.createDatabase(databaseName));
+            sqlServer.connect();
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
 
             // Create a table
             sqlServer.executeQuery(QueryFactory
@@ -110,8 +136,9 @@ public abstract class AbstractLocalFileDatabaseTest {
         try {
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table1"));
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table2"));
+            sqlServer.close();
         } catch (SqlException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
@@ -165,10 +192,24 @@ public abstract class AbstractLocalFileDatabaseTest {
                         continue;
                     }
                 }
-                if (!value.equals(resultValue)) {
-                    rowMatch = false;
-                    break;
+                if (value instanceof Number) {
+                    if (!(resultValue instanceof Number)) {
+                        rowMatch = false;
+                        break;
+                    }
+                    BigDecimal b1 = new BigDecimal(((Number) value).doubleValue());
+                    BigDecimal b2 = new BigDecimal(((Number) resultValue).doubleValue());
+                    if (b1.compareTo(b2) != 0) {
+                        rowMatch = false;
+                        break;
+                    }
+                } else {
+                    if (!value.equals(resultValue)) {
+                        rowMatch = false;
+                        break;
+                    }
                 }
+
             }
             if (rowMatch) {
                 return;

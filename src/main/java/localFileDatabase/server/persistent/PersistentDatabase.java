@@ -74,7 +74,7 @@ public class PersistentDatabase implements Serializable {
         for (QueryResultRow row : queryResult.getRows()) {
             List<ColumnValue> values = new ArrayList<>();
             for (Object value : row.getValues()) {
-                values.add(ColumnExprFactory.value(value));
+                values.add(ColumnExprFactory.valueWithAlias(value));
             }
             this.getTable(query.getTableName())
                     .insert(query.getColumns(), values);

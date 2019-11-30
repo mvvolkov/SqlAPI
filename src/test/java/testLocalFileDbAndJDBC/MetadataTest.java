@@ -1,10 +1,12 @@
-package testLocalFileDatabase;
+package testLocalFileDbAndJDBC;
 
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
+import localFileDatabase.server.SqlServerImpl;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.*;
+import sqlapi.server.SqlServer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,10 +34,17 @@ import static org.junit.Assert.*;
  * 23, test2
  * 25, test4
  */
-public class MetadataTest extends AbstractLocalFileDatabaseTest {
+public class MetadataTest extends AbstractTestRunner {
+
+    public MetadataTest(SqlServer sqlServer) {
+        super(sqlServer);
+    }
 
     @Test
     public void testDatabases() throws SqlException {
+        if (!(sqlServer instanceof SqlServerImpl)) {
+            return;
+        }
         Collection<String> databases = sqlServer.getDatabases();
         assertEquals(1, databases.size());
         assertEquals(databaseName, databases.iterator().next());
@@ -43,6 +52,9 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
 
     @Test
     public void testTables() {
+        if (!(sqlServer instanceof SqlServerImpl)) {
+            return;
+        }
         try {
             Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
             assertEquals(tables.size(), 2);
@@ -168,14 +180,16 @@ public class MetadataTest extends AbstractLocalFileDatabaseTest {
 
     @Test
     public void testDropTable() throws SqlException {
-
+        if (!(sqlServer instanceof SqlServerImpl)) {
+            return;
+        }
         try {
             sqlServer.executeQuery(QueryFactory.createTable(databaseName,
                     MetadataFactory.tableMetadata("table4",
                             Collections.singletonList(MetadataFactory.integer("id")))));
 
             Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
-            assertEquals(tables.size(), 3);
+            assertEquals(3, tables.size());
             TableMetadata table1 = null;
             TableMetadata table2 = null;
             TableMetadata table3 = null;

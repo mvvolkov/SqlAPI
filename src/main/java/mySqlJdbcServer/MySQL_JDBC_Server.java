@@ -1,5 +1,6 @@
 package mySqlJdbcServer;
 
+import clientImpl.stringUtil.QueryStringUtil;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.SqlException;
@@ -16,37 +17,46 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class MySqlJdbcServer implements SqlServer {
+public class MySQL_JDBC_Server implements SqlServer {
 
     private Connection connection;
 
-    private static final String DB_URL =
-            "jdbc:mysql://localhost:3306/logiweb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow";
+    private final String url;
 
-    //  Database credentials
-    private static final String USER = "root";
-    private static final String PASS = "mpsjetbrains2019";
+    private final String user;
 
-    public static void main(String[] args) {
-        MySqlJdbcServer server = new MySqlJdbcServer();
+    private final String password;
+
+
+    public MySQL_JDBC_Server(String url, String user, String password) {
+        this.url = url;
+        this.user = user;
+        this.password = password;
     }
 
-    public MySqlJdbcServer() {
+    @Override
+    public void connect() throws SqlException {
 
-        //STEP 2: Register JDBC driver
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new WrappedException(e);
         }
-
-        //STEP 3: Open a connection
-        System.out.println("Connecting to database...");
+        System.out.println("Connecting to " + url);
         try {
-            connection = DriverManager.getConnection(DB_URL, USER, PASS);
+            connection = DriverManager.getConnection(url, user, password);
             System.out.println("Connected.");
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void close() throws SqlException {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            throw new WrappedException(e);
         }
     }
 
@@ -54,13 +64,15 @@ public class MySqlJdbcServer implements SqlServer {
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
 
-        System.out.println(query);
+
+        String queryString = QueryStringUtil.getQueryString(query);
+        System.out.println(queryString);
 
         if (query instanceof CreateTableQuery || query instanceof DropTableQuery) {
             Statement statement = null;
             try {
                 statement = connection.createStatement();
-                statement.execute(query.toString());
+                statement.execute(queryString);
             } catch (SQLException e) {
                 throw new WrappedException(e);
             }
@@ -71,23 +83,22 @@ public class MySqlJdbcServer implements SqlServer {
             Statement statement = null;
             try {
                 statement = connection.createStatement();
-                statement.executeUpdate(query.toString());
+                statement.executeUpdate(queryString);
             } catch (SQLException e) {
                 throw new WrappedException(e);
             }
         }
-
-
     }
 
     @Override
     public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
 
-        System.out.println(selectQuery);
+        String queryString = QueryStringUtil.getSelectQueryString(selectQuery);
+        System.out.println(queryString);
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(selectQuery.toString());
+            ResultSet resultSet = statement.executeQuery(queryString);
 
             ResultSetMetaData rsmd = resultSet.getMetaData();
             int columnsNumber = rsmd.getColumnCount();
