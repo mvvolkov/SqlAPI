@@ -59,7 +59,7 @@ public final class PersistentColumnMetadata implements Serializable {
         if (value == null) {
             return;
         }
-        for (Class cl : this.getAllowedJavaTypes()) {
+        for (Class<?> cl : this.getAllowedJavaTypes()) {
             if (cl.isInstance(value)) {
                 return;
             }
@@ -137,7 +137,9 @@ public final class PersistentColumnMetadata implements Serializable {
 
     ColumnMetadata getColumnMetadata() {
 
-        final Collection<ColumnConstraint> columnConstraints = constraints.stream().map(c -> (ColumnConstraint) c).collect(Collectors.toList());
+        final Collection<ColumnConstraint> columnConstraints =
+                constraints.stream().map(c -> (ColumnConstraint) c)
+                        .collect(Collectors.toList());
 
         return new ColumnMetadata() {
             @Override

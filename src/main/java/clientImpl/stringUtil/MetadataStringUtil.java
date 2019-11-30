@@ -51,7 +51,7 @@ public class MetadataStringUtil {
             case DEFAULT_VALUE:
                 return "DEFAULT " + ColumnExprStringUtil
                         .getColumnValueString(ColumnExprFactory
-                                .valueWithAlias(constraint.getParameters().get(0)));
+                                .value(constraint.getParameters().get(0)));
             default:
                 throw new UnsupportedColumnConstraintTypeException(
                         constraint.getConstraintType());

@@ -2,6 +2,7 @@ package localFileDatabase.server.intermediateResult;
 
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.*;
+import sqlapi.metadata.SqlType;
 import sqlapi.predicates.*;
 
 import java.util.ArrayList;
@@ -20,61 +21,53 @@ public final class DataRow {
         return values;
     }
 
-    public boolean evaluatePredicate(Predicate predicate)
+    public boolean matchPredicate(Predicate predicate)
             throws SqlException {
 
         if (predicate instanceof EmptyPredicate) {
             return true;
         }
         if (predicate instanceof ColumnInPredicate) {
-            return this.evaluateInPredicate((ColumnInPredicate) predicate);
+            return this.matchInPredicate((ColumnInPredicate) predicate);
         }
         if (predicate instanceof ColumnIsNullPredicate) {
-            return this.evaluateIsNullPredicate((ColumnIsNullPredicate) predicate);
+            return this.matchIsNullPredicate((ColumnIsNullPredicate) predicate);
         }
         if (predicate instanceof ColumnIsNotNullPredicate) {
-            return this.evaluateIsNotNullPredicate((ColumnIsNotNullPredicate) predicate);
+            return this.matchIsNotNullPredicate((ColumnIsNotNullPredicate) predicate);
         }
         if (predicate instanceof CombinedPredicate) {
-            return this.evaluateCombinedPredicate((CombinedPredicate) predicate);
+            return this.matchCombinedPredicate((CombinedPredicate) predicate);
         }
         if (predicate instanceof BinaryPredicate) {
-            return this.evaluateBinaryPredicate((BinaryPredicate) predicate);
+            return this.matchBinaryPredicate((BinaryPredicate) predicate);
         }
         throw new UnsupportedPredicateTypeException(predicate);
     }
 
-    private boolean evaluateCombinedPredicate(CombinedPredicate predicate)
+    private boolean matchCombinedPredicate(CombinedPredicate predicate)
             throws SqlException {
         if (predicate instanceof AndPredicate) {
-            return this.evaluatePredicate(predicate.getLeftPredicate()) &&
-                    this.evaluatePredicate(predicate.getRightPredicate());
+            return this.matchPredicate(predicate.getLeftPredicate()) &&
+                    this.matchPredicate(predicate.getRightPredicate());
         } else if (predicate instanceof OrPredicate) {
-            return this.evaluatePredicate(predicate.getLeftPredicate()) ||
-                    this.evaluatePredicate(predicate.getRightPredicate());
+            return this.matchPredicate(predicate.getLeftPredicate()) ||
+                    this.matchPredicate(predicate.getRightPredicate());
         }
-        return false;
+        throw new UnsupportedPredicateTypeException(predicate);
     }
 
-    private boolean evaluateBinaryPredicate(BinaryPredicate predicate)
+    private boolean matchBinaryPredicate(BinaryPredicate predicate)
             throws SqlException {
 
 
-        Comparable leftValue =
-                (Comparable) evaluateColumnExpr(predicate.getLeftOperand());
-        Comparable rightValue =
-                (Comparable) evaluateColumnExpr(predicate.getRightOperand());
+        SqlValue leftValue = evaluateColumnExpr(predicate.getLeftOperand());
+        SqlValue rightValue = evaluateColumnExpr(predicate.getRightOperand());
 
-
-        if (leftValue == null || rightValue == null) {
+        if (leftValue.getValue() == null || rightValue.getValue() == null) {
             return false;
         }
-
-        if (leftValue.getClass() != rightValue.getClass()) {
-            throw new InvalidQueryException("Objects of different classes are used in " +
-                    "the predicate: " + predicate.toString());
-        }
-        int compResult = leftValue.compareTo(rightValue);
+        int compResult = SqlValue.getComparisonResult(leftValue, rightValue);
         if (predicate instanceof EqualsPredicate) {
             return compResult == 0;
         }
@@ -96,39 +89,77 @@ public final class DataRow {
         return false;
     }
 
-    private boolean evaluateInPredicate(ColumnInPredicate predicate)
+    private boolean matchInPredicate(ColumnInPredicate predicate)
             throws SqlException {
 
-        Comparable leftValue = (Comparable) evaluateColumnExpr(predicate.getColumnRef());
+        SqlValue value = evaluateColumnExpr(predicate.getColumnRef());
 
         for (ColumnValue columnValue : predicate.getColumnValues()) {
-            Comparable rightValue = (Comparable) columnValue.getValue();
-            if (leftValue != null && rightValue != null &&
-                    leftValue.compareTo(rightValue) == 0) {
+            if (isEqual(columnValue, value)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean evaluateIsNullPredicate(ColumnIsNullPredicate predicate)
-            throws SqlException {
-
-        Object leftValue = evaluateColumnExpr(predicate.getColumnRef());
-        return leftValue == null;
+    private static boolean isEqual(ColumnValue columnValue, SqlValue sqlValue)
+            throws WrongValueTypeException {
+        if (columnValue.getValue() == null && sqlValue.getValue() == null) {
+            return true;
+        }
+        if (sqlValue.getSqlType() == SqlType.INTEGER) {
+            if (!(columnValue.getValue() instanceof Integer)) {
+                throw new WrongValueTypeException();
+            }
+            Integer i1 = (Integer) columnValue.getValue();
+            Integer i2 = (Integer) sqlValue.getValue();
+            return i1.equals(i2);
+        }
+        if (sqlValue.getSqlType() == SqlType.VARCHAR) {
+            if (!(columnValue.getValue() instanceof String)) {
+                throw new WrongValueTypeException();
+            }
+            String s1 = (String) columnValue.getValue();
+            String s2 = (String) sqlValue.getValue();
+            return s1.equals(s2);
+        }
+        throw new WrongValueTypeException();
     }
 
-    private boolean evaluateIsNotNullPredicate(ColumnIsNotNullPredicate predicate)
+    private boolean matchIsNullPredicate(ColumnIsNullPredicate predicate)
             throws SqlException {
 
-        Object leftValue = evaluateColumnExpr(predicate.getColumnRef());
-        return leftValue != null;
+        SqlValue leftValue = evaluateColumnExpr(predicate.getColumnRef());
+        return leftValue.getValue() == null;
     }
 
-    private Object evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+    private boolean matchIsNotNullPredicate(ColumnIsNotNullPredicate predicate)
             throws SqlException {
-        Object leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
-        Object rightValue = this.evaluateColumnExpr(bce.getRightOperand());
+
+        SqlValue leftValue = evaluateColumnExpr(predicate.getColumnRef());
+        return leftValue.getValue() != null;
+    }
+
+    public SqlValue evaluateColumnExpr(ColumnExpression ce)
+            throws SqlException {
+
+        if (ce instanceof BinaryColumnExpression) {
+            return evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
+        }
+        if (ce instanceof ColumnRef) {
+            return evaluateColumnRef((ColumnRef) ce);
+        }
+        if (ce instanceof ColumnValue) {
+            Object value = ((ColumnValue) ce).getValue();
+            return new SqlValue(SqlValue.getSqlType(value), value);
+        }
+        throw new UnsupportedColumnExprTypeException(ce);
+    }
+
+    private SqlValue evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+            throws SqlException {
+        SqlValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
+        SqlValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
 
         if (bce instanceof SumColumnExpression) {
             return evaluateSumColumnExpr(leftValue, rightValue);
@@ -142,73 +173,79 @@ public final class DataRow {
         if (bce instanceof DivisionColumnExpression) {
             return evaluateDivisionColumnExpr(leftValue, rightValue);
         }
-        throw new InvalidQueryException("Unknown arithmetical operation");
+        throw new UnsupportedColumnExprTypeException(bce);
     }
 
-    public Object evaluateColumnExpr(ColumnExpression ce)
-            throws SqlException {
 
-        if (ce instanceof BinaryColumnExpression) {
-            return evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
+    static SqlValue evaluateSumColumnExpr(SqlValue leftValue, SqlValue rightValue)
+            throws WrongValueTypeException {
+        if (leftValue.getValue() == null || rightValue.getValue() == null) {
+            throw new WrongValueTypeException();
         }
-        if (ce instanceof ColumnRef) {
-            return evaluateColumnRef((ColumnRef) ce);
+        if (leftValue.getSqlType() != rightValue.getSqlType()) {
+            throw new WrongValueTypeException();
         }
-        if (ce instanceof ColumnValue) {
-            return ((ColumnValue) ce).getValue();
+        if (leftValue.getSqlType() == SqlType.INTEGER) {
+            Integer i1 = (Integer) leftValue.getValue();
+            Integer i2 = (Integer) rightValue.getValue();
+            return new SqlValue(SqlType.INTEGER, i1 + i2);
         }
-        return null;
+        throw new WrongValueTypeException();
     }
 
-    static private void checkArithmeticalOperands(Object leftValue, Object rightValue) throws InvalidQueryException {
-        if (leftValue == null || rightValue == null) {
-            throw new InvalidQueryException(
-                    "Null values can not be used in arithmetical expressions");
+    static SqlValue evaluateDiffColumnExpr(SqlValue leftValue, SqlValue rightValue)
+            throws WrongValueTypeException {
+        if (leftValue.getValue() == null || rightValue.getValue() == null) {
+            throw new WrongValueTypeException();
         }
-        if (!(leftValue instanceof Integer) || !(rightValue instanceof Integer)) {
-            throw new InvalidQueryException("Only numerical types can be used in " +
-                    "arithmetical expressions");
+        if (leftValue.getSqlType() != rightValue.getSqlType()) {
+            throw new WrongValueTypeException();
         }
-    }
-
-    static Object evaluateSumColumnExpr(Object leftValue, Object rightValue)
-            throws InvalidQueryException {
-        checkArithmeticalOperands(leftValue, rightValue);
-        Integer i1 = (Integer) leftValue;
-        Integer i2 = (Integer) rightValue;
-        return i1 + i2;
-    }
-
-    static Object evaluateDiffColumnExpr(Object leftValue, Object rightValue)
-            throws InvalidQueryException {
-        checkArithmeticalOperands(leftValue, rightValue);
-        Integer i1 = (Integer) leftValue;
-        Integer i2 = (Integer) rightValue;
-        return i1 - i2;
-    }
-
-    static Object evaluateProductColumnExpr(Object leftValue, Object rightValue)
-            throws InvalidQueryException {
-        checkArithmeticalOperands(leftValue, rightValue);
-        Integer i1 = (Integer) leftValue;
-        Integer i2 = (Integer) rightValue;
-        return i1 * i2;
-    }
-
-    static Object evaluateDivisionColumnExpr(Object leftValue, Object rightValue)
-            throws InvalidQueryException {
-        checkArithmeticalOperands(leftValue, rightValue);
-        Integer i1 = (Integer) leftValue;
-        Integer i2 = (Integer) rightValue;
-        if (i2 == 0) {
-            throw new InvalidQueryException("Here we need another type of " +
-                    "exception :(");
+        if (leftValue.getSqlType() == SqlType.INTEGER) {
+            Integer i1 = (Integer) leftValue.getValue();
+            Integer i2 = (Integer) rightValue.getValue();
+            return new SqlValue(SqlType.INTEGER, i1 - i2);
         }
-        return i1 / i2;
+        throw new WrongValueTypeException();
+    }
+
+    static SqlValue evaluateProductColumnExpr(SqlValue leftValue, SqlValue rightValue)
+            throws WrongValueTypeException {
+        if (leftValue.getValue() == null || rightValue.getValue() == null) {
+            throw new WrongValueTypeException();
+        }
+        if (leftValue.getSqlType() != rightValue.getSqlType()) {
+            throw new WrongValueTypeException();
+        }
+        if (leftValue.getSqlType() == SqlType.INTEGER) {
+            Integer i1 = (Integer) leftValue.getValue();
+            Integer i2 = (Integer) rightValue.getValue();
+            return new SqlValue(SqlType.INTEGER, i1 * i2);
+        }
+        throw new WrongValueTypeException();
+    }
+
+    static SqlValue evaluateDivisionColumnExpr(SqlValue leftValue, SqlValue rightValue)
+            throws WrongValueTypeException {
+        if (leftValue.getValue() == null || rightValue.getValue() == null) {
+            throw new WrongValueTypeException();
+        }
+        if (leftValue.getSqlType() != rightValue.getSqlType()) {
+            throw new WrongValueTypeException();
+        }
+        if (leftValue.getSqlType() == SqlType.INTEGER) {
+            Integer i1 = (Integer) leftValue.getValue();
+            Integer i2 = (Integer) rightValue.getValue();
+            if (i2 == 0) {
+                throw new WrongValueTypeException();
+            }
+            return new SqlValue(SqlType.INTEGER, i1 / i2);
+        }
+        throw new WrongValueTypeException();
     }
 
 
-    public Object evaluateColumnRef(ColumnRef cr)
+    public SqlValue evaluateColumnRef(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
 
         List<DataHeader> matchingHeaders = new ArrayList<>();
@@ -232,6 +269,8 @@ public final class DataRow {
         if (matchingHeaders.size() > 1) {
             throw new AmbiguousColumnNameException(cr.getColumnName());
         }
-        return this.getCells().get(matchingHeaders.get(0));
+        DataHeader matchingHeader = matchingHeaders.get(0);
+        Object value = this.getCells().get(matchingHeader);
+        return new SqlValue(matchingHeader.getSqlType(), value);
     }
 }

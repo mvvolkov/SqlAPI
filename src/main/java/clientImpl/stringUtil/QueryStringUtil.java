@@ -51,7 +51,7 @@ public class QueryStringUtil {
         if (query instanceof InsertFromSelectQuery) {
             return getInsertFromSelectQueryString((InsertFromSelectQuery) query);
         }
-        throw new UnsupportedQueryException(query);
+        throw new UnsupportedQueryTypeException(query);
     }
 
 
@@ -100,7 +100,7 @@ public class QueryStringUtil {
     }
 
     public static String getUpdateQueryString(UpdateQuery query) throws
-            UnsupportedAggregateFunctionTypeException, UnsupportedColumnExprTypeException, UnsupportedBinaryExprTypeException, UnsupportedPredicateTypeException {
+            UnsupportedAggregateFunctionTypeException, UnsupportedColumnExprTypeException, UnsupportedPredicateTypeException {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(query.getDatabaseName());
         sb.append(".");

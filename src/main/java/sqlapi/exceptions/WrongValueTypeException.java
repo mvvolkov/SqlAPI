@@ -31,8 +31,18 @@ public final class WrongValueTypeException extends SqlException {
         this.actualType = actualType;
     }
 
+    public WrongValueTypeException() {
+        this.tableName = null;
+        this.columnName = null;
+        this.allowedTypes = null;
+        this.actualType = null;
+    }
+
     @Override
     public String getMessage() {
+        if (tableName == null) {
+            return "message to be done";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("Wrong value type for the column ");
         String fullName = String.join(".", tableName,

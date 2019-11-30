@@ -60,7 +60,7 @@ public class PersistentDatabase implements Serializable {
             this.update((UpdateQuery) query);
             return;
         }
-        throw new InvalidQueryException("Invalid type of SQL query.");
+        throw new UnsupportedQueryTypeException(query);
     }
 
 
@@ -74,7 +74,7 @@ public class PersistentDatabase implements Serializable {
         for (QueryResultRow row : queryResult.getRows()) {
             List<ColumnValue> values = new ArrayList<>();
             for (Object value : row.getValues()) {
-                values.add(ColumnExprFactory.valueWithAlias(value));
+                values.add(ColumnExprFactory.value(value));
             }
             this.getTable(query.getTableName())
                     .insert(query.getColumns(), values);

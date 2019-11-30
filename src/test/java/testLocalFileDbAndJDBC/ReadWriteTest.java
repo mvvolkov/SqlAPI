@@ -48,6 +48,10 @@ public class ReadWriteTest extends AbstractTestRunner {
 
     @Test
     public void testReadAndWrite() {
+
+        if (!(sqlServer instanceof LocalFileDatabaseServerFactory)) {
+            return;
+        }
         SqlServer sqlServer = LocalFileDatabaseServerFactory.getServer();
         SqlServer sqlServer1 = LocalFileDatabaseServerFactory.getServer();
 

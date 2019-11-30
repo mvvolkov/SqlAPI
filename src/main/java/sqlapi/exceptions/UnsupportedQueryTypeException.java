@@ -2,11 +2,11 @@ package sqlapi.exceptions;
 
 import sqlapi.queries.SqlQuery;
 
-public class UnsupportedQueryException extends SqlException {
+public class UnsupportedQueryTypeException extends SqlException {
 
     private final SqlQuery query;
 
-    public UnsupportedQueryException(SqlQuery query) {
+    public UnsupportedQueryTypeException(SqlQuery query) {
         this.query = query;
     }
 

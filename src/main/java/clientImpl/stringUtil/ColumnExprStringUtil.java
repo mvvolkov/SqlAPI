@@ -2,7 +2,6 @@ package clientImpl.stringUtil;
 
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.UnsupportedAggregateFunctionTypeException;
-import sqlapi.exceptions.UnsupportedBinaryExprTypeException;
 import sqlapi.exceptions.UnsupportedColumnExprTypeException;
 
 public class ColumnExprStringUtil {
@@ -11,8 +10,7 @@ public class ColumnExprStringUtil {
     }
 
     public static String getColumnExpressionString(ColumnExpression ce)
-            throws UnsupportedBinaryExprTypeException,
-            UnsupportedAggregateFunctionTypeException,
+            throws UnsupportedAggregateFunctionTypeException,
             UnsupportedColumnExprTypeException {
 
         if (ce instanceof ColumnRef) {
@@ -61,7 +59,7 @@ public class ColumnExprStringUtil {
     }
 
     public static String getBinaryColumnExpressionString(BinaryColumnExpression bce)
-            throws UnsupportedBinaryExprTypeException, UnsupportedColumnExprTypeException,
+            throws UnsupportedColumnExprTypeException,
             UnsupportedAggregateFunctionTypeException {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
@@ -79,7 +77,7 @@ public class ColumnExprStringUtil {
     }
 
     private static String getBinaryExpressionOperatorName(BinaryColumnExpression bce)
-            throws UnsupportedBinaryExprTypeException {
+            throws UnsupportedColumnExprTypeException {
         if (bce instanceof SumColumnExpression) {
             return "+";
         }
@@ -92,7 +90,7 @@ public class ColumnExprStringUtil {
         if (bce instanceof DivisionColumnExpression) {
             return "/";
         }
-        throw new UnsupportedBinaryExprTypeException(bce);
+        throw new UnsupportedColumnExprTypeException(bce);
     }
 
     public static String getAggregateFunctionString(AggregateFunction af)

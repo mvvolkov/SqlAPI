@@ -33,7 +33,7 @@ public final class SqlServerImpl implements SqlServer {
 
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
-        System.out.println(query);
+
         try {
             QueryStringUtil.printQuery(query);
         } catch (SqlException se) {
@@ -42,34 +42,27 @@ public final class SqlServerImpl implements SqlServer {
         if (query instanceof CreateDatabaseQuery) {
             this.createDatabase((CreateDatabaseQuery) query);
             return;
-        }
-
-        if (query instanceof ReadDatabaseFromFileQuery) {
+        } else if (query instanceof ReadDatabaseFromFileQuery) {
             try {
                 this.readDatabase((ReadDatabaseFromFileQuery) query);
             } catch (IOException | ClassNotFoundException e) {
                 throw new WrappedException(e);
             }
             return;
-        }
-
-        if (query instanceof SaveDatabaseToFileQuery) {
+        } else if (query instanceof SaveDatabaseToFileQuery) {
             try {
                 this.saveDatabase((SaveDatabaseToFileQuery) query);
             } catch (IOException e) {
                 throw new WrappedException(e);
             }
             return;
-        }
-        if (query instanceof CreateTableQuery) {
+        } else if (query instanceof CreateTableQuery) {
             this.createTable((CreateTableQuery) query);
             return;
-        }
-        if (query instanceof DropTableQuery) {
+        } else if (query instanceof DropTableQuery) {
             this.dropTable((DropTableQuery) query);
             return;
-        }
-        if (query instanceof TableActionQuery) {
+        } else if (query instanceof TableActionQuery) {
             if (query instanceof InsertFromSelectQuery) {
                 InsertFromSelectQuery insertFromSelectQuery =
                         (InsertFromSelectQuery) query;
@@ -84,7 +77,7 @@ public final class SqlServerImpl implements SqlServer {
             this.executeTableQuery((TableActionQuery) query);
             return;
         }
-        throw new UnsupportedQueryException(query);
+        throw new UnsupportedQueryTypeException(query);
     }
 
     @Override
@@ -112,11 +105,9 @@ public final class SqlServerImpl implements SqlServer {
     }
 
     @Override public void connect() throws SqlException {
-
     }
 
     @Override public void close() throws SqlException {
-
     }
 
     private void createDatabase(CreateDatabaseQuery query)
@@ -223,10 +214,10 @@ public final class SqlServerImpl implements SqlServer {
             return result;
         }
 
-        List<ColumnExpression> columnExpressions =
+        List<ColumnExpression> selectedExpressions =
                 this.getSelectedColumnExpressions(se.getSelectedItems());
 
-        List<DataHeader> headers = DataUtil.getSelectedColumns(columnExpressions);
+        List<DataHeader> headers = DataUtil.getSelectedColumns(selectedExpressions);
         List<DataRow> resultRows;
         if (!se.getGroupByColumns().isEmpty()) {
             Collection<DataGroup> groups =
@@ -235,16 +226,16 @@ public final class SqlServerImpl implements SqlServer {
             resultRows = new ArrayList<>();
             for (DataGroup group : groups) {
                 Map<DataHeader, Object> values = new HashMap<>();
-                for (ColumnExpression ce : columnExpressions) {
+                for (ColumnExpression ce : selectedExpressions) {
                     String columnName = ce.getAlias().isEmpty() ? ce.toString() :
                             ce.getAlias();
                     values.put(new DataHeader(columnName),
-                            group.evaluateColumnExpr(ce));
+                            group.evaluateColumnExpr(ce).getValue());
                 }
                 resultRows.add(new DataRow(values));
             }
         } else {
-            resultRows = DataUtil.getSelectedValues(result, headers, columnExpressions);
+            resultRows = DataUtil.getSelectedValues(result, headers, selectedExpressions);
         }
         return new DataSet(headers, resultRows);
     }
@@ -403,7 +394,7 @@ public final class SqlServerImpl implements SqlServer {
             return dataSet;
         }
 
-        // second, replace table name with the alias everythere in the result data.
+        // second, replace table name with the alias everywhere in the result data.
         List<DataHeader> newColumns = new ArrayList<>();
         for (DataHeader cr : dataSet.getColumns()) {
             newColumns.add(new DataHeader(cr.getSqlType(), "", alias,

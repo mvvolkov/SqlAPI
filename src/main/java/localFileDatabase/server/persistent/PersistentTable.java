@@ -61,7 +61,7 @@ public final class PersistentTable implements Serializable {
 
     public void insert(List<String> columnNames, List<ColumnValue> values)
             throws WrongValueTypeException, ConstraintViolationException,
-            InvalidQueryException {
+            InvalidQueryException, UnsupportedColumnConstraintTypeException {
 
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -105,7 +105,7 @@ public final class PersistentTable implements Serializable {
         }
         List<PersistentRow> rowsToDelete = new ArrayList<>();
         for (PersistentRow row : rows) {
-            if (this.getDataRow(row).evaluatePredicate(predicate)) {
+            if (this.getDataRow(row).matchPredicate(predicate)) {
                 rowsToDelete.add(row);
             }
         }
@@ -117,10 +117,10 @@ public final class PersistentTable implements Serializable {
 
         for (PersistentRow row : rows) {
             DataRow irr = this.getDataRow(row);
-            if (irr.evaluatePredicate(stmt.getPredicate())) {
+            if (irr.matchPredicate(stmt.getPredicate())) {
                 for (AssignmentOperation ao : stmt.getAssignmentOperations()) {
                     String columnName = ao.getColumnName();
-                    Object newValue = irr.evaluateColumnExpr(ao.getValue());
+                    Object newValue = irr.evaluateColumnExpr(ao.getValue()).getValue();
                     this.checkConstraints(this.getColumnMetadata(columnName), newValue);
                     row.getValues().put(columnName, newValue);
                 }
@@ -172,7 +172,8 @@ public final class PersistentTable implements Serializable {
 
     private void checkConstraints(PersistentColumnMetadata cm,
                                   Object newValue)
-            throws WrongValueTypeException, ConstraintViolationException {
+            throws WrongValueTypeException, ConstraintViolationException,
+            UnsupportedColumnConstraintTypeException {
 
         cm.checkValueType(newValue);
 
@@ -192,6 +193,10 @@ public final class PersistentTable implements Serializable {
                 case MAX_SIZE:
                     this.checkMaxSize(newValue, cm, type);
                     break;
+                case DEFAULT_VALUE:
+                    break;
+                default:
+                    throw new UnsupportedColumnConstraintTypeException(type);
             }
         }
     }
@@ -229,7 +234,9 @@ public final class PersistentTable implements Serializable {
 
     TableMetadata getTableMetadata() {
 
-        final List<ColumnMetadata> columnsMetadata = columns.stream().map(PersistentColumnMetadata::getColumnMetadata).collect(Collectors.toList());
+        final List<ColumnMetadata> columnsMetadata =
+                columns.stream().map(PersistentColumnMetadata::getColumnMetadata)
+                        .collect(Collectors.toList());
 
         return new TableMetadata() {
             @Override

@@ -62,7 +62,7 @@ public class UpdateTest extends AbstractTestRunner {
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
                             .assign("column4",
-                                    ColumnExprFactory.valueWithAlias("updtd")))));
+                                    ColumnExprFactory.value("updtd")))));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
@@ -99,10 +99,10 @@ public class UpdateTest extends AbstractTestRunner {
 
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
-                                    .assign("column4", ColumnExprFactory.valueWithAlias("updtd")),
+                                    .assign("column4", ColumnExprFactory.value("updtd")),
                             AssignmentOperationFactory
                                     .assign("column2",
-                                            ColumnExprFactory.valueWithAlias(37)))));
+                                            ColumnExprFactory.value(37)))));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
@@ -139,10 +139,10 @@ public class UpdateTest extends AbstractTestRunner {
 
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Arrays.asList(AssignmentOperationFactory
-                                    .assign("column4", ColumnExprFactory.valueWithAlias("updtd")),
+                                    .assign("column4", ColumnExprFactory.value("updtd")),
                             AssignmentOperationFactory
                                     .assign("column2",
-                                            ColumnExprFactory.valueWithAlias(37))),
+                                            ColumnExprFactory.value(37))),
                     PredicateFactory.isNull("column4")));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
@@ -182,7 +182,7 @@ public class UpdateTest extends AbstractTestRunner {
             sqlServer.executeQuery(QueryFactory.update(databaseName, "table1",
                     Collections.singletonList(AssignmentOperationFactory
                             .assign("column1", ColumnExprFactory.sum("column1", "column2")
-                                    .add(ColumnExprFactory.valueWithAlias(11)))),
+                                    .add(ColumnExprFactory.value(11)))),
                     PredicateFactory.isNotNull("column2")
                             .and(PredicateFactory.isNotNull("column1")
                             )));

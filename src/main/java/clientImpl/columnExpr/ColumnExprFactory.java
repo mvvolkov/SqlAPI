@@ -18,14 +18,14 @@ public class ColumnExprFactory {
         return new ColumnValueImpl(value, alias);
     }
 
-    public static @NotNull ColumnValue valueWithAlias(@Nullable Object value) {
+    public static @NotNull ColumnValue value(@Nullable Object value) {
         return valueWithAlias(value, "");
     }
 
     public static @NotNull List<ColumnValue> values(Object... objects) {
         List<ColumnValue> columnValues = new ArrayList<>();
         for (Object obj : objects) {
-            columnValues.add(valueWithAlias(obj));
+            columnValues.add(value(obj));
         }
         return columnValues;
     }

@@ -25,7 +25,7 @@ public class DataUtil {
         List<DataHeader> columns = new ArrayList<>(resultSet.getColumns());
         List<DataRow> rows = new ArrayList<>();
         for (DataRow row : resultSet.getRows()) {
-            if (row.evaluatePredicate(predicate)) {
+            if (row.matchPredicate(predicate)) {
                 rows.add(row);
             }
         }
@@ -55,7 +55,7 @@ public class DataUtil {
                         new HashMap<>(leftRow.getCells());
                 values.putAll(rightRow.getCells());
                 DataRow row = new DataRow(values);
-                if (row.evaluatePredicate(sc)) {
+                if (row.matchPredicate(sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
@@ -84,7 +84,7 @@ public class DataUtil {
                         new HashMap<>(leftRow.getCells());
                 values.putAll(rightRow.getCells());
                 DataRow row = new DataRow(values);
-                if (row.evaluatePredicate(sc)) {
+                if (row.matchPredicate(sc)) {
                     rows.add(row);
                     matchFound = true;
                 }
@@ -141,7 +141,7 @@ public class DataUtil {
             Map<DataHeader, Object> values = new HashMap<>();
             for (int i = 0; i < columns.size(); i++) {
                 values.put(columns.get(i),
-                        row.evaluateColumnExpr(columnExpressions.get(i)));
+                        row.evaluateColumnExpr(columnExpressions.get(i)).getValue());
             }
             resultRows.add(new DataRow(values));
         }

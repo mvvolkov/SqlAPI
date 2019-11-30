@@ -193,7 +193,7 @@ public class SelectTest extends AbstractTestRunner {
                     Arrays.asList(ColumnExprFactory.valueWithAlias(15, "N15"),
                             ColumnExprFactory.sumWithAlias("column2", "column1", "sum1"),
                             ColumnExprFactory.columnRef("column2")
-                                    .subtract(ColumnExprFactory.valueWithAlias(11))
+                                    .subtract(ColumnExprFactory.value(11))
                     ),
                     PredicateFactory.isNotNull("column2")
             ));
@@ -238,10 +238,10 @@ public class SelectTest extends AbstractTestRunner {
                             ColumnExprFactory.columnRef("column1")
                     ),
                     PredicateFactory
-                            .equals("column5", ColumnExprFactory.valueWithAlias(22))
+                            .equals("column5", ColumnExprFactory.value(22))
                             .and(PredicateFactory
                                     .equals("column1",
-                                            ColumnExprFactory.valueWithAlias(13)))
+                                            ColumnExprFactory.value(13)))
             ));
 
             printResultSet(queryResult);
@@ -420,7 +420,7 @@ public class SelectTest extends AbstractTestRunner {
                             ColumnExprFactory.columnRef("column4"))
                     ,
                     PredicateFactory.equals("column4",
-                            ColumnExprFactory.valueWithAlias("t653"))));
+                            ColumnExprFactory.value("t653"))));
 
             printResultSet(queryResult);
 
@@ -437,7 +437,7 @@ public class SelectTest extends AbstractTestRunner {
                                             PredicateFactory.equals("column5",
                                                     ColumnExprFactory.diff("column2",
                                                             ColumnExprFactory
-                                                                    .valueWithAlias(9))
+                                                                    .value(9))
                                             )))));
 
             printResultSet(queryResult);
@@ -460,7 +460,7 @@ public class SelectTest extends AbstractTestRunner {
                                                             ColumnExprFactory
                                                                     .diff("column2",
                                                                             ColumnExprFactory
-                                                                                    .valueWithAlias(
+                                                                                    .value(
                                                                                             9))
                                                     ))),
                             databaseName, "table3",
@@ -608,7 +608,7 @@ public class SelectTest extends AbstractTestRunner {
                     TableRefFactory.dbTable(databaseName, "table1"),
                     Arrays.asList(ColumnExprFactory.columnRef("column3"),
                             ColumnExprFactory.sumWithAlias(ColumnExprFactory.countAll(),
-                                    ColumnExprFactory.valueWithAlias(1),
+                                    ColumnExprFactory.value(1),
                                     "COUNT_ALL_plus_1"),
                             ColumnExprFactory.countWithAlias("column2", "COUNT_column2")),
                     Collections
