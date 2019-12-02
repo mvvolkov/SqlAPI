@@ -4,7 +4,27 @@ import sqlapi.exceptions.WrongValueTypeException;
 
 import java.math.BigDecimal;
 
-public class DataValue {
+public final class DataValue {
+
+    private final DataHeader header;
+
+    private final Object value;
+
+    private static DataValue NULL_VALUE = new DataValue(null);
+
+    public DataValue(DataHeader header, Object value) {
+        this.header = header;
+        this.value = value;
+    }
+
+    public DataValue(Object value) {
+        this.header = new DataHeader();
+        this.value = value;
+    }
+
+    public static DataValue nullValue() {
+        return NULL_VALUE;
+    }
 
     public DataHeader getHeader() {
         return header;
@@ -12,15 +32,6 @@ public class DataValue {
 
     public Object getValue() {
         return value;
-    }
-
-    private final DataHeader header;
-
-    private final Object value;
-
-    public DataValue(DataHeader header, Object value) {
-        this.header = header;
-        this.value = value;
     }
 
     private static BigDecimal getBigDecimal(Object value) throws WrongValueTypeException {
@@ -33,7 +44,7 @@ public class DataValue {
         }
         if (value instanceof Number) {
             try {
-                return new BigDecimal(((Number) value).doubleValue());
+                return BigDecimal.valueOf(((Number) value).doubleValue());
             } catch (NumberFormatException nfe) {
                 throw new WrongValueTypeException();
             }

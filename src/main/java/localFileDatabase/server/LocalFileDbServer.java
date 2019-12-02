@@ -83,7 +83,6 @@ public final class LocalFileDbServer implements SqlServer {
     @Override
     public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
             throws SqlException {
-        System.out.println(selectQuery);
         try {
             QueryStringUtil.printSelectQuery(selectQuery);
         } catch (SqlException se) {

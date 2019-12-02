@@ -1,6 +1,5 @@
 package localFileDatabase.server.persistent;
 
-import localFileDatabase.server.intermediateResult.SqlValue;
 import sqlapi.exceptions.NoSuchColumnException;
 import sqlapi.exceptions.WrongValueTypeException;
 import sqlapi.metadata.ColumnConstraint;
@@ -9,6 +8,7 @@ import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.SqlType;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -70,10 +70,32 @@ public final class PersistentColumnMetadata implements Serializable, ColumnMetad
     }
 
     void checkValueType(Object value) throws WrongValueTypeException {
-        if (value != null && sqlType != SqlValue.getSqlType(value)) {
-            throw new WrongValueTypeException();
+        if (value == null) {
+            return;
+        }
+        if (sqlType == SqlType.INTEGER) {
+            if (value instanceof Number) {
+                try {
+                    BigDecimal bd = BigDecimal.valueOf(((Number) value).doubleValue());
+                } catch (NumberFormatException nfe) {
+                    throw new WrongValueTypeException();
+                }
+            }
+            if (value instanceof String) {
+                try {
+                    BigDecimal bd = new BigDecimal(((String) value));
+                } catch (NumberFormatException nfe) {
+                    throw new WrongValueTypeException();
+                }
+            }
+        }
+        if (sqlType == SqlType.VARCHAR) {
+            if (!(value instanceof String)) {
+                throw new WrongValueTypeException();
+            }
         }
     }
+
 
     private ColumnConstraint getConstraintOrNull(ColumnConstraintType type) {
         for (ColumnConstraint constraint : this.getConstraints()) {

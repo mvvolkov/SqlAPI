@@ -5,6 +5,7 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
+import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -48,10 +49,10 @@ public abstract class AbstractTestRunner {
 //                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
 //                        "=false&serverTimezone=Europe/Moscow",
 //                "root", "mpsjetbrains2019");
-//        SqlServer mySqlServer = new MySQL_JDBC_Server(
-//                "jdbc:mysql://sql7.freesqldatabase.com:3306/sql7314024",
-//                "sql7314024", "9hc9cPjLjg");
-//        servers.add(mySqlServer);
+        SqlServer mySqlServer = new MySQL_JDBC_Server(
+                "jdbc:mysql://sql7.freesqldatabase.com:3306",
+                "sql7314024", "9hc9cPjLjg");
+        servers.add(mySqlServer);
         return servers;
     }
 
@@ -199,8 +200,9 @@ public abstract class AbstractTestRunner {
                         rowMatch = false;
                         break;
                     }
-                    BigDecimal b1 = new BigDecimal(((Number) value).doubleValue());
-                    BigDecimal b2 = new BigDecimal(((Number) resultValue).doubleValue());
+                    BigDecimal b1 = BigDecimal.valueOf(((Number) value).doubleValue());
+                    BigDecimal b2 =
+                            BigDecimal.valueOf(((Number) resultValue).doubleValue());
                     if (b1.compareTo(b2) != 0) {
                         rowMatch = false;
                         break;

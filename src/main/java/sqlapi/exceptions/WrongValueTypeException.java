@@ -4,7 +4,7 @@ public final class WrongValueTypeException extends SqlException {
 
 
     public WrongValueTypeException() {
-
+        int a = 1;
     }
 
     @Override

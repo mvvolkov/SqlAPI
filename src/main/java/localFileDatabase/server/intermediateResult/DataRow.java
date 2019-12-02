@@ -65,7 +65,7 @@ public final class DataRow {
         if (leftValue.getValue() == null || rightValue.getValue() == null) {
             return false;
         }
-        int compResult = leftValue.getComparisonResult(rightValue);
+        int compResult = leftValue.getComparisonResult(rightValue.getValue());
         if (predicate instanceof EqualsPredicate) {
             return compResult == 0;
         }
@@ -124,8 +124,7 @@ public final class DataRow {
             return evaluateColumnRef((ColumnRef) ce);
         }
         if (ce instanceof ColumnValue) {
-            Object value = ((ColumnValue) ce).getValue();
-            return new DataValue(new DataHeader(), value);
+            return new DataValue(((ColumnValue) ce).getValue());
         }
         throw new UnsupportedColumnExprTypeException(ce);
     }

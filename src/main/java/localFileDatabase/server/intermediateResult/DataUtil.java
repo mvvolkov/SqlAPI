@@ -60,6 +60,9 @@ public class DataUtil {
             if (!matchFound) {
                 List<DataValue> values =
                         new ArrayList<>(leftRow.getValues());
+                for (DataHeader header : right.getColumns()) {
+                    values.add(new DataValue(header, null));
+                }
                 rows.add(new DataRow(values));
             }
         }
@@ -86,8 +89,11 @@ public class DataUtil {
                 }
             }
             if (!matchFound) {
-                List<DataValue> values =
-                        new ArrayList<>(rightRow.getValues());
+                List<DataValue> values = new ArrayList<>();
+                for (DataHeader header : left.getColumns()) {
+                    values.add(new DataValue(header, null));
+                }
+                values.addAll(rightRow.getValues());
                 rows.add(new DataRow(values));
             }
         }

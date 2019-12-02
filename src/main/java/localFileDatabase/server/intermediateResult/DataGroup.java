@@ -30,8 +30,7 @@ public final class DataGroup {
             return evaluateColumnRef((ColumnRef) ce);
         }
         if (ce instanceof ColumnValue) {
-            Object value = ((ColumnValue) ce).getValue();
-            return new DataValue(new DataHeader(), value);
+            return new DataValue(((ColumnValue) ce).getValue());
         }
         if (ce instanceof AggregateFunction) {
             return evaluateAggregateFunction((AggregateFunction) ce);
@@ -103,7 +102,7 @@ public final class DataGroup {
                 count++;
             }
         }
-        return new DataValue(new DataHeader(), count);
+        return new DataValue(count);
     }
 
     private Collection<DataValue> getValues(ColumnRef cr)
@@ -129,9 +128,9 @@ public final class DataGroup {
 
         Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new DataValue(new DataHeader(), null);
+            return DataValue.nullValue();
         }
-        DataValue sum = new DataValue(new DataHeader(), 0);
+        DataValue sum = new DataValue(0);
         for (DataValue value : values) {
             sum = sum.add(value);
         }
@@ -144,13 +143,13 @@ public final class DataGroup {
 
         Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new DataValue(new DataHeader(), null);
+            return DataValue.nullValue();
         }
-        DataValue sum = new DataValue(new DataHeader(), 0);
+        DataValue sum = new DataValue(0);
         for (DataValue value : values) {
             sum = sum.add(value);
         }
-        return sum.divide(new DataValue(new DataHeader(), values.size()));
+        return sum.divide(new DataValue(values.size()));
     }
 
     private DataValue getMax(ColumnRef cr)
@@ -158,7 +157,7 @@ public final class DataGroup {
             WrongValueTypeException {
         Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new DataValue(new DataHeader(), null);
+            return DataValue.nullValue();
         }
         DataValue maxValue = null;
 
@@ -167,7 +166,7 @@ public final class DataGroup {
                 maxValue = value;
                 continue;
             }
-            if (value.getComparisonResult(maxValue) > 0) {
+            if (value.getComparisonResult(maxValue.getValue()) > 0) {
                 maxValue = value;
             }
         }
@@ -179,16 +178,15 @@ public final class DataGroup {
             WrongValueTypeException {
         Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new DataValue(new DataHeader(), null);
+            return DataValue.nullValue();
         }
         DataValue minValue = null;
-
         for (DataValue value : values) {
             if (minValue == null) {
                 minValue = value;
                 continue;
             }
-            if (value.getComparisonResult(minValue) < 0) {
+            if (value.getComparisonResult(minValue.getValue()) < 0) {
                 minValue = value;
             }
         }

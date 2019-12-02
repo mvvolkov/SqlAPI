@@ -77,7 +77,7 @@ public class SelectTest extends AbstractTestRunner {
                     ColumnExprFactory.values("test3", "cc", 41)));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table3",
                     ColumnExprFactory.values("ccc", "t43", 38)));
-            getTableData("DB1", "table3");
+            getTableData(databaseName, "table3");
             System.out.println("===== END OF SET UP =====");
 
         } catch (SqlException e) {
