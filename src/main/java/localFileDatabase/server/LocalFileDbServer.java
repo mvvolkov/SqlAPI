@@ -66,9 +66,8 @@ public final class LocalFileDbServer implements SqlServer {
             if (query instanceof InsertFromSelectQuery) {
                 InsertFromSelectQuery insertFromSelectQuery =
                         (InsertFromSelectQuery) query;
-                QueryResult queryResult = DataUtil.createResultSet(
-                        this.getInternalQueryResult(
-                                (insertFromSelectQuery.getSelectQuery())));
+                QueryResult queryResult = this.getInternalQueryResult(
+                        (insertFromSelectQuery.getSelectQuery())).createResultSet();
                 this.getDatabase(insertFromSelectQuery.getDatabaseName())
                         .insert(insertFromSelectQuery,
                                 queryResult);
@@ -88,7 +87,7 @@ public final class LocalFileDbServer implements SqlServer {
         } catch (SqlException se) {
             System.out.println(se.getMessage());
         }
-        return DataUtil.createResultSet(this.getInternalQueryResult(selectQuery));
+        return this.getInternalQueryResult(selectQuery).createResultSet();
     }
 
     @Override
@@ -209,7 +208,7 @@ public final class LocalFileDbServer implements SqlServer {
             SqlException {
 
         DataSet result = this.getProductOfTables(se.getTableReferences());
-        result = DataUtil.getFilteredResult(result, se.getPredicate());
+        result = result.getFilteredResult(se.getPredicate());
 
         if (se.getSelectedItems().isEmpty()) {
             return result;
@@ -218,7 +217,7 @@ public final class LocalFileDbServer implements SqlServer {
         List<ColumnExpression> selectedExpressions =
                 this.getSelectedColumnExpressions(se.getSelectedItems());
 
-        List<DataHeader> headers = DataUtil.getSelectedColumns(selectedExpressions);
+        List<DataHeader> headers = DataHeader.getSelectedColumns(selectedExpressions);
         List<DataRow> resultRows;
         if (!se.getGroupByColumns().isEmpty()) {
             Collection<DataGroup> groups =
@@ -237,7 +236,7 @@ public final class LocalFileDbServer implements SqlServer {
                 resultRows.add(new DataRow(values));
             }
         } else {
-            resultRows = DataUtil.getSelectedValues(result, headers, selectedExpressions);
+            resultRows = result.getSelectedValues(headers, selectedExpressions);
         }
         return new DataSet(headers, resultRows);
     }
@@ -373,14 +372,13 @@ public final class LocalFileDbServer implements SqlServer {
         DataSet right =
                 this.getDataFromTableRef(tableReference.getRightTableReference());
         if (tableReference instanceof InnerJoinTableReference) {
-            return DataUtil.innerJoin(left, right, tableReference.getPredicate());
+            return left.innerJoin(right, tableReference.getPredicate());
         }
         if (tableReference instanceof LeftOuterJoinTableReference) {
-            return DataUtil.leftOuterJoin(left, right, tableReference.getPredicate());
+            return left.leftOuterJoin(right, tableReference.getPredicate());
         }
         if (tableReference instanceof RightOuterJoinTableReference) {
-            return DataUtil
-                    .rightOuterJoin(left, right, tableReference.getPredicate());
+            return left.rightOuterJoin(right, tableReference.getPredicate());
         }
         throw new UnsupportedTableReferenceTypeException(tableReference);
     }

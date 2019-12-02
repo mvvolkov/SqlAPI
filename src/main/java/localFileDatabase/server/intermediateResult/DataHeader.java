@@ -1,8 +1,11 @@
 package localFileDatabase.server.intermediateResult;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public final class DataHeader {
@@ -90,5 +93,22 @@ public final class DataHeader {
             sb.insert(0, tableName);
         }
         return sb.toString();
+    }
+
+    public static List<DataHeader> getSelectedColumns(
+            List<ColumnExpression> columnExpressions) {
+
+        List<DataHeader> resultColumns = new ArrayList<>();
+        for (ColumnExpression columnExpression : columnExpressions) {
+            if (!columnExpression.getAlias().isEmpty()) {
+                resultColumns
+                        .add(new DataHeader((columnExpression).getAlias()));
+            } else if (columnExpression instanceof ColumnRef) {
+                resultColumns.add(new DataHeader((ColumnRef) columnExpression));
+            } else {
+                resultColumns.add(new DataHeader(columnExpression.toString()));
+            }
+        }
+        return resultColumns;
     }
 }
