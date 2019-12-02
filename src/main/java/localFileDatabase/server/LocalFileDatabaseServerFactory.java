@@ -8,6 +8,6 @@ public class LocalFileDatabaseServerFactory {
     }
 
     public static SqlServer getServer() {
-        return new SqlServerImpl();
+        return new LocalFileDbServer();
     }
 }

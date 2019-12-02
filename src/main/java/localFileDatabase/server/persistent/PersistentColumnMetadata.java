@@ -1,5 +1,6 @@
 package localFileDatabase.server.persistent;
 
+import localFileDatabase.server.intermediateResult.SqlValue;
 import sqlapi.exceptions.NoSuchColumnException;
 import sqlapi.exceptions.WrongValueTypeException;
 import sqlapi.metadata.ColumnConstraint;
@@ -10,10 +11,8 @@ import sqlapi.metadata.SqlType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
-public final class PersistentColumnMetadata implements Serializable {
+public final class PersistentColumnMetadata implements Serializable, ColumnMetadata {
 
     public static final long serialVersionUID = 1318768379416289869L;
 
@@ -21,58 +20,43 @@ public final class PersistentColumnMetadata implements Serializable {
 
     private final SqlType sqlType;
 
+    private final Collection<PersistentColumnConstraint> constraints;
 
-    private final Collection<PersistentColumnConstraint> constraints = new ArrayList<>();
-
-    private final PersistentTable table;
+    private final Object defaultValue;
 
 
-    PersistentColumnMetadata(String columnName, SqlType sqlType,
-                             Collection<ColumnConstraint> constraints,
-                             PersistentTable table)
+    PersistentColumnMetadata(ColumnMetadata columnMetadata)
             throws WrongValueTypeException {
-        this.columnName = columnName;
-        this.sqlType = sqlType;
-        this.table = table;
-        for (ColumnConstraint constraint : constraints) {
+        this.columnName = columnMetadata.getColumnName();
+        this.sqlType = columnMetadata.getSqlType();
+        constraints = new ArrayList<>();
+        Object defaultValue = null;
+        for (ColumnConstraint constraint : columnMetadata.getConstraints()) {
             if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
-                this.checkValueType(constraint.getParameters().get(0));
+                defaultValue = constraint.getParameters().get(0);
+                this.checkValueType(defaultValue);
             }
-            this.constraints
-                    .add(new PersistentColumnConstraint(constraint.getConstraintType(),
-                            constraint.getParameters()));
+            constraints.add(new PersistentColumnConstraint(constraint));
         }
+        this.defaultValue = defaultValue;
     }
 
-    Collection<Class<?>> getAllowedJavaTypes() {
-        switch (sqlType) {
-            case INTEGER:
-                return Collections.singletonList(Integer.class);
-            case VARCHAR:
-                return Collections.singletonList(String.class);
-            default:
-                return Collections.emptyList();
-        }
-    }
-
-    void checkValueType(Object value) throws WrongValueTypeException {
-        if (value == null) {
-            return;
-        }
-        for (Class<?> cl : this.getAllowedJavaTypes()) {
-            if (cl.isInstance(value)) {
-                return;
-            }
-        }
-        throw new WrongValueTypeException(table.getTableName(), columnName,
-                this.getAllowedJavaTypes(), value.getClass());
-    }
-
+    @Override
     public String getColumnName() {
         return columnName;
     }
 
-    public int getSize() {
+    @Override
+    public SqlType getSqlType() {
+        return sqlType;
+    }
+
+    @Override
+    public Collection<ColumnConstraint> getConstraints() {
+        return new ArrayList<>(constraints);
+    }
+
+    int getSize() {
         for (ColumnConstraint constraint : constraints) {
             if (constraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
                 return (int) constraint.getParameters().get(0);
@@ -81,18 +65,20 @@ public final class PersistentColumnMetadata implements Serializable {
         return -1;
     }
 
-    SqlType getSqlType() {
-        return sqlType;
-    }
-
-    Collection<PersistentColumnConstraint> getConstraints() {
-        return constraints;
-    }
-
     Object getDefaultValue() {
-        for (ColumnConstraint constraint : constraints) {
-            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
-                return constraint.getParameters().get(0);
+        return defaultValue;
+    }
+
+    void checkValueType(Object value) throws WrongValueTypeException {
+        if (value != null && sqlType != SqlValue.getSqlType(value)) {
+            throw new WrongValueTypeException();
+        }
+    }
+
+    private ColumnConstraint getConstraintOrNull(ColumnConstraintType type) {
+        for (ColumnConstraint constraint : this.getConstraints()) {
+            if (constraint.getConstraintType() == type) {
+                return constraint;
             }
         }
         return null;
@@ -107,56 +93,23 @@ public final class PersistentColumnMetadata implements Serializable {
             throw new NoSuchColumnException(columnName);
         }
         for (ColumnConstraint constraint : columnMetadata.getConstraints()) {
-            ColumnConstraint existConstraint = null;
-            for (ColumnConstraint constraint1 : this.getConstraints()) {
-                if (constraint1.getConstraintType() == constraint.getConstraintType()) {
-                    existConstraint = constraint1;
-                    break;
-                }
-            }
+            ColumnConstraintType type = constraint.getConstraintType();
+            ColumnConstraint existConstraint = this.getConstraintOrNull(type);
             if (existConstraint == null) {
                 throw new NoSuchColumnException(columnName);
             }
-            if (existConstraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
-                int size1 = (int) existConstraint.getParameters().get(0);
-                int size2 = (int) constraint.getParameters().get(0);
-                if (size1 != size2) {
+            if (type == ColumnConstraintType.MAX_SIZE) {
+                int size = (int) constraint.getParameters().get(0);
+                if (size != this.getSize()) {
                     throw new NoSuchColumnException(columnName);
                 }
             }
-            if (existConstraint.getConstraintType() ==
-                    ColumnConstraintType.DEFAULT_VALUE) {
-                Object obj1 = existConstraint.getParameters().get(0);
-                Object obj2 = constraint.getParameters().get(0);
-                if (!obj1.equals(obj2)) {
+            if (type == ColumnConstraintType.DEFAULT_VALUE) {
+                Object defaultValue = constraint.getParameters().get(0);
+                if (!defaultValue.equals(this.getDefaultValue())) {
                     throw new NoSuchColumnException(columnName);
                 }
             }
         }
     }
-
-    ColumnMetadata getColumnMetadata() {
-
-        final Collection<ColumnConstraint> columnConstraints =
-                constraints.stream().map(c -> (ColumnConstraint) c)
-                        .collect(Collectors.toList());
-
-        return new ColumnMetadata() {
-            @Override
-            public String getColumnName() {
-                return columnName;
-            }
-
-            @Override
-            public SqlType getSqlType() {
-                return sqlType;
-            }
-
-            @Override
-            public Collection<ColumnConstraint> getConstraints() {
-                return columnConstraints;
-            }
-        };
-    }
-
 }

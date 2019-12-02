@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class PersistentTable implements Serializable {
+public final class PersistentTable implements Serializable, TableMetadata {
 
     public static final long serialVersionUID = 9082226890498779849L;
 
@@ -34,14 +34,20 @@ public final class PersistentTable implements Serializable {
             throws WrongValueTypeException {
         this.databaseName = databaseName;
         this.tableName = tableMetadata.getTableName();
-        for (ColumnMetadata c : tableMetadata.getColumnsMetadata()) {
-            this.columns.add(new PersistentColumnMetadata(c.getColumnName(),
-                    c.getSqlType(), c.getConstraints(), this));
+        for (ColumnMetadata columnMetadata : tableMetadata.getColumnsMetadata()) {
+            this.columns.add(new PersistentColumnMetadata(columnMetadata));
         }
     }
 
+    @NotNull
+    @Override
     public String getTableName() {
         return tableName;
+    }
+
+    @Override
+    public @NotNull List<ColumnMetadata> getColumnsMetadata() {
+        return new ArrayList<>(columns);
     }
 
     public List<PersistentColumnMetadata> getColumns() {
@@ -61,40 +67,40 @@ public final class PersistentTable implements Serializable {
 
     public void insert(List<String> columnNames, List<ColumnValue> values)
             throws WrongValueTypeException, ConstraintViolationException,
-            InvalidQueryException, UnsupportedColumnConstraintTypeException {
+            InvalidQueryException, UnsupportedColumnConstraintTypeException,
+            NoSuchColumnException {
 
+        // check number of values
+        int columnCount = columnNames.isEmpty() ? columns.size() : columnNames.size();
+        if (columnCount != values.size()) {
+            throw new InvalidQueryException(
+                    "Invalid insert query. Number of values differs from number of columns");
+        }
 
-        Map<String, Object> resultMap = new HashMap<>();
-        if (columnNames.isEmpty()) {
-            for (int i = 0; i < columns.size(); i++) {
-                PersistentColumnMetadata columnMetadata = columns.get(i);
-                Object value = values.size() > i ? values.get(i).getValue() : null;
-                this.checkConstraints(columnMetadata, value);
-                resultMap.put(columnMetadata.getColumnName(), value);
-            }
-        } else {
-            if (columnNames.size() != values.size()) {
-                throw new InvalidQueryException(
-                        "Invalid insert query. Number of values differs from number of columns");
-            }
-            Map<String, Object> insertMap = new HashMap<>();
-            for (int i = 0; i < columnNames.size(); i++) {
-                insertMap.put(columnNames.get(i), values.get(i).getValue());
-            }
+        Map<String, Object> columnToValueMap = new HashMap<>();
 
+        // insert values
+        for (int i = 0; i < columnCount; i++) {
+            String columnName = columnNames.isEmpty() ? columns.get(i).getColumnName()
+                    : columnNames.get(i);
+            Object value = values.get(i).getValue();
+            this.checkConstraints(this.getColumnMetadata(columnName), value);
+            columnToValueMap.put(columnName, value);
+        }
+
+        // insert default values for missing columns
+        if (columnToValueMap.size() != columns.size()) {
             for (PersistentColumnMetadata columnMetadata : columns) {
                 String columnName = columnMetadata.getColumnName();
-                Object value;
-                if (insertMap.containsKey(columnName)) {
-                    value = insertMap.get(columnName);
-                } else {
-                    value = columnMetadata.getDefaultValue();
+                if (columnToValueMap.containsKey(columnName)) {
+                    continue;
                 }
+                Object value = columnMetadata.getDefaultValue();
                 this.checkConstraints(columnMetadata, value);
-                resultMap.put(columnName, value);
+                columnToValueMap.put(columnName, value);
             }
         }
-        rows.add(new PersistentRow(resultMap));
+        rows.add(new PersistentRow(columnToValueMap));
     }
 
 
@@ -105,7 +111,7 @@ public final class PersistentTable implements Serializable {
         }
         List<PersistentRow> rowsToDelete = new ArrayList<>();
         for (PersistentRow row : rows) {
-            if (this.getDataRow(row).matchPredicate(predicate)) {
+            if (this.createDataRow(row).matchPredicate(predicate)) {
                 rowsToDelete.add(row);
             }
         }
@@ -116,7 +122,7 @@ public final class PersistentTable implements Serializable {
             throws SqlException {
 
         for (PersistentRow row : rows) {
-            DataRow irr = this.getDataRow(row);
+            DataRow irr = this.createDataRow(row);
             if (irr.matchPredicate(stmt.getPredicate())) {
                 for (AssignmentOperation ao : stmt.getAssignmentOperations()) {
                     String columnName = ao.getColumnName();
@@ -128,15 +134,6 @@ public final class PersistentTable implements Serializable {
         }
     }
 
-
-    private DataRow getDataRow(PersistentRow row) {
-        Map<DataHeader, Object> values = new HashMap<>();
-        for (PersistentColumnMetadata cm : columns) {
-            values.put(this.createColumnRef(cm.getColumnName(), cm.getSqlType()),
-                    row.getValues().get(cm.getColumnName()));
-        }
-        return new DataRow(values);
-    }
 
     private void checkNotNullConstraint(Object newValue, String ColumnName,
                                         ColumnConstraintType type)
@@ -160,13 +157,18 @@ public final class PersistentTable implements Serializable {
 
     private void checkMaxSize(Object newValue, PersistentColumnMetadata cm,
                               ColumnConstraintType type)
-            throws ConstraintViolationException {
+            throws ConstraintViolationException,
+            UnsupportedColumnConstraintTypeException {
         if (cm.getSize() != -1 && newValue != null) {
-            String strValue = (String) newValue;
-            if (strValue.length() > cm.getSize()) {
-                throw new ConstraintViolationException(databaseName, tableName,
-                        cm.getColumnName(), type);
+            if (cm.getSqlType() == SqlType.VARCHAR) {
+                String strValue = (String) newValue;
+                if (strValue.length() > cm.getSize()) {
+                    throw new ConstraintViolationException(databaseName, tableName,
+                            cm.getColumnName(), type);
+                }
+                return;
             }
+            throw new UnsupportedColumnConstraintTypeException(type);
         }
     }
 
@@ -188,7 +190,8 @@ public final class PersistentTable implements Serializable {
                     break;
                 case PRIMARY_KEY:
                     this.checkNotNullConstraint(newValue, cm.getColumnName(), type);
-                    this.checkUniqueConstraint(newValue, cm.getColumnName(), type);
+                    this.checkUniqueConstraint(newValue,
+                            cm.getColumnName(), type);
                     break;
                 case MAX_SIZE:
                     this.checkMaxSize(newValue, cm, type);
@@ -202,22 +205,25 @@ public final class PersistentTable implements Serializable {
     }
 
 
-    public DataSet getData() {
-        List<DataHeader> headers = new ArrayList<>();
-        for (PersistentColumnMetadata column : columns) {
-            headers.add(
-                    this.createColumnRef(column.getColumnName(), column.getSqlType()));
-        }
-        List<DataRow> resultRows = new ArrayList<>();
-        for (PersistentRow row : rows) {
-            resultRows.add(this.getDataRow(row));
-        }
+    public DataSet createDataSet() {
+        List<DataHeader> headers = columns.stream().map(this::createDataHeader).collect(
+                Collectors.toList());
+        List<DataRow> resultRows = rows.stream().map(this::createDataRow).collect(
+                Collectors.toList());
         return new DataSet(headers, resultRows);
     }
 
-    private DataHeader createColumnRef(String columnName,
-                                       SqlType sqlType) {
-        return new DataHeader(sqlType, databaseName, tableName, columnName);
+    private DataRow createDataRow(PersistentRow row) {
+        Map<DataHeader, Object> values = new HashMap<>();
+        for (PersistentColumnMetadata cm : columns) {
+            values.put(this.createDataHeader(cm), row.getValue(cm.getColumnName()));
+        }
+        return new DataRow(values);
+    }
+
+    private DataHeader createDataHeader(PersistentColumnMetadata columnMetadata) {
+        return new DataHeader(columnMetadata.getSqlType(), databaseName, tableName,
+                columnMetadata.getColumnName());
     }
 
     void validate(TableMetadata tableMetadata)
@@ -230,24 +236,5 @@ public final class PersistentTable implements Serializable {
                     this.getColumnMetadata(cm.getColumnName());
             columnMetadata.validate(cm);
         }
-    }
-
-    TableMetadata getTableMetadata() {
-
-        final List<ColumnMetadata> columnsMetadata =
-                columns.stream().map(PersistentColumnMetadata::getColumnMetadata)
-                        .collect(Collectors.toList());
-
-        return new TableMetadata() {
-            @Override
-            public @NotNull String getTableName() {
-                return tableName;
-            }
-
-            @Override
-            public @NotNull List<ColumnMetadata> getColumnsMetadata() {
-                return columnsMetadata;
-            }
-        };
     }
 }

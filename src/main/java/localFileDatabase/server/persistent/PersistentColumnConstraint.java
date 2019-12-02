@@ -14,10 +14,9 @@ public class PersistentColumnConstraint implements ColumnConstraint, Serializabl
 
     private final List<Object> parameters;
 
-    public PersistentColumnConstraint(ColumnConstraintType type,
-                                      List<Object> parameters) {
-        this.type = type;
-        this.parameters = parameters;
+    public PersistentColumnConstraint(ColumnConstraint constraint) {
+        this.type = constraint.getConstraintType();
+        this.parameters = constraint.getParameters();
     }
 
 

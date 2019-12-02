@@ -5,14 +5,13 @@ import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
-import sqlapi.queryResult.QueryResultRow;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.queryResult.QueryResultRow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PersistentDatabase implements Serializable {
 
@@ -121,7 +120,6 @@ public class PersistentDatabase implements Serializable {
     }
 
     public Collection<TableMetadata> getTables() {
-        return tables.stream().map(PersistentTable::getTableMetadata)
-                .collect(Collectors.toList());
+        return new ArrayList<>(tables);
     }
 }

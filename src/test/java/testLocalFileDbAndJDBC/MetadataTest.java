@@ -2,7 +2,7 @@ package testLocalFileDbAndJDBC;
 
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
-import localFileDatabase.server.SqlServerImpl;
+import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.*;
@@ -42,7 +42,7 @@ public class MetadataTest extends AbstractTestRunner {
 
     @Test
     public void testDatabases() throws SqlException {
-        if (!(sqlServer instanceof SqlServerImpl)) {
+        if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
         Collection<String> databases = sqlServer.getDatabases();
@@ -52,7 +52,7 @@ public class MetadataTest extends AbstractTestRunner {
 
     @Test
     public void testTables() {
-        if (!(sqlServer instanceof SqlServerImpl)) {
+        if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
         try {
@@ -180,7 +180,7 @@ public class MetadataTest extends AbstractTestRunner {
 
     @Test
     public void testDropTable() throws SqlException {
-        if (!(sqlServer instanceof SqlServerImpl)) {
+        if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
         try {

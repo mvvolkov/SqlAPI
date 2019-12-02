@@ -23,11 +23,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public final class SqlServerImpl implements SqlServer {
+public final class LocalFileDbServer implements SqlServer {
 
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
-    SqlServerImpl() {
+    LocalFileDbServer() {
         System.out.println("New local file SQL server instantiated.");
     }
 
@@ -360,7 +360,7 @@ public final class SqlServerImpl implements SqlServer {
 
     private DataSet getDataFromPersistentTable(DatabaseTableReference dtr)
             throws SqlException {
-        return this.getTable(dtr).getData();
+        return this.getTable(dtr).createDataSet();
     }
 
     private DataSet getDataFromJoinedTable(JoinedTableReference tableReference)
