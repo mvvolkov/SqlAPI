@@ -5,14 +5,13 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
-import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import sqlapi.exceptions.SqlException;
-import sqlapi.queryResult.QueryResultRow;
 import sqlapi.queryResult.QueryResult;
+import sqlapi.queryResult.QueryResultRow;
 import sqlapi.server.SqlServer;
 
 import java.math.BigDecimal;
@@ -27,12 +26,12 @@ public abstract class AbstractTestRunner {
 
     protected SqlServer sqlServer;
 
-    protected static String databaseName = "test2019";
+    protected static String databaseName = "sql7314024";
 
     public AbstractTestRunner(SqlServer sqlServer) {
         this.sqlServer = sqlServer;
     }
-    
+
     @Parameterized.Parameters
     public static Collection<SqlServer> getServers() {
 
@@ -44,12 +43,15 @@ public abstract class AbstractTestRunner {
             servers.add(localFileDbServer);
         } catch (SqlException ignored) {
         }
-        SqlServer mySqlServer = new MySQL_JDBC_Server(
-                "jdbc:mysql://localhost:3306/test2019?useUnicode=true" +
-                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
-                        "=false&serverTimezone=Europe/Moscow",
-                "root", "mpsjetbrains2019");
-        servers.add(mySqlServer);
+//        SqlServer mySqlServer = new MySQL_JDBC_Server(
+//                "jdbc:mysql://localhost:3306/test2019?useUnicode=true" +
+//                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
+//                        "=false&serverTimezone=Europe/Moscow",
+//                "root", "mpsjetbrains2019");
+//        SqlServer mySqlServer = new MySQL_JDBC_Server(
+//                "jdbc:mysql://sql7.freesqldatabase.com:3306/sql7314024",
+//                "sql7314024", "9hc9cPjLjg");
+//        servers.add(mySqlServer);
         return servers;
     }
 

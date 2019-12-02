@@ -1,17 +1,15 @@
 package localFileDatabase.server.intermediateResult;
 
-import localFileDatabase.server.queryResult.QueryResultRowImpl;
 import localFileDatabase.server.queryResult.QueryResultImpl;
+import localFileDatabase.server.queryResult.QueryResultRowImpl;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.exceptions.*;
+import sqlapi.exceptions.SqlException;
 import sqlapi.predicates.Predicate;
 import sqlapi.queryResult.QueryResultRow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DataUtil {
@@ -36,7 +34,7 @@ public class DataUtil {
                                     DataSet right, Predicate sc)
             throws SqlException {
 
-        DataSet dataSet = left.joinWith(right);
+        DataSet dataSet = left.productWith(right);
         return getFilteredResult(dataSet, sc);
     }
 
@@ -51,9 +49,8 @@ public class DataUtil {
         for (DataRow leftRow : left.getRows()) {
             boolean matchFound = false;
             for (DataRow rightRow : right.getRows()) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
-                values.putAll(rightRow.getCells());
+                List<DataValue> values = new ArrayList<>(leftRow.getValues());
+                values.addAll(rightRow.getValues());
                 DataRow row = new DataRow(values);
                 if (row.matchPredicate(sc)) {
                     rows.add(row);
@@ -61,8 +58,8 @@ public class DataUtil {
                 }
             }
             if (!matchFound) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
+                List<DataValue> values =
+                        new ArrayList<>(leftRow.getValues());
                 rows.add(new DataRow(values));
             }
         }
@@ -80,9 +77,8 @@ public class DataUtil {
         for (DataRow rightRow : right.getRows()) {
             boolean matchFound = false;
             for (DataRow leftRow : left.getRows()) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(leftRow.getCells());
-                values.putAll(rightRow.getCells());
+                List<DataValue> values = new ArrayList<>(leftRow.getValues());
+                values.addAll(rightRow.getValues());
                 DataRow row = new DataRow(values);
                 if (row.matchPredicate(sc)) {
                     rows.add(row);
@@ -90,8 +86,8 @@ public class DataUtil {
                 }
             }
             if (!matchFound) {
-                Map<DataHeader, Object> values =
-                        new HashMap<>(rightRow.getCells());
+                List<DataValue> values =
+                        new ArrayList<>(rightRow.getValues());
                 rows.add(new DataRow(values));
             }
         }
@@ -106,8 +102,8 @@ public class DataUtil {
 
         for (DataRow row : dataSet.getRows()) {
             List<Object> values = new ArrayList<>();
-            for (DataHeader cr : dataSet.getColumns()) {
-                values.add(row.getCells().get(cr));
+            for (DataValue value : row.getValues()) {
+                values.add(value.getValue());
             }
             queryResultRows.add(new QueryResultRowImpl(values));
         }
@@ -138,10 +134,10 @@ public class DataUtil {
 
         List<DataRow> resultRows = new ArrayList<>();
         for (DataRow row : dataSet.getRows()) {
-            Map<DataHeader, Object> values = new HashMap<>();
+            List<DataValue> values = new ArrayList<>();
             for (int i = 0; i < columns.size(); i++) {
-                values.put(columns.get(i),
-                        row.evaluateColumnExpr(columnExpressions.get(i)).getValue());
+                values.add(new DataValue(columns.get(i),
+                        row.evaluateColumnExpr(columnExpressions.get(i)).getValue()));
             }
             resultRows.add(new DataRow(values));
         }

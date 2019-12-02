@@ -104,10 +104,12 @@ public final class LocalFileDbServer implements SqlServer {
         return this.getDatabase(databaseName).getTables();
     }
 
-    @Override public void connect() throws SqlException {
+    @Override
+    public void connect() throws SqlException {
     }
 
-    @Override public void close() throws SqlException {
+    @Override
+    public void close() throws SqlException {
     }
 
     private void createDatabase(CreateDatabaseQuery query)
@@ -225,12 +227,13 @@ public final class LocalFileDbServer implements SqlServer {
 
             resultRows = new ArrayList<>();
             for (DataGroup group : groups) {
-                Map<DataHeader, Object> values = new HashMap<>();
+                List<DataValue> values = new ArrayList<>();
                 for (ColumnExpression ce : selectedExpressions) {
                     String columnName = ce.getAlias().isEmpty() ? ce.toString() :
                             ce.getAlias();
-                    values.put(new DataHeader(columnName),
-                            group.evaluateColumnExpr(ce).getValue());
+
+                    values.add(new DataValue(new DataHeader(columnName),
+                            group.evaluateColumnExpr(ce).getValue()));
                 }
                 resultRows.add(new DataRow(values));
             }
@@ -352,7 +355,7 @@ public final class LocalFileDbServer implements SqlServer {
         Iterator<DataSet> it = dataSets.iterator();
         DataSet resultSet = it.next();
         while (it.hasNext()) {
-            resultSet = resultSet.joinWith(it.next());
+            resultSet = resultSet.productWith(it.next());
         }
         return resultSet;
     }
@@ -387,8 +390,7 @@ public final class LocalFileDbServer implements SqlServer {
             throws SqlException {
 
         // first, get a result of subquery.
-        DataSet dataSet =
-                getInternalQueryResult(tr.getSelectQuery());
+        DataSet dataSet = getInternalQueryResult(tr.getSelectQuery());
         String alias = tr.getAlias();
         if (alias.isEmpty()) {
             return dataSet;
@@ -397,17 +399,17 @@ public final class LocalFileDbServer implements SqlServer {
         // second, replace table name with the alias everywhere in the result data.
         List<DataHeader> newColumns = new ArrayList<>();
         for (DataHeader cr : dataSet.getColumns()) {
-            newColumns.add(new DataHeader(cr.getSqlType(), "", alias,
+            newColumns.add(new DataHeader("", alias,
                     cr.getColumnName()));
         }
         List<DataRow> newRows = new ArrayList<>();
         for (DataRow row : dataSet.getRows()) {
-            Map<DataHeader, Object> values = new HashMap<>();
-            for (Map.Entry<DataHeader, Object> entry : row.getCells()
-                    .entrySet()) {
-                values.put(new DataHeader(entry.getKey().getSqlType(), "", alias,
-                                entry.getKey().getColumnName()),
-                        entry.getValue());
+            List<DataValue> values = new ArrayList<>();
+            for (DataValue value : row.getValues()) {
+                DataHeader oldHeader = value.getHeader();
+                DataHeader header = new DataHeader("", alias,
+                        oldHeader.getColumnName());
+                values.add(new DataValue(header, value.getValue()));
             }
             newRows.add(new DataRow(values));
         }

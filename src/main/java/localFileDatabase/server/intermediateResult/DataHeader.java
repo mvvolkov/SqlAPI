@@ -1,8 +1,7 @@
 package localFileDatabase.server.intermediateResult;
 
-import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
-import sqlapi.metadata.SqlType;
+import sqlapi.columnExpr.ColumnRef;
 
 import java.util.Objects;
 
@@ -20,14 +19,9 @@ public final class DataHeader {
     private final String columnName;
 
 
-    private SqlType sqlType;
-
-
-    public DataHeader(SqlType sqlType,
-                      @NotNull String databaseName,
+    public DataHeader(@NotNull String databaseName,
                       @NotNull String tableName,
                       @NotNull String columnName) {
-        this.sqlType = sqlType;
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
@@ -36,7 +30,11 @@ public final class DataHeader {
 
 
     public DataHeader(@NotNull String columnName) {
-        this(null, "", "", columnName);
+        this("", "", columnName);
+    }
+
+    public DataHeader() {
+        this("", "", "");
     }
 
 
@@ -56,10 +54,6 @@ public final class DataHeader {
         return tableName;
     }
 
-
-    public SqlType getSqlType() {
-        return sqlType;
-    }
 
     @NotNull
     public String getDatabaseName() {

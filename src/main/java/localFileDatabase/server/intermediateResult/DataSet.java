@@ -1,19 +1,17 @@
 package localFileDatabase.server.intermediateResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class DataSet {
 
 
     private final List<DataHeader> columns;
-    private final List<DataRow> rows;
 
-    public DataSet(List<DataHeader> columns, List<DataRow> rows) {
-        this.columns = columns;
-        this.rows = rows;
+    private final Collection<DataRow> rows;
+
+    public DataSet(List<DataHeader> columns, Collection<DataRow> rows) {
+        this.columns = Collections.unmodifiableList(columns);
+        this.rows = Collections.unmodifiableCollection(rows);
     }
 
 
@@ -21,19 +19,19 @@ public final class DataSet {
         return columns;
     }
 
-    public List<DataRow> getRows() {
+    public Collection<DataRow> getRows() {
         return rows;
     }
 
-    public DataSet joinWith(DataSet otherSet) {
+    public DataSet productWith(DataSet otherSet) {
 
         List<DataHeader> newColumns = new ArrayList<>(columns);
         newColumns.addAll(otherSet.getColumns());
         List<DataRow> newRows = new ArrayList<>();
         for (DataRow row : rows) {
             for (DataRow otherRow : otherSet.getRows()) {
-                Map<DataHeader, Object> newValues = new HashMap<>(row.getCells());
-                newValues.putAll(otherRow.getCells());
+                List<DataValue> newValues = new ArrayList<>(row.getValues());
+                newValues.addAll(otherRow.getValues());
                 newRows.add(new DataRow(newValues));
             }
         }

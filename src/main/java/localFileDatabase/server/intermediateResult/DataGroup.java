@@ -20,7 +20,7 @@ public final class DataGroup {
         this.rows = rows;
     }
 
-    public SqlValue evaluateColumnExpr(ColumnExpression ce)
+    public DataValue evaluateColumnExpr(ColumnExpression ce)
             throws SqlException {
 
         if (ce instanceof BinaryColumnExpression) {
@@ -31,7 +31,7 @@ public final class DataGroup {
         }
         if (ce instanceof ColumnValue) {
             Object value = ((ColumnValue) ce).getValue();
-            return new SqlValue(SqlValue.getSqlType(value), value);
+            return new DataValue(new DataHeader(), value);
         }
         if (ce instanceof AggregateFunction) {
             return evaluateAggregateFunction((AggregateFunction) ce);
@@ -40,28 +40,28 @@ public final class DataGroup {
     }
 
 
-    private SqlValue evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+    private DataValue evaluateBinaryColumnExpr(BinaryColumnExpression bce)
             throws SqlException {
-        SqlValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
-        SqlValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
+        DataValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
+        DataValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
 
         if (bce instanceof SumColumnExpression) {
-            return DataRow.evaluateSumColumnExpr(leftValue, rightValue);
+            return leftValue.add(rightValue);
         }
         if (bce instanceof DiffColumnExpression) {
-            return DataRow.evaluateDiffColumnExpr(leftValue, rightValue);
+            return leftValue.subtract(rightValue);
         }
         if (bce instanceof ProductColumnExpression) {
-            return DataRow.evaluateProductColumnExpr(leftValue, rightValue);
+            return leftValue.multiply(rightValue);
         }
         if (bce instanceof DivisionColumnExpression) {
-            return DataRow.evaluateDivisionColumnExpr(leftValue, rightValue);
+            return leftValue.divide(rightValue);
         }
         throw new UnsupportedColumnExprTypeException(bce);
     }
 
 
-    private SqlValue evaluateColumnRef(ColumnRef cr)
+    private DataValue evaluateColumnRef(ColumnRef cr)
             throws SqlException {
 
         if (!groupedByColumns.contains(new DataHeader(cr))) {
@@ -73,7 +73,7 @@ public final class DataGroup {
 
     }
 
-    private SqlValue evaluateAggregateFunction(AggregateFunction af)
+    private DataValue evaluateAggregateFunction(AggregateFunction af)
             throws SqlException {
 
         if (af instanceof CountAggregateFunction) {
@@ -94,7 +94,7 @@ public final class DataGroup {
         throw new UnsupportedAggregateFunctionTypeException(af);
     }
 
-    private SqlValue getCount(ColumnRef cr)
+    private DataValue getCount(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
         int count = 0;
         for (DataRow row : rows) {
@@ -103,147 +103,96 @@ public final class DataGroup {
                 count++;
             }
         }
-        return new SqlValue(SqlType.INTEGER, count);
+        return new DataValue(new DataHeader(), count);
     }
 
-    private Collection<SqlValue> getValues(ColumnRef cr)
+    private Collection<DataValue> getValues(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
         // result type
         SqlType type = null;
-        Collection<SqlValue> values = new ArrayList<>();
+        Collection<DataValue> values = new ArrayList<>();
         for (DataRow row : rows) {
-            SqlValue value = row.evaluateColumnRef(cr);
-            if (value.getValue() == null || value.getSqlType() == null) {
+            DataValue value = row.evaluateColumnRef(cr);
+            if (value.getValue() == null) {
                 //"Null value can not be used in aggregate function except for COUNT(*)");
                 throw new WrongValueTypeException();
-            }
-            if (type == null) {
-                type = value.getSqlType();
-            } else {
-                if (type != value.getSqlType()) {
-                    throw new WrongValueTypeException();
-                }
             }
             values.add(value);
         }
         return values;
     }
 
-    private SqlValue getSum(ColumnRef cr)
+    private DataValue getSum(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
 
-        Collection<SqlValue> values = this.getValues(cr);
+        Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new SqlValue(null, null);
+            return new DataValue(new DataHeader(), null);
         }
-        SqlType sqlType = values.iterator().next().getSqlType();
-        if (sqlType == SqlType.INTEGER) {
-            int sum = 0;
-            for (SqlValue value : values) {
-                sum += (int) value.getValue();
-            }
-            return new SqlValue(sqlType, sum);
+        DataValue sum = new DataValue(new DataHeader(), 0);
+        for (DataValue value : values) {
+            sum = sum.add(value);
         }
-        throw new WrongValueTypeException();
+        return sum;
     }
 
-    private SqlValue getAvg(ColumnRef cr)
+    private DataValue getAvg(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
 
-        Collection<SqlValue> values = this.getValues(cr);
+        Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new SqlValue(null, null);
+            return new DataValue(new DataHeader(), null);
         }
-        SqlType sqlType = values.iterator().next().getSqlType();
-        if (sqlType == SqlType.INTEGER) {
-            int sum = 0;
-            for (SqlValue value : values) {
-                sum += (int) value.getValue();
-            }
-            return new SqlValue(sqlType, sum / values.size());
+        DataValue sum = new DataValue(new DataHeader(), 0);
+        for (DataValue value : values) {
+            sum = sum.add(value);
         }
-        throw new WrongValueTypeException();
+        return sum.divide(new DataValue(new DataHeader(), values.size()));
     }
 
-    private SqlValue getMax(ColumnRef cr)
+    private DataValue getMax(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
-        Collection<SqlValue> values = this.getValues(cr);
+        Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new SqlValue(null, null);
+            return new DataValue(new DataHeader(), null);
         }
-        SqlType sqlType = values.iterator().next().getSqlType();
-        if (sqlType == SqlType.INTEGER) {
-            Integer maxValue = null;
-            for (SqlValue sqlValue : values) {
-                Integer value = (Integer) sqlValue.getValue();
-                if (maxValue == null) {
-                    maxValue = value;
-                    continue;
-                }
-                if (value.compareTo(maxValue) > 0) {
-                    maxValue = value;
-                }
+        DataValue maxValue = null;
+
+        for (DataValue value : values) {
+            if (maxValue == null) {
+                maxValue = value;
+                continue;
             }
-            return new SqlValue(sqlType, maxValue);
-        }
-        if (sqlType == SqlType.VARCHAR) {
-            String maxValue = null;
-            for (SqlValue sqlValue : values) {
-                String value = (String) sqlValue.getValue();
-                if (maxValue == null) {
-                    maxValue = value;
-                    continue;
-                }
-                if (value.compareTo(maxValue) > 0) {
-                    maxValue = value;
-                }
+            if (value.getComparisonResult(maxValue) > 0) {
+                maxValue = value;
             }
-            return new SqlValue(sqlType, maxValue);
         }
-        throw new WrongValueTypeException();
+        return maxValue;
     }
 
-    private SqlValue getMin(ColumnRef cr)
+    private DataValue getMin(ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
-        Collection<SqlValue> values = this.getValues(cr);
+        Collection<DataValue> values = this.getValues(cr);
         if (values.isEmpty()) {
-            return new SqlValue(null, null);
+            return new DataValue(new DataHeader(), null);
         }
-        SqlType sqlType = values.iterator().next().getSqlType();
-        if (sqlType == SqlType.INTEGER) {
-            Integer minValue = null;
-            for (SqlValue sqlValue : values) {
-                Integer value = (Integer) sqlValue.getValue();
-                if (minValue == null) {
-                    minValue = value;
-                    continue;
-                }
-                if (value < minValue) {
-                    minValue = value;
-                }
+        DataValue minValue = null;
+
+        for (DataValue value : values) {
+            if (minValue == null) {
+                minValue = value;
+                continue;
             }
-            return new SqlValue(sqlType, minValue);
-        }
-        if (sqlType == SqlType.VARCHAR) {
-            String minValue = null;
-            for (SqlValue sqlValue : values) {
-                String value = (String) sqlValue.getValue();
-                if (minValue == null) {
-                    minValue = value;
-                    continue;
-                }
-                if (value.compareTo(minValue) < 0) {
-                    minValue = value;
-                }
+            if (value.getComparisonResult(minValue) < 0) {
+                minValue = value;
             }
-            return new SqlValue(sqlType, minValue);
         }
-        throw new WrongValueTypeException();
+        return minValue;
     }
 
     public static Collection<DataGroup> getGroups(

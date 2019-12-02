@@ -3,6 +3,7 @@ package localFileDatabase.server.persistent;
 import localFileDatabase.server.intermediateResult.DataHeader;
 import localFileDatabase.server.intermediateResult.DataRow;
 import localFileDatabase.server.intermediateResult.DataSet;
+import localFileDatabase.server.intermediateResult.DataValue;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
@@ -12,10 +13,7 @@ import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateQuery;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class PersistentTable implements Serializable, TableMetadata {
@@ -28,7 +26,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
 
     private final List<PersistentColumnMetadata> columns = new ArrayList<>();
 
-    private final List<PersistentRow> rows = new ArrayList<>();
+    private final Collection<PersistentRow> rows = new ArrayList<>();
 
     PersistentTable(String databaseName, TableMetadata tableMetadata)
             throws WrongValueTypeException {
@@ -214,15 +212,15 @@ public final class PersistentTable implements Serializable, TableMetadata {
     }
 
     private DataRow createDataRow(PersistentRow row) {
-        Map<DataHeader, Object> values = new HashMap<>();
+        List<DataValue> values = new ArrayList<>();
         for (PersistentColumnMetadata cm : columns) {
-            values.put(this.createDataHeader(cm), row.getValue(cm.getColumnName()));
+            values.add(new DataValue(this.createDataHeader(cm), row.getValue(cm.getColumnName())));
         }
         return new DataRow(values);
     }
 
     private DataHeader createDataHeader(PersistentColumnMetadata columnMetadata) {
-        return new DataHeader(columnMetadata.getSqlType(), databaseName, tableName,
+        return new DataHeader(databaseName, tableName,
                 columnMetadata.getColumnName());
     }
 
