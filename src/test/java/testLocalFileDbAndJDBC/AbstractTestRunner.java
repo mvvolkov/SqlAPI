@@ -171,16 +171,17 @@ public abstract class AbstractTestRunner {
     }
 
     static void checkHeaders(List<String> headers1, String... headers2) {
-        assertEquals(headers1.size(), headers2.length);
+        assertEquals(headers2.length, headers1.size());
         for (int i = 0; i < headers1.size(); i++) {
             assertEquals(headers2[i], headers1.get(i));
         }
     }
 
     static void checkRowExists(QueryResult queryResult, Object... values) {
-        assertEquals(queryResult.getHeaders().size(), values.length);
+        assertEquals(values.length, queryResult.getHeaders().size());
 
         for (QueryResultRow row : queryResult.getRows()) {
+            assertEquals(values.length, row.getValues().size());
             boolean rowMatch = true;
             for (int i = 0; i < queryResult.getHeaders().size(); i++) {
                 Object value = values[i];

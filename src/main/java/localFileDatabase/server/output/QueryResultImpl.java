@@ -1,4 +1,4 @@
-package localFileDatabase.server.queryResult;
+package localFileDatabase.server.output;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.queryResult.QueryResultRow;

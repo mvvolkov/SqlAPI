@@ -9,7 +9,7 @@ public final class PersistentRow implements Serializable {
 
     private final Map<String, Object> values;
 
-    public PersistentRow(Map<String, Object> values) {
+    PersistentRow(Map<String, Object> values) {
         this.values = values;
     }
 

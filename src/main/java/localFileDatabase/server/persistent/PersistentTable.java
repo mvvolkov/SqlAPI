@@ -1,16 +1,18 @@
 package localFileDatabase.server.persistent;
 
-import localFileDatabase.server.intermediateResult.DataHeader;
-import localFileDatabase.server.intermediateResult.DataRow;
-import localFileDatabase.server.intermediateResult.DataSet;
-import localFileDatabase.server.intermediateResult.DataValue;
+import clientImpl.columnExpr.ColumnExprFactory;
+import localFileDatabase.server.intermediate.ResultHeader;
+import localFileDatabase.server.intermediate.ResultRow;
+import localFileDatabase.server.intermediate.ResultValue;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.predicates.Predicate;
-import sqlapi.queries.UpdateQuery;
+import sqlapi.queries.*;
+import sqlapi.queryResult.QueryResult;
+import sqlapi.queryResult.QueryResultRow;
 
 import java.io.Serializable;
 import java.util.*;
@@ -62,6 +64,44 @@ public final class PersistentTable implements Serializable, TableMetadata {
         throw new NoSuchColumnException(columnName);
     }
 
+    public void executeQuery(TableActionQuery query) throws SqlException {
+        if (query instanceof InsertQuery) {
+            this.insert((InsertQuery) query);
+            return;
+        }
+        if (query instanceof DeleteQuery) {
+            this.delete((DeleteQuery) query);
+            return;
+        }
+        if (query instanceof UpdateQuery) {
+            this.update((UpdateQuery) query);
+            return;
+        }
+        throw new UnsupportedQueryTypeException(query);
+    }
+
+
+    private void insert(InsertQuery query)
+            throws SqlException {
+        this.insert(query.getColumns(), query.getValues());
+    }
+
+    public void insert(InsertFromSelectQuery query, QueryResult queryResult)
+            throws SqlException {
+        for (QueryResultRow row : queryResult.getRows()) {
+            List<ColumnValue> values = new ArrayList<>();
+            for (Object value : row.getValues()) {
+                values.add(ColumnExprFactory.value(value));
+            }
+            this.insert(query.getColumns(), values);
+        }
+    }
+
+    private void delete(DeleteQuery query)
+            throws SqlException {
+        this.delete(query.getPredicate());
+    }
+
 
     public void insert(List<String> columnNames, List<ColumnValue> values)
             throws WrongValueTypeException, ConstraintViolationException,
@@ -109,20 +149,20 @@ public final class PersistentTable implements Serializable, TableMetadata {
         }
         List<PersistentRow> rowsToDelete = new ArrayList<>();
         for (PersistentRow row : rows) {
-            if (this.createDataRow(row).matchPredicate(predicate)) {
+            if (this.createResultRow(row).matchPredicate(predicate)) {
                 rowsToDelete.add(row);
             }
         }
         rows.removeAll(rowsToDelete);
     }
 
-    void update(UpdateQuery stmt)
+    void update(UpdateQuery query)
             throws SqlException {
 
         for (PersistentRow row : rows) {
-            DataRow irr = this.createDataRow(row);
-            if (irr.matchPredicate(stmt.getPredicate())) {
-                for (AssignmentOperation ao : stmt.getAssignmentOperations()) {
+            ResultRow irr = this.createResultRow(row);
+            if (irr.matchPredicate(query.getPredicate())) {
+                for (AssignmentOperation ao : query.getAssignmentOperations()) {
                     String columnName = ao.getColumnName();
                     Object newValue = irr.evaluateColumnExpr(ao.getValue()).getValue();
                     this.checkConstraints(this.getColumnMetadata(columnName), newValue);
@@ -202,25 +242,27 @@ public final class PersistentTable implements Serializable, TableMetadata {
         }
     }
 
-
-    public DataSet createDataSet() {
-        List<DataHeader> headers = columns.stream().map(this::createDataHeader).collect(
+    public List<ResultHeader> getResultHeaders() {
+        return columns.stream().map(this::createResultHeader).collect(
                 Collectors.toList());
-        List<DataRow> resultRows = rows.stream().map(this::createDataRow).collect(
-                Collectors.toList());
-        return new DataSet(headers, resultRows);
     }
 
-    private DataRow createDataRow(PersistentRow row) {
-        List<DataValue> values = new ArrayList<>();
+    public List<ResultRow> getResultRows() {
+        return rows.stream().map(this::createResultRow).collect(
+                Collectors.toList());
+    }
+
+
+    private ResultRow createResultRow(PersistentRow row) {
+        List<ResultValue> values = new ArrayList<>();
         for (PersistentColumnMetadata cm : columns) {
-            values.add(new DataValue(this.createDataHeader(cm), row.getValue(cm.getColumnName())));
+            values.add(new ResultValue(this.createResultHeader(cm), row.getValue(cm.getColumnName())));
         }
-        return new DataRow(values);
+        return new ResultRow(values);
     }
 
-    private DataHeader createDataHeader(PersistentColumnMetadata columnMetadata) {
-        return new DataHeader(databaseName, tableName,
+    private ResultHeader createResultHeader(PersistentColumnMetadata columnMetadata) {
+        return new ResultHeader(databaseName, tableName,
                 columnMetadata.getColumnName());
     }
 

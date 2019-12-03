@@ -1,4 +1,4 @@
-package localFileDatabase.server.intermediateResult;
+package localFileDatabase.server.intermediate;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class DataHeader {
+public final class ResultHeader {
 
 
     @NotNull
@@ -22,9 +22,9 @@ public final class DataHeader {
     private final String columnName;
 
 
-    public DataHeader(@NotNull String databaseName,
-                      @NotNull String tableName,
-                      @NotNull String columnName) {
+    public ResultHeader(@NotNull String databaseName,
+                        @NotNull String tableName,
+                        @NotNull String columnName) {
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.columnName = columnName;
@@ -32,16 +32,16 @@ public final class DataHeader {
     }
 
 
-    public DataHeader(@NotNull String columnName) {
+    public ResultHeader(@NotNull String columnName) {
         this("", "", columnName);
     }
 
-    public DataHeader() {
+    public ResultHeader() {
         this("", "", "");
     }
 
 
-    public DataHeader(@NotNull ColumnRef columnRef) {
+    public ResultHeader(@NotNull ColumnRef columnRef) {
         this.databaseName = columnRef.getDatabaseName();
         this.tableName = columnRef.getTableName();
         this.columnName = columnRef.getColumnName();
@@ -67,10 +67,10 @@ public final class DataHeader {
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
-        if (!(obj instanceof DataHeader)) {
+        if (!(obj instanceof ResultHeader)) {
             return false;
         }
-        DataHeader cr = (DataHeader) obj;
+        ResultHeader cr = (ResultHeader) obj;
         return Objects.equals(databaseName, cr.databaseName)
                 && Objects.equals(tableName, cr.tableName)
                 && Objects.equals(columnName, cr.columnName);
@@ -95,18 +95,18 @@ public final class DataHeader {
         return sb.toString();
     }
 
-    public static List<DataHeader> getSelectedColumns(
+    public static List<ResultHeader> getSelectedColumns(
             List<ColumnExpression> columnExpressions) {
 
-        List<DataHeader> resultColumns = new ArrayList<>();
+        List<ResultHeader> resultColumns = new ArrayList<>();
         for (ColumnExpression columnExpression : columnExpressions) {
             if (!columnExpression.getAlias().isEmpty()) {
                 resultColumns
-                        .add(new DataHeader((columnExpression).getAlias()));
+                        .add(new ResultHeader((columnExpression).getAlias()));
             } else if (columnExpression instanceof ColumnRef) {
-                resultColumns.add(new DataHeader((ColumnRef) columnExpression));
+                resultColumns.add(new ResultHeader((ColumnRef) columnExpression));
             } else {
-                resultColumns.add(new DataHeader(columnExpression.toString()));
+                resultColumns.add(new ResultHeader(columnExpression.toString()));
             }
         }
         return resultColumns;

@@ -6,7 +6,7 @@ import sqlapi.metadata.ColumnConstraintType;
 import java.io.Serializable;
 import java.util.List;
 
-public class PersistentColumnConstraint implements ColumnConstraint, Serializable {
+public final class PersistentColumnConstraint implements ColumnConstraint, Serializable {
 
     public static final long serialVersionUID = 2486445454968848262L;
 
@@ -14,7 +14,7 @@ public class PersistentColumnConstraint implements ColumnConstraint, Serializabl
 
     private final List<Object> parameters;
 
-    public PersistentColumnConstraint(ColumnConstraint constraint) {
+    PersistentColumnConstraint(ColumnConstraint constraint) {
         this.type = constraint.getConstraintType();
         this.parameters = constraint.getParameters();
     }
