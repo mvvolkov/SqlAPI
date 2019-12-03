@@ -5,7 +5,6 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDatabaseServerFactory;
-import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -49,10 +48,10 @@ public abstract class AbstractTestRunner {
 //                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
 //                        "=false&serverTimezone=Europe/Moscow",
 //                "root", "mpsjetbrains2019");
-        SqlServer mySqlServer = new MySQL_JDBC_Server(
-                "jdbc:mysql://sql7.freesqldatabase.com:3306",
-                "sql7314024", "9hc9cPjLjg");
-        servers.add(mySqlServer);
+//        SqlServer mySqlServer = new MySQL_JDBC_Server(
+//                "jdbc:mysql://sql7.freesqldatabase.com:3306",
+//                "sql7314024", "9hc9cPjLjg");
+//        servers.add(mySqlServer);
         return servers;
     }
 

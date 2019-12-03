@@ -49,20 +49,20 @@ public final class DataSet {
     public DataSet getFilteredResult(Predicate predicate)
             throws SqlException {
 
-        List<DataRow> rows = new ArrayList<>();
+        List<DataRow> newRows = new ArrayList<>();
         for (DataRow row : rows) {
             if (row.matchPredicate(predicate)) {
-                rows.add(row);
+                newRows.add(row);
             }
         }
-        return new DataSet(columns, rows);
+        return new DataSet(columns, newRows);
     }
 
     public DataSet innerJoin(DataSet right, Predicate sc)
             throws SqlException {
 
         DataSet dataSet = this.productWith(right);
-        return this.getFilteredResult(sc);
+        return dataSet.getFilteredResult(sc);
     }
 
     public DataSet leftOuterJoin(DataSet right, Predicate sc)
