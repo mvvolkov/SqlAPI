@@ -1,6 +1,7 @@
 package localFileDatabase.server.intermediate;
 
 import localFileDatabase.server.LocalFileDbServer;
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.*;
 import sqlapi.misc.SelectedItem;
@@ -10,23 +11,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Class for group of rows.
+ */
 final class ResultGroup {
 
+    @NotNull
     private LocalFileDbServer server;
 
+    @NotNull
     private final Collection<ResultHeader> groupedByColumns;
 
+    @NotNull
     private final Collection<ResultRow> rows;
 
 
-    ResultGroup(LocalFileDbServer server, Collection<ResultHeader> groupedByColumns, Collection<ResultRow> rows) {
+    ResultGroup(@NotNull LocalFileDbServer server,
+                @NotNull Collection<ResultHeader> groupedByColumns,
+                @NotNull Collection<ResultRow> rows) {
         this.server = server;
         this.groupedByColumns = groupedByColumns;
         this.rows = rows;
     }
 
 
-    ResultRow getSelectedValues(List<SelectedItem> selectedItems, List<ResultHeader> headers) throws SqlException {
+    @NotNull
+    ResultRow getSelectedValues(@NotNull List<SelectedItem> selectedItems,
+                                @NotNull List<ResultHeader> headers) throws SqlException {
 
         List<ResultValue> newValues = new ArrayList<>();
         if (selectedItems.isEmpty()) {
@@ -37,7 +48,8 @@ final class ResultGroup {
         for (SelectedItem selectedItem : selectedItems) {
             if (selectedItem instanceof DatabaseTableReference) {
                 DatabaseTableReference tableRef = (DatabaseTableReference) selectedItem;
-                List<ResultHeader> tableHeaders = server.getTable(tableRef).getResultHeaders();
+                List<ResultHeader> tableHeaders =
+                        server.getTable(tableRef).getResultHeaders();
                 for (ResultHeader header : tableHeaders) {
                     newValues.add(this.evaluateHeaderValue(header));
                 }
@@ -49,7 +61,8 @@ final class ResultGroup {
     }
 
 
-    private ResultValue evaluateColumnExpr(ColumnExpression ce)
+    @NotNull
+    private ResultValue evaluateColumnExpr(@NotNull ColumnExpression ce)
             throws SqlException {
 
         if (ce instanceof BinaryColumnExpression) {
@@ -68,7 +81,8 @@ final class ResultGroup {
     }
 
 
-    private ResultValue evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+    @NotNull
+    private ResultValue evaluateBinaryColumnExpr(@NotNull BinaryColumnExpression bce)
             throws SqlException {
         ResultValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
         ResultValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
@@ -88,28 +102,32 @@ final class ResultGroup {
         throw new UnsupportedColumnExprTypeException(bce);
     }
 
-
-    private ResultValue evaluateColumnRef(ColumnRef cr)
+    @NotNull
+    private ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws SqlException {
 
-        if (!groupedByColumns.isEmpty() && !groupedByColumns.contains(new ResultHeader(cr))) {
+        if (!groupedByColumns.isEmpty() &&
+                !groupedByColumns.contains(new ResultHeader(cr.getColumnName()))) {
             throw new InvalidQueryException("Column can not be used outside aggregate " +
                     "function: " + cr.getColumnName());
         }
         return rows.iterator().next().evaluateColumnExpr(cr);
     }
 
-    private ResultValue evaluateHeaderValue(ResultHeader header)
+    @NotNull
+    private ResultValue evaluateHeaderValue(@NotNull ResultHeader header)
             throws SqlException {
 
-        if (!groupedByColumns.isEmpty() && !groupedByColumns.contains(header)) {
+        if (!groupedByColumns.isEmpty() &&
+                !groupedByColumns.contains(new ResultHeader(header.getColumnName()))) {
             throw new InvalidQueryException("Column can not be used outside aggregate " +
                     "function: " + header.getColumnName());
         }
         return rows.iterator().next().evaluateHeaderValue(header);
     }
 
-    private ResultValue evaluateAggregateFunction(AggregateFunction af)
+    @NotNull
+    private ResultValue evaluateAggregateFunction(@NotNull AggregateFunction af)
             throws SqlException {
 
         if (af instanceof CountAggregateFunction) {
@@ -130,7 +148,8 @@ final class ResultGroup {
         throw new UnsupportedAggregateFunctionTypeException(af);
     }
 
-    private ResultValue getCount(ColumnRef cr)
+    @NotNull
+    private ResultValue getCount(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
         int count = 0;
         for (ResultRow row : rows) {
@@ -142,36 +161,28 @@ final class ResultGroup {
         return new ResultValue(count);
     }
 
-    private Collection<ResultValue> getValues(ColumnRef cr)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            WrongValueTypeException {
+    @NotNull
+    private Collection<ResultValue> getColumnValues(@NotNull ColumnRef cr)
+            throws NoSuchColumnException, AmbiguousColumnNameException {
 
         Collection<ResultValue> values = new ArrayList<>();
         for (ResultRow row : rows) {
             ResultValue value = row.evaluateColumnRef(cr);
-            if (value.getValue() == null) {
-                //"Null value can not be used in aggregate function except for COUNT(*)");
-                throw new WrongValueTypeException();
+            if (value.getValue() != null) {
+                values.add(value);
             }
-            values.add(value);
         }
         return values;
     }
 
-    private ResultValue getSum(ColumnRef cr)
+    @NotNull
+    private ResultValue getSum(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
 
-        Collection<ResultValue> values = this.getValues(cr);
-        if (values.isEmpty()) {
-            return ResultValue.nullValue();
-        }
-        ResultValue sumValue = new ResultValue(0);
-        for (ResultValue value : values) {
-            if (value.isNull()) {
-                continue;
-            }
-            if (sumValue == null) {
+        ResultValue sumValue = ResultValue.nullValue();
+        for (ResultValue value : this.getColumnValues(cr)) {
+            if (sumValue.isNull()) {
                 sumValue = value;
                 continue;
             }
@@ -180,42 +191,23 @@ final class ResultGroup {
         return sumValue;
     }
 
-    private ResultValue getAvg(ColumnRef cr)
+    @NotNull
+    private ResultValue getAvg(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
 
-        Collection<ResultValue> values = this.getValues(cr);
-        if (values.isEmpty()) {
-            return ResultValue.nullValue();
-        }
-        ResultValue sumValue = null;
-        for (ResultValue value : values) {
-            if (value.isNull()) {
-                continue;
-            }
-            if (sumValue == null) {
-                sumValue = value;
-                continue;
-            }
-            sumValue = sumValue.add(value);
-        }
-        return sumValue.divide(new ResultValue(values.size()));
+        Collection<ResultValue> values = this.getColumnValues(cr);
+        return this.getSum(cr).divide(new ResultValue(values.size()));
     }
 
-    private ResultValue getMax(ColumnRef cr)
+    @NotNull
+    private ResultValue getMax(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
-        Collection<ResultValue> values = this.getValues(cr);
-        if (values.isEmpty()) {
-            return ResultValue.nullValue();
-        }
-        ResultValue maxValue = null;
 
-        for (ResultValue value : values) {
-            if (value.isNull()) {
-                continue;
-            }
-            if (maxValue == null) {
+        ResultValue maxValue = ResultValue.nullValue();
+        for (ResultValue value : this.getColumnValues(cr)) {
+            if (maxValue.isNull()) {
                 maxValue = value;
                 continue;
             }
@@ -226,19 +218,14 @@ final class ResultGroup {
         return maxValue;
     }
 
-    private ResultValue getMin(ColumnRef cr)
+    @NotNull
+    private ResultValue getMin(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException,
             WrongValueTypeException {
-        Collection<ResultValue> values = this.getValues(cr);
-        if (values.isEmpty()) {
-            return ResultValue.nullValue();
-        }
-        ResultValue minValue = null;
-        for (ResultValue value : values) {
-            if (value.isNull()) {
-                continue;
-            }
-            if (minValue == null) {
+
+        ResultValue minValue = ResultValue.nullValue();
+        for (ResultValue value : this.getColumnValues(cr)) {
+            if (minValue.isNull()) {
                 minValue = value;
                 continue;
             }
@@ -248,6 +235,4 @@ final class ResultGroup {
         }
         return minValue;
     }
-
-
 }

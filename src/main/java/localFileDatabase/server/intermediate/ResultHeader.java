@@ -1,19 +1,17 @@
 package localFileDatabase.server.intermediate;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
+/**
+ * Fully qualified column name. Can be used as a key in maps.
+ */
 public final class ResultHeader {
-
 
     @NotNull
     private final String databaseName;
-
 
     @NotNull
     private final String tableName;
@@ -39,7 +37,6 @@ public final class ResultHeader {
     public ResultHeader() {
         this("", "", "");
     }
-
 
     public ResultHeader(@NotNull ColumnRef columnRef) {
         this.databaseName = columnRef.getDatabaseName();
@@ -93,22 +90,5 @@ public final class ResultHeader {
             sb.insert(0, tableName);
         }
         return sb.toString();
-    }
-
-    public static List<ResultHeader> getSelectedColumns(
-            List<ColumnExpression> columnExpressions) {
-
-        List<ResultHeader> resultColumns = new ArrayList<>();
-        for (ColumnExpression columnExpression : columnExpressions) {
-            if (!columnExpression.getAlias().isEmpty()) {
-                resultColumns
-                        .add(new ResultHeader((columnExpression).getAlias()));
-            } else if (columnExpression instanceof ColumnRef) {
-                resultColumns.add(new ResultHeader((ColumnRef) columnExpression));
-            } else {
-                resultColumns.add(new ResultHeader(columnExpression.toString()));
-            }
-        }
-        return resultColumns;
     }
 }

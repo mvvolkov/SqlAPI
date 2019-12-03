@@ -3,10 +3,11 @@ package localFileDatabase.server;
 import clientImpl.stringUtil.QueryStringUtil;
 import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import localFileDatabase.client.api.SaveDatabaseToFileQuery;
-import localFileDatabase.server.intermediate.Result;
+import localFileDatabase.server.intermediate.InternalQueryResult;
 import localFileDatabase.server.persistent.PersistentDatabase;
 import localFileDatabase.server.persistent.PersistentTable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 public final class LocalFileDbServer implements SqlServer {
 
+    @NotNull
     private final Collection<PersistentDatabase> databases = new ArrayList<>();
 
     LocalFileDbServer() {
@@ -79,7 +81,7 @@ public final class LocalFileDbServer implements SqlServer {
         } catch (SqlException se) {
             System.out.println(se.getMessage());
         }
-        return new Result(this).getQueryResult(selectQuery);
+        return new InternalQueryResult(this).getQueryResult(selectQuery);
     }
 
 
@@ -104,13 +106,13 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
     @NotNull
-    public PersistentTable getTable(DatabaseTableReference tableReference) throws
+    public PersistentTable getTable(@NotNull DatabaseTableReference tableReference) throws
             NoSuchTableException, NoSuchDatabaseException {
         return this.getDatabase(tableReference.getDatabaseName())
                 .getTable(tableReference.getTableName());
     }
 
-    private void createDatabase(CreateDatabaseQuery query)
+    private void createDatabase(@NotNull CreateDatabaseQuery query)
             throws DatabaseAlreadyExistsException {
         String databaseName = query.getDatabaseName();
         PersistentDatabase database = this.getDatabaseOrNull(databaseName);
@@ -121,7 +123,7 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
 
-    private void readDatabase(ReadDatabaseFromFileQuery query)
+    private void readDatabase(@NotNull ReadDatabaseFromFileQuery query)
             throws IOException, ClassNotFoundException, NoSuchTableException,
             NoSuchColumnException {
         PersistentDatabase database = this.getDatabaseOrNull(query.getDatabaseName());
@@ -144,7 +146,7 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
 
-    private void saveDatabase(SaveDatabaseToFileQuery query)
+    private void saveDatabase(@NotNull SaveDatabaseToFileQuery query)
             throws IOException, NoSuchDatabaseException {
         ObjectOutputStream oos = null;
         try {
@@ -159,31 +161,35 @@ public final class LocalFileDbServer implements SqlServer {
         }
     }
 
-    private void executeInsertFromSelectQuery(InsertFromSelectQuery query) throws SqlException {
-        QueryResult queryResult = new Result(this).getQueryResult(
+    private void executeInsertFromSelectQuery(@NotNull InsertFromSelectQuery query)
+            throws SqlException {
+        QueryResult queryResult = new InternalQueryResult(this).getQueryResult(
                 (query.getSelectQuery()));
         this.getDatabase(query.getDatabaseName()).getTable(query.getTableName())
                 .insert(query, queryResult);
     }
 
 
-    private void executeTableQuery(TableActionQuery query) throws SqlException {
-        this.getDatabase(query.getDatabaseName()).getTable(query.getTableName()).executeQuery(query);
+    private void executeTableQuery(@NotNull TableActionQuery query) throws SqlException {
+        this.getDatabase(query.getDatabaseName()).getTable(query.getTableName())
+                .executeQuery(query);
     }
 
-    private void createTable(CreateTableQuery query)
+    private void createTable(@NotNull CreateTableQuery query)
             throws NoSuchDatabaseException, TableAlreadyExistsException,
             WrongValueTypeException {
         this.getDatabase(query.getDatabaseName())
                 .createTable(query.getTableMetadata());
     }
 
-    private void dropTable(DropTableQuery query)
+    private void dropTable(@NotNull DropTableQuery query)
             throws NoSuchDatabaseException, NoSuchTableException {
         this.getDatabase(query.getDatabaseName()).dropTable(query.getTableName());
     }
 
-    private PersistentDatabase getDatabase(String name) throws NoSuchDatabaseException {
+    @NotNull
+    private PersistentDatabase getDatabase(@NotNull String name)
+            throws NoSuchDatabaseException {
         PersistentDatabase database = this.getDatabaseOrNull(name);
         if (database != null) {
             return database;
@@ -191,7 +197,8 @@ public final class LocalFileDbServer implements SqlServer {
         throw new NoSuchDatabaseException(name);
     }
 
-    private PersistentDatabase getDatabaseOrNull(String name) {
+    @Nullable
+    private PersistentDatabase getDatabaseOrNull(@Nullable String name) {
         for (PersistentDatabase database : databases) {
             if (database.getName().equals(name)) {
                 return database;

@@ -1,23 +1,27 @@
 package localFileDatabase.server.intermediate;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sqlapi.exceptions.WrongValueTypeException;
 
 import java.math.BigDecimal;
 
 public final class ResultValue {
 
+    @NotNull
     private final ResultHeader header;
 
+    @Nullable
     private final Object value;
 
     private static ResultValue NULL_VALUE = new ResultValue(null);
 
-    public ResultValue(ResultHeader header, Object value) {
+    public ResultValue(@NotNull ResultHeader header, @Nullable Object value) {
         this.header = header;
         this.value = value;
     }
 
-    ResultValue(Object value) {
+    ResultValue(@Nullable Object value) {
         this.header = new ResultHeader();
         this.value = value;
     }
@@ -30,15 +34,22 @@ public final class ResultValue {
         return NULL_VALUE;
     }
 
+    @NotNull
     ResultHeader getHeader() {
         return header;
     }
 
+    @Nullable
     public Object getValue() {
         return value;
     }
 
-    private static BigDecimal getBigDecimal(Object value) throws WrongValueTypeException {
+    @Nullable
+    private static BigDecimal getBigDecimal(@Nullable Object value)
+            throws WrongValueTypeException {
+        if (value == null) {
+            return null;
+        }
         if (value instanceof String) {
             try {
                 return new BigDecimal((String) value);
@@ -56,31 +67,51 @@ public final class ResultValue {
         throw new WrongValueTypeException();
     }
 
-    ResultValue add(ResultValue anotherResultValue) throws WrongValueTypeException {
+    @NotNull
+    ResultValue add(@NotNull ResultValue anotherResultValue)
+            throws WrongValueTypeException {
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
+        if (bd1 == null || bd2 == null) {
+            return ResultValue.nullValue();
+        }
         return new ResultValue(new ResultHeader(), bd1.add(bd2));
     }
 
-    ResultValue subtract(ResultValue anotherResultValue) throws WrongValueTypeException {
+    @NotNull
+    ResultValue subtract(@NotNull ResultValue anotherResultValue)
+            throws WrongValueTypeException {
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
+        if (bd1 == null || bd2 == null) {
+            return ResultValue.nullValue();
+        }
         return new ResultValue(new ResultHeader(), bd1.subtract(bd2));
     }
 
-    ResultValue multiply(ResultValue anotherResultValue) throws WrongValueTypeException {
+    @NotNull
+    ResultValue multiply(@NotNull ResultValue anotherResultValue)
+            throws WrongValueTypeException {
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
+        if (bd1 == null || bd2 == null) {
+            return ResultValue.nullValue();
+        }
         return new ResultValue(new ResultHeader(), bd1.multiply(bd2));
     }
 
-    ResultValue divide(ResultValue anotherResultValue) throws WrongValueTypeException {
+    @NotNull
+    ResultValue divide(@NotNull ResultValue anotherResultValue)
+            throws WrongValueTypeException {
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
+        if (bd1 == null || bd2 == null) {
+            return ResultValue.nullValue();
+        }
         return new ResultValue(new ResultHeader(), bd1.divide(bd2));
     }
 
-    int getComparisonResult(Object anotherValue)
+    int getComparisonResult(@Nullable Object anotherValue)
             throws WrongValueTypeException {
         if (value instanceof Number) {
             BigDecimal bd1 = getBigDecimal(value);
@@ -97,7 +128,7 @@ public final class ResultValue {
         throw new WrongValueTypeException();
     }
 
-    boolean isEqual(Object anotherValue)
+    boolean isEqual(@Nullable Object anotherValue)
             throws WrongValueTypeException {
         if (anotherValue == null && value == null) {
             return true;

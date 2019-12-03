@@ -1,27 +1,28 @@
 package localFileDatabase.server.intermediate;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.*;
 import sqlapi.exceptions.*;
-import sqlapi.misc.SelectedItem;
 import sqlapi.predicates.*;
-import sqlapi.tables.DatabaseTableReference;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class ResultRow {
 
+    @NotNull
     private final List<ResultValue> values;
 
-    public ResultRow(List<ResultValue> values) {
+    public ResultRow(@NotNull List<ResultValue> values) {
         this.values = values;
     }
 
+    @NotNull
     public List<ResultValue> getValues() {
         return values;
     }
 
-    public boolean matchPredicate(Predicate predicate)
+    public boolean matchPredicate(@NotNull Predicate predicate)
             throws SqlException {
 
         if (predicate instanceof EmptyPredicate) {
@@ -45,7 +46,7 @@ public final class ResultRow {
         throw new UnsupportedPredicateTypeException(predicate);
     }
 
-    private boolean matchCombinedPredicate(CombinedPredicate predicate)
+    private boolean matchCombinedPredicate(@NotNull CombinedPredicate predicate)
             throws SqlException {
         if (predicate instanceof AndPredicate) {
             return this.matchPredicate(predicate.getLeftPredicate()) &&
@@ -57,7 +58,7 @@ public final class ResultRow {
         throw new UnsupportedPredicateTypeException(predicate);
     }
 
-    private boolean matchBinaryPredicate(BinaryPredicate predicate)
+    private boolean matchBinaryPredicate(@NotNull BinaryPredicate predicate)
             throws SqlException {
 
 
@@ -89,7 +90,7 @@ public final class ResultRow {
         return false;
     }
 
-    private boolean matchInPredicate(ColumnInPredicate predicate)
+    private boolean matchInPredicate(@NotNull ColumnInPredicate predicate)
             throws SqlException {
 
         ResultValue value = this.evaluateColumnExpr(predicate.getColumnRef());
@@ -102,21 +103,22 @@ public final class ResultRow {
     }
 
 
-    private boolean matchIsNullPredicate(ColumnIsNullPredicate predicate)
+    private boolean matchIsNullPredicate(@NotNull ColumnIsNullPredicate predicate)
             throws SqlException {
 
         ResultValue leftValue = evaluateColumnRef(predicate.getColumnRef());
         return leftValue.getValue() == null;
     }
 
-    private boolean matchIsNotNullPredicate(ColumnIsNotNullPredicate predicate)
+    private boolean matchIsNotNullPredicate(@NotNull ColumnIsNotNullPredicate predicate)
             throws SqlException {
 
         ResultValue leftValue = evaluateColumnRef(predicate.getColumnRef());
         return leftValue.getValue() != null;
     }
 
-    public ResultValue evaluateColumnExpr(ColumnExpression ce)
+    @NotNull
+    public ResultValue evaluateColumnExpr(@NotNull ColumnExpression ce)
             throws SqlException {
 
         if (ce instanceof BinaryColumnExpression) {
@@ -131,7 +133,8 @@ public final class ResultRow {
         throw new UnsupportedColumnExprTypeException(ce);
     }
 
-    private ResultValue evaluateBinaryColumnExpr(BinaryColumnExpression bce)
+    @NotNull
+    private ResultValue evaluateBinaryColumnExpr(@NotNull BinaryColumnExpression bce)
             throws SqlException {
         ResultValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
         ResultValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
@@ -151,7 +154,10 @@ public final class ResultRow {
         throw new UnsupportedColumnExprTypeException(bce);
     }
 
-    private ResultValue evaluateColumnRef(String databaseName, String tableName, String columnName)
+    @NotNull
+    private ResultValue evaluateColumnRef(@NotNull String databaseName,
+                                          @NotNull String tableName,
+                                          @NotNull String columnName)
             throws NoSuchColumnException, AmbiguousColumnNameException {
 
         List<ResultValue> matchingValues = new ArrayList<>();
@@ -179,34 +185,21 @@ public final class ResultRow {
     }
 
 
-    ResultValue evaluateColumnRef(ColumnRef cr)
+    @NotNull
+    ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
 
-        return evaluateColumnRef(cr.getDatabaseName(), cr.getTableName(), cr.getColumnName());
+        return this.evaluateColumnRef(cr.getDatabaseName(), cr.getTableName(),
+                cr.getColumnName());
     }
 
-    ResultValue evaluateHeaderValue(ResultHeader header)
+
+    @NotNull
+    ResultValue evaluateHeaderValue(@NotNull ResultHeader header)
             throws NoSuchColumnException, AmbiguousColumnNameException {
-        return evaluateColumnRef(header.getDatabaseName(), header.getTableName(), header.getColumnName());
+        return this.evaluateColumnRef(header.getDatabaseName(), header.getTableName(),
+                header.getColumnName());
     }
 
-    ResultRow evaluateSelectedItems(List<SelectedItem> selectedItems) throws SqlException {
 
-        List<ResultValue> newValues = new ArrayList<>();
-        for (SelectedItem selectedItem : selectedItems) {
-            if (selectedItem instanceof DatabaseTableReference) {
-                DatabaseTableReference tableRef = (DatabaseTableReference) selectedItem;
-                for (ResultValue value : values) {
-                    ResultHeader header = value.getHeader();
-                    if (header.getDatabaseName().equals(tableRef.getDatabaseName()) &&
-                            header.getTableName().equals(tableRef.getTableName())) {
-                        newValues.add(this.evaluateHeaderValue(header));
-                    }
-                }
-            } else {
-                newValues.add(this.evaluateColumnExpr((ColumnExpression) selectedItem));
-            }
-        }
-        return new ResultRow(newValues);
-    }
 }
