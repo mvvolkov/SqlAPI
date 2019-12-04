@@ -34,8 +34,9 @@ import static org.junit.Assert.fail;
  */
 public class DeleteTest extends AbstractTestRunner {
 
-    public DeleteTest(SqlServer sqlServer) {
-        super(sqlServer);
+
+    public DeleteTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
 
     /**

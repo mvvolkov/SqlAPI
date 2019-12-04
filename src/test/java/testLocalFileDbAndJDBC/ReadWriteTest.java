@@ -2,10 +2,10 @@ package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
 import localFileDatabase.client.impl.FileQueryFactory;
-import localFileDatabase.server.LocalFileDatabaseServerFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
+import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
@@ -42,18 +42,18 @@ import static org.junit.Assert.fail;
  */
 public class ReadWriteTest extends AbstractTestRunner {
 
-    public ReadWriteTest(SqlServer sqlServer) {
-        super(sqlServer);
+    public ReadWriteTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
 
     @Test
     public void testReadAndWrite() {
 
-        if (!(sqlServer instanceof LocalFileDatabaseServerFactory)) {
+        if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
-        SqlServer sqlServer = LocalFileDatabaseServerFactory.getServer();
-        SqlServer sqlServer1 = LocalFileDatabaseServerFactory.getServer();
+        SqlServer sqlServer = LocalFileDbServer.getInstance();
+        SqlServer sqlServer1 = LocalFileDbServer.getInstance();
 
         try {
 

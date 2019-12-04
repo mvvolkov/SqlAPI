@@ -1,4 +1,4 @@
-package mySqlJdbcServer;
+package mySqlJdbcServer.output;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.queryResult.QueryResultRow;

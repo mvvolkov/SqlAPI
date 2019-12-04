@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import sqlapi.exceptions.WrongValueTypeException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public final class ResultValue {
 
@@ -14,7 +15,7 @@ public final class ResultValue {
     @Nullable
     private final Object value;
 
-    private static ResultValue NULL_VALUE = new ResultValue(null);
+    private static final ResultValue NULL_VALUE = new ResultValue(null);
 
     public ResultValue(@NotNull ResultHeader header, @Nullable Object value) {
         this.header = header;
@@ -44,12 +45,9 @@ public final class ResultValue {
         return value;
     }
 
-    @Nullable
-    private static BigDecimal getBigDecimal(@Nullable Object value)
+    @NotNull
+    private static BigDecimal getBigDecimal(@NotNull Object value)
             throws WrongValueTypeException {
-        if (value == null) {
-            return null;
-        }
         if (value instanceof String) {
             try {
                 return new BigDecimal((String) value);
@@ -70,48 +68,52 @@ public final class ResultValue {
     @NotNull
     ResultValue add(@NotNull ResultValue anotherResultValue)
             throws WrongValueTypeException {
-        BigDecimal bd1 = getBigDecimal(value);
-        BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
-        if (bd1 == null || bd2 == null) {
+        Object anotherValue = anotherResultValue.getValue();
+        if (value == null || anotherValue == null) {
             return ResultValue.nullValue();
         }
+        BigDecimal bd1 = getBigDecimal(value);
+        BigDecimal bd2 = getBigDecimal(anotherValue);
         return new ResultValue(new ResultHeader(), bd1.add(bd2));
     }
 
     @NotNull
     ResultValue subtract(@NotNull ResultValue anotherResultValue)
             throws WrongValueTypeException {
-        BigDecimal bd1 = getBigDecimal(value);
-        BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
-        if (bd1 == null || bd2 == null) {
+        Object anotherValue = anotherResultValue.getValue();
+        if (value == null || anotherValue == null) {
             return ResultValue.nullValue();
         }
+        BigDecimal bd1 = getBigDecimal(value);
+        BigDecimal bd2 = getBigDecimal(anotherValue);
         return new ResultValue(new ResultHeader(), bd1.subtract(bd2));
     }
 
     @NotNull
     ResultValue multiply(@NotNull ResultValue anotherResultValue)
             throws WrongValueTypeException {
-        BigDecimal bd1 = getBigDecimal(value);
-        BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
-        if (bd1 == null || bd2 == null) {
+        Object anotherValue = anotherResultValue.getValue();
+        if (value == null || anotherValue == null) {
             return ResultValue.nullValue();
         }
+        BigDecimal bd1 = getBigDecimal(value);
+        BigDecimal bd2 = getBigDecimal(anotherValue);
         return new ResultValue(new ResultHeader(), bd1.multiply(bd2));
     }
 
     @NotNull
     ResultValue divide(@NotNull ResultValue anotherResultValue)
             throws WrongValueTypeException {
-        BigDecimal bd1 = getBigDecimal(value);
-        BigDecimal bd2 = getBigDecimal(anotherResultValue.getValue());
-        if (bd1 == null || bd2 == null) {
+        Object anotherValue = anotherResultValue.getValue();
+        if (value == null || anotherValue == null) {
             return ResultValue.nullValue();
         }
-        return new ResultValue(new ResultHeader(), bd1.divide(bd2));
+        BigDecimal bd1 = getBigDecimal(value);
+        BigDecimal bd2 = getBigDecimal(anotherValue);
+        return new ResultValue(new ResultHeader(), bd1.divide(bd2, RoundingMode.FLOOR));
     }
 
-    int getComparisonResult(@Nullable Object anotherValue)
+    int getComparisonResult(@NotNull Object anotherValue)
             throws WrongValueTypeException {
         if (value instanceof Number) {
             BigDecimal bd1 = getBigDecimal(value);
@@ -130,8 +132,8 @@ public final class ResultValue {
 
     boolean isEqual(@Nullable Object anotherValue)
             throws WrongValueTypeException {
-        if (anotherValue == null && value == null) {
-            return true;
+        if (anotherValue == null) {
+            return value == null;
         }
         return this.getComparisonResult(anotherValue) == 0;
     }

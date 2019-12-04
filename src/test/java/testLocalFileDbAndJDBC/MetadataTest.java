@@ -36,8 +36,9 @@ import static org.junit.Assert.*;
  */
 public class MetadataTest extends AbstractTestRunner {
 
-    public MetadataTest(SqlServer sqlServer) {
-        super(sqlServer);
+
+    public MetadataTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
 
     @Test
@@ -179,7 +180,7 @@ public class MetadataTest extends AbstractTestRunner {
     }
 
     @Test
-    public void testDropTable() throws SqlException {
+    public void testDropTable() {
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }

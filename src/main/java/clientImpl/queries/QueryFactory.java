@@ -20,8 +20,14 @@ public class QueryFactory {
     private QueryFactory() {
     }
 
-    public static @NotNull CreateDatabaseQuery createDatabase(@NotNull String databaseName) {
-        return new CreateDatabaseQueryImpl(databaseName);
+    public static @NotNull CreateDatabaseQuery createDatabase(
+            @NotNull String databaseName) {
+        return new CreateDatabaseQueryImpl(databaseName, false);
+    }
+
+    public static @NotNull CreateDatabaseQuery createDatabaseIfNotExists(
+            @NotNull String databaseName) {
+        return new CreateDatabaseQueryImpl(databaseName, true);
     }
 
     public static @NotNull CreateTableQuery createTable(@NotNull String databaseName,

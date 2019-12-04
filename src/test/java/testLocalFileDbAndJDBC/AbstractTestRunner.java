@@ -4,7 +4,7 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
-import localFileDatabase.server.LocalFileDatabaseServerFactory;
+import localFileDatabase.server.LocalFileDbServer;
 import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
@@ -25,34 +25,38 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public abstract class AbstractTestRunner {
 
-    protected SqlServer sqlServer;
+    protected final SqlServer sqlServer;
 
-    protected static String databaseName = "sql7314024";
+    protected final String databaseName;
 
-    public AbstractTestRunner(SqlServer sqlServer) {
+    public AbstractTestRunner(SqlServer sqlServer, String databaseName) {
         this.sqlServer = sqlServer;
+        this.databaseName = databaseName;
     }
 
     @Parameterized.Parameters
-    public static Collection<SqlServer> getServers() {
+    public static Iterable<Object[]> getServers() {
 
-        Collection<SqlServer> servers = new ArrayList<>();
 
-        SqlServer localFileDbServer = LocalFileDatabaseServerFactory.getServer();
-        try {
-            localFileDbServer.executeQuery(QueryFactory.createDatabase(databaseName));
-            servers.add(localFileDbServer);
-        } catch (SqlException ignored) {
-        }
-//        SqlServer mySqlServer = new MySQL_JDBC_Server(
-//                "jdbc:mysql://localhost:3306/test2019?useUnicode=true" +
-//                        "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode" +
-//                        "=false&serverTimezone=Europe/Moscow",
-//                "root", "mpsjetbrains2019");
-        SqlServer mySqlServer = new MySQL_JDBC_Server(
+        Collection<Object[]> servers = new ArrayList<>();
+
+        servers.add(new Object[]{LocalFileDbServer.getInstance(), "DB1"});
+
+        servers.add(new Object[]{new MySQL_JDBC_Server(
                 "jdbc:mysql://sql7.freesqldatabase.com:3306",
-                "sql7314024", "9hc9cPjLjg");
-        servers.add(mySqlServer);
+                "sql7314024", "9hc9cPjLjg"), "sql7314024"});
+
+        // slow connection
+//        servers.add(new Object[]{new MySQL_JDBC_Server(
+//                "jdbc:mysql://db4free.net:3306",
+//                "mvolkov_test2019", "mpsjetbrains2019"), "mvolkov_test2019"});
+
+        servers.add(new Object[]{new MySQL_JDBC_Server(
+                "jdbc:mysql://localhost:3306/test2019?useUnicode=true"
+                        + "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode"
+                        + "=false&serverTimezone=Europe/Moscow",
+                "root", "mpsjetbrains2019"), "test2019"});
+
         return servers;
     }
 
@@ -62,6 +66,7 @@ public abstract class AbstractTestRunner {
         System.out.println("===== SET UP =====");
         try {
             sqlServer.connect();
+            sqlServer.executeQuery(QueryFactory.createDatabaseIfNotExists(databaseName));
             this.createTable1();
             this.createTable2();
         } catch (SqlException e) {
@@ -157,10 +162,7 @@ public abstract class AbstractTestRunner {
     static void printResultSet(QueryResult queryResult) {
 
         StringBuilder sb = new StringBuilder();
-
-        String columnsHeaders = String.join(", ", queryResult.getHeaders());
-
-        sb.append(columnsHeaders);
+        sb.append(String.join(", ", queryResult.getHeaders()));
         for (QueryResultRow row : queryResult.getRows()) {
             String rowString =
                     row.getValues().stream().map(String::valueOf)
@@ -201,7 +203,8 @@ public abstract class AbstractTestRunner {
                         rowMatch = false;
                         break;
                     }
-                    BigDecimal b1 = BigDecimal.valueOf(((Number) value).doubleValue());
+                    BigDecimal b1 =
+                            BigDecimal.valueOf(((Number) value).doubleValue());
                     BigDecimal b2 =
                             BigDecimal.valueOf(((Number) resultValue).doubleValue());
                     if (b1.compareTo(b2) != 0) {

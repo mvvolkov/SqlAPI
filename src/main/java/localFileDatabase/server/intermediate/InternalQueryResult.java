@@ -28,16 +28,17 @@ public final class InternalQueryResult {
     private final LocalFileDbServer server;
 
     @NotNull
-    private List<ResultHeader> headers;
+    private final List<ResultHeader> headers;
 
     @NotNull
-    private Collection<ResultRow> rows;
+    private final Collection<ResultRow> rows;
 
     public InternalQueryResult(@NotNull LocalFileDbServer server) {
         this(server, Collections.emptyList(), Collections.emptyList());
     }
 
-    private InternalQueryResult(@NotNull LocalFileDbServer server, @NotNull List<ResultHeader> headers,
+    private InternalQueryResult(@NotNull LocalFileDbServer server,
+                                @NotNull List<ResultHeader> headers,
                                 @NotNull Collection<ResultRow> rows) {
         this.server = server;
         this.headers = Collections.unmodifiableList(headers);
@@ -104,7 +105,8 @@ public final class InternalQueryResult {
     }
 
     @NotNull
-    private InternalQueryResult calcProductOfTables(@NotNull List<TableReference> tableReferences)
+    private InternalQueryResult calcProductOfTables(
+            @NotNull List<TableReference> tableReferences)
             throws SqlException {
 
         List<InternalQueryResult> results = new ArrayList<>();
@@ -112,7 +114,8 @@ public final class InternalQueryResult {
             results.add(this.getDataFromTableRef(tr));
         }
         if (results.isEmpty()) {
-            return new InternalQueryResult(server, Collections.emptyList(), Collections.emptyList());
+            return new InternalQueryResult(server, Collections.emptyList(),
+                    Collections.emptyList());
         }
         Iterator<InternalQueryResult> it = results.iterator();
         InternalQueryResult resultSet = it.next();
@@ -124,14 +127,17 @@ public final class InternalQueryResult {
 
 
     @NotNull
-    private InternalQueryResult getDataFromPersistentTable(@NotNull DatabaseTableReference dtr)
+    private InternalQueryResult getDataFromPersistentTable(
+            @NotNull DatabaseTableReference dtr)
             throws SqlException {
         PersistentTable table = server.getTable(dtr);
-        return new InternalQueryResult(server, table.getResultHeaders(), table.getResultRows());
+        return new InternalQueryResult(server, table.getResultHeaders(),
+                table.getResultRows());
     }
 
     @NotNull
-    private InternalQueryResult getDataFromJoinedTable(@NotNull JoinedTableReference tableReference)
+    private InternalQueryResult getDataFromJoinedTable(
+            @NotNull JoinedTableReference tableReference)
             throws SqlException {
 
         InternalQueryResult left =
@@ -231,14 +237,16 @@ public final class InternalQueryResult {
     }
 
     @NotNull
-    private InternalQueryResult innerJoin(@NotNull InternalQueryResult right, @NotNull Predicate sc)
+    private InternalQueryResult innerJoin(@NotNull InternalQueryResult right,
+                                          @NotNull Predicate sc)
             throws SqlException {
 
         return this.productWith(right).applyPredicate(sc);
     }
 
     @NotNull
-    private InternalQueryResult leftOuterJoin(@NotNull InternalQueryResult right, @NotNull Predicate sc)
+    private InternalQueryResult leftOuterJoin(@NotNull InternalQueryResult right,
+                                              @NotNull Predicate sc)
             throws SqlException {
 
         List<ResultHeader> newColumns = new ArrayList<>();
@@ -269,7 +277,8 @@ public final class InternalQueryResult {
     }
 
     @NotNull
-    private InternalQueryResult rightOuterJoin(@NotNull InternalQueryResult right, @NotNull Predicate sc)
+    private InternalQueryResult rightOuterJoin(@NotNull InternalQueryResult right,
+                                               @NotNull Predicate sc)
             throws SqlException {
 
         List<ResultHeader> newColumns = new ArrayList<>();

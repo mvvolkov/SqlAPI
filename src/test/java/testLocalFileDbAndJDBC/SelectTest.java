@@ -48,9 +48,10 @@ import static org.junit.Assert.fail;
  */
 public class SelectTest extends AbstractTestRunner {
 
-    public SelectTest(SqlServer sqlServer) {
-        super(sqlServer);
+    public SelectTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
+
 
     @Before
     @Override

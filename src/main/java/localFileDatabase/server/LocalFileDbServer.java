@@ -30,6 +30,10 @@ public final class LocalFileDbServer implements SqlServer {
         System.out.println("New local file SQL server instantiated.");
     }
 
+    public static LocalFileDbServer getInstance() {
+        return new LocalFileDbServer();
+    }
+
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
 
@@ -98,11 +102,11 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
     @Override
-    public void connect() throws SqlException {
+    public void connect() {
     }
 
     @Override
-    public void close() throws SqlException {
+    public void close() {
     }
 
     @NotNull
@@ -117,6 +121,9 @@ public final class LocalFileDbServer implements SqlServer {
         String databaseName = query.getDatabaseName();
         PersistentDatabase database = this.getDatabaseOrNull(databaseName);
         if (database != null) {
+            if (query.checkExistence()) {
+                return;
+            }
             throw new DatabaseAlreadyExistsException(databaseName);
         }
         databases.add(new PersistentDatabase(databaseName));

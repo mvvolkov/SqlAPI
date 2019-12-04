@@ -38,8 +38,9 @@ import static org.junit.Assert.fail;
  */
 public class UpdateTest extends AbstractTestRunner {
 
-    public UpdateTest(SqlServer sqlServer) {
-        super(sqlServer);
+
+    public UpdateTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
 
     /**

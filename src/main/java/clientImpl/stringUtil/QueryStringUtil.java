@@ -56,7 +56,14 @@ public class QueryStringUtil {
 
 
     public static String getCreateDatabaseString(CreateDatabaseQuery query) {
-        return "CREATE DATABASE " + query.getDatabaseName() + ";";
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE DATABASE ");
+        if (query.checkExistence()) {
+            sb.append("IF NOT EXISTS ");
+        }
+        sb.append(query.getDatabaseName());
+        sb.append(";");
+        return sb.toString();
     }
 
     public static String getDropTableString(DropTableQuery query) {
@@ -66,7 +73,8 @@ public class QueryStringUtil {
     public static String getCreateTableString(CreateTableQuery query) throws
             UnsupportedColumnConstraintTypeException {
         return "CREATE TABLE " + query.getDatabaseName() + "."
-                + MetadataStringUtil.getTableMetadataString(query.getTableMetadata()) + ";";
+                + MetadataStringUtil.getTableMetadataString(query.getTableMetadata()) +
+                ";";
     }
 
     public static String getInsertQueryString(InsertQuery query) {
@@ -80,27 +88,31 @@ public class QueryStringUtil {
             sb.append(")");
         }
         sb.append(" VALUES (");
-        String valuesString = query.getValues().stream().map(ColumnExprStringUtil::getColumnValueString)
-                .collect(Collectors.joining(", "));
+        String valuesString =
+                query.getValues().stream().map(ColumnExprStringUtil::getColumnValueString)
+                        .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
         return sb.toString();
     }
 
-    public static String getDeleteQueryString(DeleteQuery query) throws UnsupportedPredicateTypeException {
+    public static String getDeleteQueryString(DeleteQuery query)
+            throws UnsupportedPredicateTypeException {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(query.getDatabaseName());
         sb.append(".");
         sb.append(query.getTableName());
         if (!query.getPredicate().isEmpty()) {
-            sb.append(" WHERE ").append(PredicateStringUtil.getPredicateString(query.getPredicate()));
+            sb.append(" WHERE ")
+                    .append(PredicateStringUtil.getPredicateString(query.getPredicate()));
         }
         sb.append(";");
         return sb.toString();
     }
 
     public static String getUpdateQueryString(UpdateQuery query) throws
-            UnsupportedAggregateFunctionTypeException, UnsupportedColumnExprTypeException, UnsupportedPredicateTypeException {
+            UnsupportedAggregateFunctionTypeException, UnsupportedColumnExprTypeException,
+            UnsupportedPredicateTypeException {
         StringBuilder sb = new StringBuilder("UPDATE ");
         sb.append(query.getDatabaseName());
         sb.append(".");
@@ -108,12 +120,14 @@ public class QueryStringUtil {
         sb.append(" SET ");
         StringJoiner joiner = new StringJoiner(", ");
         for (AssignmentOperation assignmentOperation : query.getAssignmentOperations()) {
-            String assignmentOperationString = AssignmentStringUtil.getAssignmentOperationString(assignmentOperation);
+            String assignmentOperationString = AssignmentStringUtil
+                    .getAssignmentOperationString(assignmentOperation);
             joiner.add(assignmentOperationString);
         }
         sb.append(joiner.toString());
         if (!query.getPredicate().isEmpty()) {
-            sb.append(" WHERE ").append(PredicateStringUtil.getPredicateString(query.getPredicate()));
+            sb.append(" WHERE ")
+                    .append(PredicateStringUtil.getPredicateString(query.getPredicate()));
         }
         sb.append(";");
         return sb.toString();
@@ -128,10 +142,12 @@ public class QueryStringUtil {
             List<String> columns = new ArrayList<>();
             for (SelectedItem se : query.getSelectedItems()) {
                 if (se instanceof ColumnExpression) {
-                    columns.add(ColumnExprStringUtil.getColumnExpressionString((ColumnExpression) se));
+                    columns.add(ColumnExprStringUtil
+                            .getColumnExpressionString((ColumnExpression) se));
                 }
                 if (se instanceof DatabaseTableReference) {
-                    columns.add(TableRefStringUtil.getDatabaseTableReferenceString((DatabaseTableReference) se)
+                    columns.add(TableRefStringUtil
+                            .getDatabaseTableReferenceString((DatabaseTableReference) se)
                             + ".*");
                 }
             }
@@ -141,23 +157,27 @@ public class QueryStringUtil {
         sb.append(" FROM ");
         StringJoiner joiner = new StringJoiner(", ");
         for (TableReference tableReference : query.getTableReferences()) {
-            String tableReferenceString = TableRefStringUtil.getTableReferenceString(tableReference);
+            String tableReferenceString =
+                    TableRefStringUtil.getTableReferenceString(tableReference);
             joiner.add(tableReferenceString);
         }
         String tables = joiner.toString();
         sb.append(tables);
         if (!query.getPredicate().isEmpty()) {
-            sb.append(" WHERE ").append(PredicateStringUtil.getPredicateString(query.getPredicate()));
+            sb.append(" WHERE ")
+                    .append(PredicateStringUtil.getPredicateString(query.getPredicate()));
         }
         if (!query.getGroupByColumns().isEmpty()) {
             sb.append(" GROUP BY ");
-            sb.append(query.getGroupByColumns().stream().map(ColumnExprStringUtil::getColumnRefString)
+            sb.append(query.getGroupByColumns().stream()
+                    .map(ColumnExprStringUtil::getColumnRefString)
                     .collect(Collectors.joining(", ")));
         }
         return sb.toString();
     }
 
-    public static String getInsertFromSelectQueryString(InsertFromSelectQuery query) throws SqlException {
+    public static String getInsertFromSelectQueryString(InsertFromSelectQuery query)
+            throws SqlException {
         StringBuilder sb = new StringBuilder("INSERT INTO ");
         sb.append(query.getDatabaseName());
         sb.append(".");

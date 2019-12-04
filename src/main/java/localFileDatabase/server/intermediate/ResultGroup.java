@@ -17,7 +17,7 @@ import java.util.List;
 final class ResultGroup {
 
     @NotNull
-    private LocalFileDbServer server;
+    private final LocalFileDbServer server;
 
     @NotNull
     private final Collection<ResultHeader> groupedByColumns;

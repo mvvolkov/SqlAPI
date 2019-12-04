@@ -12,7 +12,6 @@ import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -42,8 +41,8 @@ import static org.junit.Assert.fail;
 public class InsertTest extends AbstractTestRunner {
 
 
-    public InsertTest(SqlServer sqlServer) {
-        super(sqlServer);
+    public InsertTest(SqlServer sqlServer, String database) {
+        super(sqlServer, database);
     }
 
     /**

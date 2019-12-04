@@ -1,8 +1,9 @@
 package mySqlJdbcServer;
 
 import clientImpl.stringUtil.QueryStringUtil;
+import mySqlJdbcServer.output.QueryResultImpl;
+import mySqlJdbcServer.output.QueryResultRowImpl;
 import org.jetbrains.annotations.NotNull;
-import sqlapi.exceptions.NoSuchDatabaseException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.WrappedException;
 import sqlapi.metadata.TableMetadata;
@@ -64,14 +65,12 @@ public class MySQL_JDBC_Server implements SqlServer {
     @Override
     public void executeQuery(@NotNull SqlQuery query) throws SqlException {
 
-
         String queryString = QueryStringUtil.getQueryString(query);
         System.out.println(queryString);
 
         if (query instanceof CreateTableQuery || query instanceof DropTableQuery) {
-            Statement statement = null;
             try {
-                statement = connection.createStatement();
+                Statement statement = connection.createStatement();
                 statement.execute(queryString);
             } catch (SQLException e) {
                 throw new WrappedException(e);
@@ -80,9 +79,8 @@ public class MySQL_JDBC_Server implements SqlServer {
 
         if (query instanceof InsertQuery || query instanceof DeleteQuery ||
                 query instanceof UpdateQuery || query instanceof InsertFromSelectQuery) {
-            Statement statement = null;
             try {
-                statement = connection.createStatement();
+                Statement statement = connection.createStatement();
                 statement.executeUpdate(queryString);
             } catch (SQLException e) {
                 throw new WrappedException(e);
@@ -140,8 +138,8 @@ public class MySQL_JDBC_Server implements SqlServer {
     }
 
     @Override
-    public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
-            throws NoSuchDatabaseException {
+    public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName) {
+        // TODO to be done
         return Collections.emptyList();
     }
 }
