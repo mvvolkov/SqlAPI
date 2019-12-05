@@ -96,7 +96,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
 
     private void insert(InsertQuery query)
             throws SqlException {
-        this.insert(query.getColumns(), query.getValues());
+        this.insert(query.getColumns(), query.getInputValues());
     }
 
     public void insert(InsertFromSelectQuery query, QueryResult queryResult)

@@ -89,7 +89,7 @@ public class QueryStringUtil {
         }
         sb.append(" VALUES (");
         String valuesString =
-                query.getValues().stream().map(ColumnExprStringUtil::getColumnValueString)
+                query.getInputValues().stream().map(ColumnExprStringUtil::getInputValueString)
                         .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");

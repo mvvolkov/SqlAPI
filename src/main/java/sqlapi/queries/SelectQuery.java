@@ -17,4 +17,6 @@ public interface SelectQuery {
     @NotNull List<SelectedItem> getSelectedItems();
 
     @NotNull List<ColumnRef> getGroupByColumns();
+
+    void setParameters(Object... values);
 }

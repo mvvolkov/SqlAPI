@@ -627,8 +627,89 @@ public class SelectTest extends AbstractTestRunner {
             System.out.println(se.getMessage());
             fail();
         }
-
     }
+
+    @Test
+    public void testCountAll() {
+        try {
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
+                    Collections.singletonList(
+                            ColumnExprFactory.countAllWithAlias("COUNT_ALL"))));
+
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "COUNT_ALL");
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 6);
+
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testCountColumn() {
+        try {
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
+                    Collections.singletonList(
+                            ColumnExprFactory.countWithAlias("column4",
+                                    "COUNT_column4"))));
+
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "COUNT_column4");
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 3);
+
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testSum() {
+        try {
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
+                    Arrays.asList(
+                            ColumnExprFactory.groupSumWithAlias("column1", "SUM_column1"),
+                            ColumnExprFactory.groupSumWithAlias("column2",
+                                    "SUM_column2"))));
+
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "SUM_column1", "SUM_column2");
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 77, 160);
+
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testAverage() {
+        try {
+            QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
+                    TableRefFactory.dbTable(databaseName, "table1"),
+                    Arrays.asList(
+                            ColumnExprFactory.avgWithAlias("column1", "AVG_column1"),
+                            ColumnExprFactory.avgWithAlias("column2",
+                                    "AVG_column2"))));
+
+            printResultSet(queryResult);
+            checkHeaders(queryResult.getHeaders(), "AVG_column1", "AVG_column2");
+            assertEquals(1, queryResult.getRows().size());
+            checkRowExists(queryResult, 12.8333, 32);
+
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+            fail();
+        }
+    }
+
 
     /**
      * SELECT column3, SUM(column1), SUM(column2) AS S2 FROM DB1.table1

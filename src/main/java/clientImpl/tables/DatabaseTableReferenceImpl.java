@@ -3,6 +3,8 @@ package clientImpl.tables;
 import sqlapi.tables.DatabaseTableReference;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 final class DatabaseTableReferenceImpl implements DatabaseTableReference {
 
     @NotNull

@@ -32,11 +32,6 @@ abstract class BinaryPredicateImpl extends PredicateImpl implements BinaryPredic
         return rightOperand;
     }
 
-    @Override
-    public void setParameters(ArrayDeque<Object> parameters) {
-        leftOperand.setParameters(parameters);
-        rightOperand.setParameters(parameters);
-    }
 
     @Override
     public String toString() {

@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
 import sqlapi.queries.InsertQuery;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,26 +16,35 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
     private final List<String> columns;
 
     @NotNull
-    private final List<InputValue> values;
+    private final List<InputValue> inputValues;
 
     InsertQueryImpl(@NotNull String databaseName, @NotNull String tableName,
-                    @NotNull List<String> columns, @NotNull List<InputValue> values) {
+                    @NotNull List<String> columns,
+                    @NotNull List<InputValue> inputValues) {
         super(databaseName, tableName);
         this.columns = columns;
-        this.values = values;
+        this.inputValues = inputValues;
     }
 
 
     @NotNull
     @Override
-    public List<InputValue> getValues() {
-        return values;
+    public List<InputValue> getInputValues() {
+        return inputValues;
     }
 
     @NotNull
     @Override
     public List<String> getColumns() {
         return columns;
+    }
+
+    @Override public void setParameters(Object... values) {
+        List<Object> parameters = new ArrayList<>(Arrays.asList(values));
+        for (InputValue inputValue : inputValues) {
+            inputValue.setParameters(parameters);
+        }
+
     }
 
     @Override
@@ -47,21 +59,11 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
             sb.append(")");
         }
         sb.append(" VALUES (");
-        String valuesString = values.stream().map(this::getStringFromValue)
+        String valuesString = inputValues.stream().map(InputValue::toString)
                 .collect(Collectors.joining(", "));
         sb.append(valuesString);
         sb.append(");");
         return sb.toString();
     }
 
-    private String getStringFromValue(InputValue inputValue) {
-        Object value = inputValue.getValue();
-        if (value instanceof String) {
-            return '\'' + (String) value + '\'';
-        }
-        if (value == null) {
-            return "NULL";
-        }
-        return String.valueOf(value);
-    }
 }

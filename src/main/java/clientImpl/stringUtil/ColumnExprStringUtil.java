@@ -17,7 +17,7 @@ public class ColumnExprStringUtil {
             return getColumnRefString((ColumnRef) ce);
         }
         if (ce instanceof InputValue) {
-            return getColumnValueString((InputValue) ce);
+            return getInputValueString((InputValue) ce);
         }
         if (ce instanceof BinaryColumnExpression) {
             return getBinaryColumnExpressionString((BinaryColumnExpression) ce);
@@ -41,15 +41,20 @@ public class ColumnExprStringUtil {
         return sb.toString();
     }
 
-    public static String getColumnValueString(InputValue cv) {
+    public static String getInputValueString(InputValue cv) {
         StringBuilder sb = new StringBuilder();
-        Object value = cv.getValue();
-        if (value instanceof String) {
-            sb.append('\'').append(value).append('\'');
-        } else if (value == null) {
-            sb.append("NULL");
+        if (cv instanceof ParametrizedInputValue &&
+                !((ParametrizedInputValue) cv).hasValue()) {
+            sb.append("??");
         } else {
-            sb.append(value.toString());
+            Object value = cv.getValue();
+            if (value instanceof String) {
+                sb.append('\'').append(value).append('\'');
+            } else if (value == null) {
+                sb.append("NULL");
+            } else {
+                sb.append(value.toString());
+            }
         }
         if (!cv.getAlias().isEmpty()) {
             sb.append(" AS ");

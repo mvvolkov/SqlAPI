@@ -60,7 +60,7 @@ public class PredicateStringUtil {
 
     public static String getColumnInPredicateString(ColumnInPredicate predicate) {
         return ColumnExprStringUtil.getColumnRefString(predicate.getColumnRef())
-                + " IN (" + predicate.getColumnValues().stream().map(ColumnExprStringUtil::getColumnValueString)
+                + " IN (" + predicate.getColumnValues().stream().map(ColumnExprStringUtil::getInputValueString)
                 .collect(Collectors.joining(", ")) + ")";
     }
 

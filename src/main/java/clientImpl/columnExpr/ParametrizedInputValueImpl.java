@@ -3,7 +3,10 @@ package clientImpl.columnExpr;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ParametrizedInputValue;
 
-public class ParametrizedInputValueImpl extends InputValueImpl implements ParametrizedInputValue {
+import java.util.List;
+
+public class ParametrizedInputValueImpl extends InputValueImpl
+        implements ParametrizedInputValue {
 
     private boolean hasValue;
 
@@ -12,13 +15,17 @@ public class ParametrizedInputValueImpl extends InputValueImpl implements Parame
     }
 
     @Override
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    @Override
     public boolean hasValue() {
         return hasValue;
+    }
+
+    @Override public void setParameters(List<Object> parameters) {
+        if (parameters.isEmpty()) {
+            return;
+        }
+        value = parameters.get(0);
+        parameters.remove(0);
+        hasValue = true;
     }
 
     @Override

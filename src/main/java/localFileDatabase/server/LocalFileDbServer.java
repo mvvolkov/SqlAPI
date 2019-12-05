@@ -35,7 +35,12 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
     @Override
-    public void executeQuery(@NotNull SqlQuery query) throws SqlException {
+    public void executeQuery(@NotNull SqlQuery query, Object... parameters)
+            throws SqlException {
+
+        if (query instanceof TableActionQuery) {
+            ((TableActionQuery) query).setParameters(parameters);
+        }
 
         try {
             QueryStringUtil.printQuery(query);
@@ -78,8 +83,10 @@ public final class LocalFileDbServer implements SqlServer {
 
 
     @Override
-    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
+    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery,
+                                               Object... parameters)
             throws SqlException {
+        selectQuery.setParameters(parameters);
         try {
             QueryStringUtil.printSelectQuery(selectQuery);
         } catch (SqlException se) {

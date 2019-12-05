@@ -43,10 +43,4 @@ final class ColumnInPredicateImpl extends PredicateImpl
                 Collectors.joining(", ")) + ")";
     }
 
-    @Override
-    public void setParameters(ArrayDeque<Object> parameters) {
-        for (InputValue value : values) {
-            value.setParameters(parameters);
-        }
-    }
 }

@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.InsertFromSelectQuery;
 import sqlapi.queries.SelectQuery;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class InsertFromSelectQueryImpl extends TableActionQueryImpl implements
@@ -45,5 +47,9 @@ final class InsertFromSelectQueryImpl extends TableActionQueryImpl implements
         }
         sb.append(" ").append(selectQuery).append(";");
         return sb.toString();
+    }
+
+    @Override public void setParameters(Object... values) {
+        selectQuery.setParameters(new ArrayList<>(Arrays.asList(values)));
     }
 }

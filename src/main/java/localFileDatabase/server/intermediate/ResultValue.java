@@ -53,14 +53,16 @@ public final class ResultValue {
             try {
                 return new BigDecimal((String) value);
             } catch (NumberFormatException nfe) {
-                throw new WrongValueTypeException(BigDecimal.class.getSimpleName(), value);
+                throw new WrongValueTypeException(BigDecimal.class.getSimpleName(),
+                        value);
             }
         }
         if (value instanceof Number) {
             try {
                 return BigDecimal.valueOf(((Number) value).doubleValue());
             } catch (NumberFormatException nfe) {
-                throw new WrongValueTypeException(BigDecimal.class.getSimpleName(), value);
+                throw new WrongValueTypeException(BigDecimal.class.getSimpleName(),
+                        value);
             }
         }
         throw new WrongValueTypeException(BigDecimal.class.getSimpleName(), value);
@@ -111,7 +113,9 @@ public final class ResultValue {
         }
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherValue);
-        return new ResultValue(new ResultHeader(), bd1.divide(bd2, RoundingMode.FLOOR));
+        // The scele = 4 is used here to match the result of MySQL server.
+        return new ResultValue(new ResultHeader(),
+                bd1.divide(bd2, 4, RoundingMode.FLOOR));
     }
 
     int getComparisonResult(@NotNull Object anotherValue)
@@ -122,13 +126,15 @@ public final class ResultValue {
             return bd1.compareTo(bd2);
         } else if (value instanceof String) {
             if (!(anotherValue instanceof String)) {
-                throw new WrongValueTypeException(String.class.getSimpleName(), anotherValue);
+                throw new WrongValueTypeException(String.class.getSimpleName(),
+                        anotherValue);
             }
             String s1 = (String) value;
             String s2 = (String) anotherValue;
             return s1.compareTo(s2);
         }
-        throw new InvalidQueryException("Value " + value + " can not be compared to other values.");
+        throw new InvalidQueryException(
+                "Value " + value + " can not be compared to other values.");
     }
 
     boolean isEqual(@Nullable Object anotherValue)

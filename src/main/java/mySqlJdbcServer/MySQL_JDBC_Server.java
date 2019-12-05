@@ -63,7 +63,12 @@ public class MySQL_JDBC_Server implements SqlServer {
 
 
     @Override
-    public void executeQuery(@NotNull SqlQuery query) throws SqlException {
+    public void executeQuery(@NotNull SqlQuery query, Object... parameters)
+            throws SqlException {
+
+        if (query instanceof TableActionQuery) {
+            ((TableActionQuery) query).setParameters(parameters);
+        }
 
         String queryString = QueryStringUtil.getQueryString(query);
         System.out.println(queryString);
@@ -77,8 +82,7 @@ public class MySQL_JDBC_Server implements SqlServer {
             }
         }
 
-        if (query instanceof InsertQuery || query instanceof DeleteQuery ||
-                query instanceof UpdateQuery || query instanceof InsertFromSelectQuery) {
+        if (query instanceof TableActionQuery) {
             try {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate(queryString);
@@ -89,9 +93,11 @@ public class MySQL_JDBC_Server implements SqlServer {
     }
 
     @Override
-    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
+    public @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery,
+                                               Object... parameters)
             throws SqlException {
 
+        selectQuery.setParameters(parameters);
         String queryString = QueryStringUtil.getSelectQueryString(selectQuery);
         System.out.println(queryString);
         try {

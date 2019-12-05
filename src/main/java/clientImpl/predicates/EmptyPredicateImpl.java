@@ -14,7 +14,4 @@ final class EmptyPredicateImpl extends PredicateImpl implements EmptyPredicate {
         return "";
     }
 
-    @Override
-    public void setParameters(ArrayDeque<Object> parameters) {
-    }
 }

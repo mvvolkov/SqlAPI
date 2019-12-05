@@ -5,11 +5,13 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDbServer;
+import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import sqlapi.exceptions.SqlException;
+import sqlapi.queries.InsertQuery;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.queryResult.QueryResultRow;
 import sqlapi.server.SqlServer;
@@ -41,9 +43,9 @@ public abstract class AbstractTestRunner {
 
         servers.add(new Object[]{LocalFileDbServer.getInstance(), "DB1"});
 
-//        servers.add(new Object[]{new MySQL_JDBC_Server(
-//                "jdbc:mysql://sql7.freesqldatabase.com:3306",
-//                "sql7314024", "9hc9cPjLjg"), "sql7314024"});
+        servers.add(new Object[]{new MySQL_JDBC_Server(
+                "jdbc:mysql://sql7.freesqldatabase.com:3306",
+                "sql7314024", "9hc9cPjLjg"), "sql7314024"});
 
         // slow connection
 //        servers.add(new Object[]{new MySQL_JDBC_Server(
@@ -105,18 +107,19 @@ public abstract class AbstractTestRunner {
                         ))));
 
         // Fill table1
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(10, 30, "test1", "t21")));
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(11, 31, "test2", null)));
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(12, 32, "test3", "t43")));
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(13, 33, "test2", "t653")));
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(15, 34, "test1", null)));
-        sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                ColumnExprFactory.values(16, null, "test1", null)));
+        InsertQuery query = QueryFactory.insert(databaseName, "table1",
+                Arrays.asList(
+                        ColumnExprFactory.parameter(),
+                        ColumnExprFactory.parameter(),
+                        ColumnExprFactory.parameter(),
+                        ColumnExprFactory.parameter()
+                ));
+        sqlServer.executeQuery(query, 10, 30, "test1", "t21");
+        sqlServer.executeQuery(query, 11, 31, "test2", null);
+        sqlServer.executeQuery(query, 12, 32, "test3", "t43");
+        sqlServer.executeQuery(query, 13, 33, "test2", "t653");
+        sqlServer.executeQuery(query, 15, 34, "test1", null);
+        sqlServer.executeQuery(query, 16, null, "test1", null);
     }
 
     private void createTable2() throws SqlException {
@@ -135,18 +138,14 @@ public abstract class AbstractTestRunner {
                                         ))));
 
         // Fill table2
-        sqlServer.executeQuery(
-                QueryFactory
-                        .insert(databaseName, "table2",
-                                ColumnExprFactory.values(22, "test3")));
-        sqlServer.executeQuery(
-                QueryFactory
-                        .insert(databaseName, "table2",
-                                ColumnExprFactory.values(23, "test2")));
-        sqlServer.executeQuery(
-                QueryFactory
-                        .insert(databaseName, "table2",
-                                ColumnExprFactory.values(25, "test4")));
+        InsertQuery query = QueryFactory.insert(databaseName, "table2",
+                Arrays.asList(
+                        ColumnExprFactory.parameter(),
+                        ColumnExprFactory.parameter()
+                ));
+        sqlServer.executeQuery(query, 22, "test3");
+        sqlServer.executeQuery(query, 23, "test2");
+        sqlServer.executeQuery(query, 25, "test4");
     }
 
 

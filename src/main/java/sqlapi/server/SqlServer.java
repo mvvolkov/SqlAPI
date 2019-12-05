@@ -12,10 +12,12 @@ import java.util.Collection;
 public interface SqlServer {
 
 
-    void executeQuery(@NotNull SqlQuery query) throws SqlException;
+    void executeQuery(@NotNull SqlQuery query, Object... parameters) throws SqlException;
 
-    @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery)
+    @NotNull QueryResult getQueryResult(@NotNull SelectQuery selectQuery,
+                                        Object... parameters)
             throws SqlException;
+
 
     @NotNull Collection<String> getDatabases() throws SqlException;
 

@@ -9,5 +9,5 @@ public interface InsertQuery extends TableActionQuery {
 
     @NotNull List<String> getColumns();
 
-    @NotNull List<InputValue> getValues();
+    @NotNull List<InputValue> getInputValues();
 }

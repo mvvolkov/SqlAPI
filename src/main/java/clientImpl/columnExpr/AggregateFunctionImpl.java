@@ -5,6 +5,8 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 abstract class AggregateFunctionImpl extends ColumnExprImpl
         implements AggregateFunction {
 

@@ -373,7 +373,9 @@ public final class InternalQueryResult {
                         headers.add(new ResultHeader(header.getColumnName()));
                     }
                     return Collections
-                            .singletonList(new ResultGroup(server, headers, rows));
+                            .singletonList(
+                                    new ResultGroup(server, Collections.emptyList(),
+                                            rows));
                 }
             }
         }

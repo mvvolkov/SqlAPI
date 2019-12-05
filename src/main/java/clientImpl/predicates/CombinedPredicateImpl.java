@@ -35,11 +35,6 @@ abstract class CombinedPredicateImpl extends PredicateImpl
         return rightPredicate;
     }
 
-    @Override
-    public void setParameters(ArrayDeque<Object> parameters) {
-        leftPredicate.setParameters(parameters);
-        rightPredicate.setParameters(parameters);
-    }
 
     @Override
     public String toString() {

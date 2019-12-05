@@ -3,6 +3,8 @@ package sqlapi.misc;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 
+import java.util.List;
+
 public interface AssignmentOperation {
 
     @NotNull
@@ -10,4 +12,8 @@ public interface AssignmentOperation {
 
     @NotNull
     ColumnExpression getValue();
+
+    default void setParameters(List<Object> parameters) {
+        getValue().setParameters(parameters);
+    }
 }

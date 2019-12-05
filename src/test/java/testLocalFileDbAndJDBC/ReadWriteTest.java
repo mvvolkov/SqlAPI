@@ -9,6 +9,7 @@ import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
+import sqlapi.queries.InsertQuery;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
@@ -76,18 +77,18 @@ public class ReadWriteTest extends AbstractTestRunner {
                     .createTable("DB1", tm1));
 
             // Fill table1
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(10, 30, "test1", "t21")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(11, 31, "test2", null)));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(12, 32, "test3", "t43")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(13, 33, "test2", "t653")));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(15, 34, "test1", null)));
-            sqlServer.executeQuery(QueryFactory.insert("DB1", "table1",
-                    ColumnExprFactory.values(16, null, "test1", null)));
+            InsertQuery query = QueryFactory.insert("DB1", "table1", Arrays.asList(
+                    ColumnExprFactory.parameter(),
+                    ColumnExprFactory.parameter(),
+                    ColumnExprFactory.parameter(),
+                    ColumnExprFactory.parameter()
+            ));
+            sqlServer.executeQuery(query, 10, 30, "test1", "t21");
+            sqlServer.executeQuery(query, 11, 31, "test2", null);
+            sqlServer.executeQuery(query, 12, 32, "test3", "t43");
+            sqlServer.executeQuery(query, 13, 33, "test2", "t653");
+            sqlServer.executeQuery(query, 15, 34, "test1", null);
+            sqlServer.executeQuery(query, 16, null, "test1", null);
 
             TableMetadata tm2 = MetadataFactory.tableMetadata("table2",
                     Arrays.asList(

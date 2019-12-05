@@ -4,6 +4,8 @@ import sqlapi.columnExpr.BinaryColumnExpression;
 import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 abstract class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {
 
@@ -32,6 +34,7 @@ abstract class BinaryColumnExprImpl extends ColumnExprImpl
     public ColumnExpression getRightOperand() {
         return rightOperand;
     }
+
 
     @Override
     public String toString() {

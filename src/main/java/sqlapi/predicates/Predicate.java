@@ -2,7 +2,7 @@ package sqlapi.predicates;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayDeque;
+import java.util.List;
 
 public interface Predicate {
 
@@ -14,5 +14,6 @@ public interface Predicate {
         return false;
     }
 
-    void setParameters(ArrayDeque<Object> parameters);
+    default void setParameters(List<Object> parameters) {
+    }
 }

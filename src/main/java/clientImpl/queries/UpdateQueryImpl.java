@@ -5,7 +5,7 @@ import sqlapi.misc.AssignmentOperation;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.UpdateQuery;
 
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 final class UpdateQueryImpl extends TableActionQueryImpl
@@ -47,5 +47,13 @@ final class UpdateQueryImpl extends TableActionQueryImpl
         }
         sb.append(";");
         return sb.toString();
+    }
+
+    @Override public void setParameters(Object... values) {
+        List<Object> parameters = new ArrayList<>(Arrays.asList(values));
+        for (AssignmentOperation assignmentOperation : assignmentOperations) {
+            assignmentOperation.setParameters(parameters);
+        }
+        predicate.setParameters(parameters);
     }
 }

@@ -65,7 +65,7 @@ final class ResultGroup extends AbstractResultRow {
     protected ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws SqlException {
 
-        if (!groupedByColumns.isEmpty() &&
+        if (rows.size() > 1 &&
                 !groupedByColumns.contains(new ResultHeader(cr.getColumnName()))) {
             throw new InvalidQueryException("Column can not be used outside aggregate " +
                     "function: " + cr.getColumnName());

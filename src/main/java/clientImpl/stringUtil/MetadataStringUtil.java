@@ -50,7 +50,7 @@ public class MetadataStringUtil {
                 return "PRIMARY KEY";
             case DEFAULT_VALUE:
                 return "DEFAULT " + ColumnExprStringUtil
-                        .getColumnValueString(ColumnExprFactory
+                        .getInputValueString(ColumnExprFactory
                                 .value(constraint.getParameters().get(0)));
             default:
                 throw new UnsupportedColumnConstraintTypeException(

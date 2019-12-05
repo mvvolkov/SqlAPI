@@ -29,8 +29,4 @@ final class ColumnIsNotNullPredicateImpl extends PredicateImpl
         return columnRef + " IS NOT NULL";
     }
 
-    @Override
-    public void setParameters(ArrayDeque<Object> parameters) {
-
-    }
 }

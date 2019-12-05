@@ -1,4 +1,10 @@
 package sqlapi.queries;
 
-public interface DropTableQuery extends TableActionQuery {
+import org.jetbrains.annotations.NotNull;
+
+public interface DropTableQuery extends SqlQuery {
+
+    @NotNull String getDatabaseName();
+
+    @NotNull String getTableName();
 }

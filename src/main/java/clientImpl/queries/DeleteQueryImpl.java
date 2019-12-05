@@ -5,10 +5,11 @@ import sqlapi.predicates.Predicate;
 import sqlapi.queries.DeleteQuery;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 final class DeleteQueryImpl extends TableActionQueryImpl
         implements DeleteQuery {
-
 
     private final @NotNull Predicate predicate;
 
@@ -38,10 +39,7 @@ final class DeleteQueryImpl extends TableActionQueryImpl
     }
 
     @Override
-    public void setParameters(Object... values) {
-
-        ArrayDeque<Object> parameters = this.getParametersStack(values);
-
-
+    public void setParameters(Object... parameters) {
+        predicate.setParameters(new ArrayList<>(Arrays.asList(parameters)));
     }
 }

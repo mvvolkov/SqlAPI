@@ -2,6 +2,7 @@ package localFileDatabase.server.intermediate;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.*;
+import sqlapi.exceptions.MissingParameterException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.UnsupportedColumnExprTypeException;
 
@@ -21,6 +22,10 @@ public abstract class AbstractResultRow {
             return this.evaluateColumnRef((ColumnRef) ce);
         }
         if (ce instanceof InputValue) {
+            if (ce instanceof ParametrizedInputValue &&
+                    !((ParametrizedInputValue) ce).hasValue()) {
+                throw new MissingParameterException();
+            }
             return new ResultValue(((InputValue) ce).getValue());
         }
         if (ce instanceof AggregateFunction) {
@@ -32,7 +37,8 @@ public abstract class AbstractResultRow {
     protected abstract ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws SqlException;
 
-    protected abstract ResultValue evaluateAggregateFunction(@NotNull AggregateFunction af)
+    protected abstract ResultValue evaluateAggregateFunction(
+            @NotNull AggregateFunction af)
             throws SqlException;
 
     @NotNull

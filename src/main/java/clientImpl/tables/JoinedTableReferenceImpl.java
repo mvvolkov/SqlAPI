@@ -6,6 +6,8 @@ import sqlapi.tables.JoinedTableReference;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
 
+import java.util.ArrayDeque;
+
 abstract class JoinedTableReferenceImpl implements JoinedTableReference {
 
 
@@ -44,6 +46,7 @@ abstract class JoinedTableReferenceImpl implements JoinedTableReference {
     public Predicate getPredicate() {
         return predicate;
     }
+
 
     protected abstract String getJoinName();
 

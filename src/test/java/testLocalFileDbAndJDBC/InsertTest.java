@@ -137,17 +137,9 @@ public class InsertTest extends AbstractTestRunner {
                     ColumnExprFactory.values(17, "t35", "39", null)));
         } catch (WrongValueTypeException wvte) {
             System.out.println(wvte.getMessage());
-//            assertEquals("table1", wvte.getTableName());
-//            assertEquals("column2", wvte.getColumnName());
-//            assertEquals("Integer",
-//                    wvte.getAllowedTypes().stream().map(Class::getSimpleName)
-//                            .collect(Collectors.joining(", ")));
-//            assertEquals("String", wvte.getActualType().getSimpleName());
             return;
         } catch (WrappedException we) {
             System.out.println(we.getMessage());
-//            assertEquals("Incorrect integer value: 't35' for column 'column2' at row 1"
-//                    , we.getMessage());
             return;
         } catch (SqlException se) {
             System.out.println(se.getMessage());
@@ -272,7 +264,6 @@ public class InsertTest extends AbstractTestRunner {
                             PredicateFactory.isNotNull("column4"))));
 
             QueryResult queryResult = this.getTableData(databaseName, "table2");
-            assertEquals(2, queryResult.getHeaders().size());
             assertEquals(6, queryResult.getRows().size());
 
             // old values

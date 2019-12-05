@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.TableActionQuery;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class TableActionQueryImpl implements TableActionQuery {
 
@@ -26,14 +28,6 @@ abstract class TableActionQueryImpl implements TableActionQuery {
     @Override
     public String getDatabaseName() {
         return databaseName;
-    }
-
-    protected ArrayDeque<Object> getParametersStack(Object... values) {
-        ArrayDeque<Object> parameters = new ArrayDeque<Object>();
-        for (int i = values.length - 1; i >= 0; i--) {
-            parameters.push(values[i]);
-        }
-        return parameters;
     }
 
 }
