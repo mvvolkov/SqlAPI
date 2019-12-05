@@ -16,8 +16,8 @@ public class ColumnExprStringUtil {
         if (ce instanceof ColumnRef) {
             return getColumnRefString((ColumnRef) ce);
         }
-        if (ce instanceof ColumnValue) {
-            return getColumnValueString((ColumnValue) ce);
+        if (ce instanceof InputValue) {
+            return getColumnValueString((InputValue) ce);
         }
         if (ce instanceof BinaryColumnExpression) {
             return getBinaryColumnExpressionString((BinaryColumnExpression) ce);
@@ -41,7 +41,7 @@ public class ColumnExprStringUtil {
         return sb.toString();
     }
 
-    public static String getColumnValueString(ColumnValue cv) {
+    public static String getColumnValueString(InputValue cv) {
         StringBuilder sb = new StringBuilder();
         Object value = cv.getValue();
         if (value instanceof String) {

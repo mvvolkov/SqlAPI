@@ -1,7 +1,7 @@
 package clientImpl.queries;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.ColumnValue;
+import sqlapi.columnExpr.InputValue;
 import sqlapi.queries.InsertQuery;
 
 import java.util.List;
@@ -13,10 +13,10 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
     private final List<String> columns;
 
     @NotNull
-    private final List<ColumnValue> values;
+    private final List<InputValue> values;
 
     InsertQueryImpl(@NotNull String databaseName, @NotNull String tableName,
-                    @NotNull List<String> columns, @NotNull List<ColumnValue> values) {
+                    @NotNull List<String> columns, @NotNull List<InputValue> values) {
         super(databaseName, tableName);
         this.columns = columns;
         this.values = values;
@@ -25,7 +25,7 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
 
     @NotNull
     @Override
-    public List<ColumnValue> getValues() {
+    public List<InputValue> getValues() {
         return values;
     }
 
@@ -54,8 +54,8 @@ final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery 
         return sb.toString();
     }
 
-    private String getStringFromValue(ColumnValue columnValue) {
-        Object value = columnValue.getValue();
+    private String getStringFromValue(InputValue inputValue) {
+        Object value = inputValue.getValue();
         if (value instanceof String) {
             return '\'' + (String) value + '\'';
         }

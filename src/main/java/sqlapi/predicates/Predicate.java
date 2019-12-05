@@ -2,6 +2,8 @@ package sqlapi.predicates;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 public interface Predicate {
 
     @NotNull Predicate and(@NotNull Predicate predicate);
@@ -11,4 +13,6 @@ public interface Predicate {
     default boolean isEmpty() {
         return false;
     }
+
+    void setParameters(ArrayDeque<Object> parameters);
 }

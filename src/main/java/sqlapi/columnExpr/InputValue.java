@@ -3,9 +3,8 @@ package sqlapi.columnExpr;
 
 import org.jetbrains.annotations.Nullable;
 
-public interface ColumnValue extends ColumnExpression {
+public interface InputValue extends ColumnExpression {
 
     @Nullable
     Object getValue();
-
 }

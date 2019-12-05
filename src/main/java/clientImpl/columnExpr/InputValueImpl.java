@@ -1,16 +1,16 @@
 package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.ColumnValue;
+import sqlapi.columnExpr.InputValue;
 import org.jetbrains.annotations.Nullable;
 
-final class ColumnValueImpl extends ColumnExprImpl implements ColumnValue {
+class InputValueImpl extends ColumnExprImpl implements InputValue {
 
     @Nullable
-    private final Object value;
+    protected Object value;
 
 
-    ColumnValueImpl(@Nullable Object value, @NotNull String alias) {
+    InputValueImpl(@Nullable Object value, @NotNull String alias) {
         super(alias);
         this.value = value;
     }

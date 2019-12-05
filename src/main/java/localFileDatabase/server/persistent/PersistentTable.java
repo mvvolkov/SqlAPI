@@ -5,7 +5,7 @@ import localFileDatabase.server.intermediate.ResultHeader;
 import localFileDatabase.server.intermediate.ResultRow;
 import localFileDatabase.server.intermediate.ResultValue;
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.ColumnValue;
+import sqlapi.columnExpr.InputValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
 import sqlapi.misc.AssignmentOperation;
@@ -102,7 +102,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
     public void insert(InsertFromSelectQuery query, QueryResult queryResult)
             throws SqlException {
         for (QueryResultRow row : queryResult.getRows()) {
-            List<ColumnValue> values = new ArrayList<>();
+            List<InputValue> values = new ArrayList<>();
             for (Object value : row.getValues()) {
                 values.add(ColumnExprFactory.value(value));
             }
@@ -116,7 +116,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
     }
 
 
-    public void insert(List<String> columnNames, List<ColumnValue> values)
+    public void insert(List<String> columnNames, List<InputValue> values)
             throws SqlException {
 
         // check number of values

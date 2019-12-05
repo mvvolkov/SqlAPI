@@ -1,8 +1,10 @@
 package clientImpl.queries;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.queries.DeleteQuery;
 import sqlapi.predicates.Predicate;
+import sqlapi.queries.DeleteQuery;
+
+import java.util.ArrayDeque;
 
 final class DeleteQueryImpl extends TableActionQueryImpl
         implements DeleteQuery {
@@ -33,5 +35,13 @@ final class DeleteQueryImpl extends TableActionQueryImpl
         }
         sb.append(";");
         return sb.toString();
+    }
+
+    @Override
+    public void setParameters(Object... values) {
+
+        ArrayDeque<Object> parameters = this.getParametersStack(values);
+
+
     }
 }

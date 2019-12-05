@@ -14,20 +14,28 @@ public class ColumnExprFactory {
 
     // *************************** ColumnValue **********************************
 
-    public static @NotNull ColumnValue valueWithAlias(@Nullable Object value, @NotNull String alias) {
-        return new ColumnValueImpl(value, alias);
+    public static @NotNull InputValue parametrizedValueWithAlias(@NotNull String alias) {
+        return new ParametrizedInputValueImpl(alias);
     }
 
-    public static @NotNull ColumnValue value(@Nullable Object value) {
+    public static @NotNull InputValue parametrizedValue() {
+        return parametrizedValueWithAlias("");
+    }
+
+    public static @NotNull InputValue valueWithAlias(@Nullable Object value, @NotNull String alias) {
+        return new InputValueImpl(value, alias);
+    }
+
+    public static @NotNull InputValue value(@Nullable Object value) {
         return valueWithAlias(value, "");
     }
 
-    public static @NotNull List<ColumnValue> values(Object... objects) {
-        List<ColumnValue> columnValues = new ArrayList<>();
+    public static @NotNull List<InputValue> values(Object... objects) {
+        List<InputValue> inputValues = new ArrayList<>();
         for (Object obj : objects) {
-            columnValues.add(value(obj));
+            inputValues.add(value(obj));
         }
-        return columnValues;
+        return inputValues;
     }
 
     // *************************** ColumnRef **********************************

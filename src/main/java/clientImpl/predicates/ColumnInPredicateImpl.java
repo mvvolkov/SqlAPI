@@ -1,10 +1,11 @@
 package clientImpl.predicates;
 
-import sqlapi.columnExpr.ColumnRef;
-import sqlapi.columnExpr.ColumnValue;
-import sqlapi.predicates.ColumnInPredicate;
 import org.jetbrains.annotations.NotNull;
+import sqlapi.columnExpr.ColumnRef;
+import sqlapi.columnExpr.InputValue;
+import sqlapi.predicates.ColumnInPredicate;
 
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,10 +16,10 @@ final class ColumnInPredicateImpl extends PredicateImpl
     private final ColumnRef columnRef;
 
     @NotNull
-    private final List<ColumnValue> values;
+    private final List<InputValue> values;
 
     ColumnInPredicateImpl(@NotNull ColumnRef columnRef,
-                          @NotNull List<ColumnValue> values) {
+                          @NotNull List<InputValue> values) {
         this.columnRef = columnRef;
         this.values = values;
     }
@@ -32,13 +33,20 @@ final class ColumnInPredicateImpl extends PredicateImpl
 
     @NotNull
     @Override
-    public List<ColumnValue> getColumnValues() {
+    public List<InputValue> getColumnValues() {
         return values;
     }
 
     @Override
     public String toString() {
-        return columnRef + " IN (" + values.stream().map(ColumnValue::toString).collect(
+        return columnRef + " IN (" + values.stream().map(InputValue::toString).collect(
                 Collectors.joining(", ")) + ")";
+    }
+
+    @Override
+    public void setParameters(ArrayDeque<Object> parameters) {
+        for (InputValue value : values) {
+            value.setParameters(parameters);
+        }
     }
 }

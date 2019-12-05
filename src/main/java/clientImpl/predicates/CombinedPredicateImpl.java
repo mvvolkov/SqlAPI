@@ -4,6 +4,8 @@ import sqlapi.predicates.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 abstract class CombinedPredicateImpl extends PredicateImpl
         implements CombinedPredicate {
 
@@ -31,6 +33,12 @@ abstract class CombinedPredicateImpl extends PredicateImpl
     @Override
     public Predicate getRightPredicate() {
         return rightPredicate;
+    }
+
+    @Override
+    public void setParameters(ArrayDeque<Object> parameters) {
+        leftPredicate.setParameters(parameters);
+        rightPredicate.setParameters(parameters);
     }
 
     @Override

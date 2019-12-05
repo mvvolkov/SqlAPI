@@ -20,8 +20,8 @@ public abstract class AbstractResultRow {
         if (ce instanceof ColumnRef) {
             return this.evaluateColumnRef((ColumnRef) ce);
         }
-        if (ce instanceof ColumnValue) {
-            return new ResultValue(((ColumnValue) ce).getValue());
+        if (ce instanceof InputValue) {
+            return new ResultValue(((InputValue) ce).getValue());
         }
         if (ce instanceof AggregateFunction) {
             return evaluateAggregateFunction((AggregateFunction) ce);

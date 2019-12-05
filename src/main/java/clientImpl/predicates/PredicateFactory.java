@@ -4,7 +4,7 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
-import sqlapi.columnExpr.ColumnValue;
+import sqlapi.columnExpr.InputValue;
 import sqlapi.predicates.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 
@@ -43,17 +43,17 @@ public class PredicateFactory {
         return isNotNull(ColumnExprFactory.columnRef(columnName));
     }
 
-    public static @NotNull Predicate in(@NotNull ColumnRef columnReference, @NotNull List<ColumnValue> values) {
+    public static @NotNull Predicate in(@NotNull ColumnRef columnReference, @NotNull List<InputValue> values) {
         return new ColumnInPredicateImpl(columnReference, values);
     }
 
     public static @NotNull Predicate in(@NotNull String columnName,
-                                        @NotNull List<ColumnValue> values) {
+                                        @NotNull List<InputValue> values) {
         return in(ColumnExprFactory.columnRef(columnName), values);
     }
 
     public static @NotNull Predicate in(@NotNull String tableName, @NotNull String columnName,
-                                        @NotNull List<ColumnValue> values) {
+                                        @NotNull List<InputValue> values) {
         return in(ColumnExprFactory.columnRef(tableName, columnName), values);
     }
 

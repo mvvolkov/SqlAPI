@@ -4,6 +4,8 @@ import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.predicates.BinaryPredicate;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+
 abstract class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate {
 
     @NotNull
@@ -28,6 +30,12 @@ abstract class BinaryPredicateImpl extends PredicateImpl implements BinaryPredic
     @Override
     public ColumnExpression getRightOperand() {
         return rightOperand;
+    }
+
+    @Override
+    public void setParameters(ArrayDeque<Object> parameters) {
+        leftOperand.setParameters(parameters);
+        rightOperand.setParameters(parameters);
     }
 
     @Override

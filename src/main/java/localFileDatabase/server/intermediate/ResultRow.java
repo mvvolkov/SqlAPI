@@ -94,8 +94,8 @@ public final class ResultRow extends AbstractResultRow {
             throws SqlException {
 
         ResultValue value = this.evaluateColumnExpr(predicate.getColumnRef());
-        for (ColumnValue columnValue : predicate.getColumnValues()) {
-            if (value.isEqual(columnValue)) {
+        for (InputValue inputValue : predicate.getColumnValues()) {
+            if (value.isEqual(inputValue)) {
                 return true;
             }
         }
