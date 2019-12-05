@@ -1,16 +1,19 @@
 package sqlapi.exceptions;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.AggregateFunction;
 
-public class UnsupportedAggregateFunctionTypeException extends SqlException {
+public final class UnsupportedAggregateFunctionTypeException extends SqlException {
 
+    @NotNull
     private final AggregateFunction aggregateFunction;
 
 
-    public UnsupportedAggregateFunctionTypeException(AggregateFunction aggregateFunction) {
+    public UnsupportedAggregateFunctionTypeException(@NotNull AggregateFunction aggregateFunction) {
         this.aggregateFunction = aggregateFunction;
     }
 
+    @NotNull
     public AggregateFunction getAggregateFunction() {
         return aggregateFunction;
     }

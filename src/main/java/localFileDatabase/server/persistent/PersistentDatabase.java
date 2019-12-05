@@ -1,9 +1,6 @@
 package localFileDatabase.server.persistent;
 
-import sqlapi.exceptions.NoSuchColumnException;
-import sqlapi.exceptions.NoSuchTableException;
-import sqlapi.exceptions.TableAlreadyExistsException;
-import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
 
 import java.io.Serializable;
@@ -32,7 +29,7 @@ public final class PersistentDatabase implements Serializable {
 
 
     public void createTable(TableMetadata tableMetadata)
-            throws TableAlreadyExistsException, WrongValueTypeException {
+            throws SqlException {
 
         PersistentTable table = this.getTableOrNull(tableMetadata.getTableName());
         if (table != null) {
@@ -65,12 +62,12 @@ public final class PersistentDatabase implements Serializable {
         return table;
     }
 
-    public void validate(Collection<TableMetadata> tableMetadataCollection)
-            throws NoSuchTableException, NoSuchColumnException {
-
-        for (TableMetadata tableMetadata : tableMetadataCollection) {
-            PersistentTable table = this.getTable(tableMetadata.getTableName());
-            table.validate(tableMetadata);
-        }
-    }
+//    public void validate(Collection<TableMetadata> tableMetadataCollection)
+//            throws NoSuchTableException, NoSuchColumnException {
+//
+//        for (TableMetadata tableMetadata : tableMetadataCollection) {
+//            PersistentTable table = this.getTable(tableMetadata.getTableName());
+//            table.validate(tableMetadata);
+//        }
+//    }
 }

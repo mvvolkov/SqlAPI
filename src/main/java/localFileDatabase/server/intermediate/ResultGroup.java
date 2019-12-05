@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Class for group of rows.
  */
-final class ResultGroup {
+final class ResultGroup extends AbstractResultRow {
 
     @NotNull
     private final LocalFileDbServer server;
@@ -62,48 +62,7 @@ final class ResultGroup {
 
 
     @NotNull
-    private ResultValue evaluateColumnExpr(@NotNull ColumnExpression ce)
-            throws SqlException {
-
-        if (ce instanceof BinaryColumnExpression) {
-            return this.evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
-        }
-        if (ce instanceof ColumnRef) {
-            return this.evaluateColumnRef((ColumnRef) ce);
-        }
-        if (ce instanceof ColumnValue) {
-            return new ResultValue(((ColumnValue) ce).getValue());
-        }
-        if (ce instanceof AggregateFunction) {
-            return evaluateAggregateFunction((AggregateFunction) ce);
-        }
-        throw new UnsupportedColumnExprTypeException(ce);
-    }
-
-
-    @NotNull
-    private ResultValue evaluateBinaryColumnExpr(@NotNull BinaryColumnExpression bce)
-            throws SqlException {
-        ResultValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
-        ResultValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
-
-        if (bce instanceof SumColumnExpression) {
-            return leftValue.add(rightValue);
-        }
-        if (bce instanceof DiffColumnExpression) {
-            return leftValue.subtract(rightValue);
-        }
-        if (bce instanceof ProductColumnExpression) {
-            return leftValue.multiply(rightValue);
-        }
-        if (bce instanceof DivisionColumnExpression) {
-            return leftValue.divide(rightValue);
-        }
-        throw new UnsupportedColumnExprTypeException(bce);
-    }
-
-    @NotNull
-    private ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
+    protected ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws SqlException {
 
         if (!groupedByColumns.isEmpty() &&
@@ -127,7 +86,7 @@ final class ResultGroup {
     }
 
     @NotNull
-    private ResultValue evaluateAggregateFunction(@NotNull AggregateFunction af)
+    protected ResultValue evaluateAggregateFunction(@NotNull AggregateFunction af)
             throws SqlException {
 
         if (af instanceof CountAggregateFunction) {
@@ -202,17 +161,19 @@ final class ResultGroup {
 
     @NotNull
     private ResultValue getMax(@NotNull ColumnRef cr)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            WrongValueTypeException {
+            throws SqlException {
 
         ResultValue maxValue = ResultValue.nullValue();
-        for (ResultValue value : this.getColumnValues(cr)) {
-            if (maxValue.isNull()) {
-                maxValue = value;
+        for (ResultValue resultValue : this.getColumnValues(cr)) {
+            if (maxValue.isNull() && !resultValue.isNull()) {
+                maxValue = resultValue;
                 continue;
             }
-            if (value.getComparisonResult(maxValue.getValue()) > 0) {
-                maxValue = value;
+            if (maxValue.getValue() == null) {
+                continue;
+            }
+            if (resultValue.getComparisonResult(maxValue.getValue()) > 0) {
+                maxValue = resultValue;
             }
         }
         return maxValue;
@@ -220,13 +181,15 @@ final class ResultGroup {
 
     @NotNull
     private ResultValue getMin(@NotNull ColumnRef cr)
-            throws NoSuchColumnException, AmbiguousColumnNameException,
-            WrongValueTypeException {
+            throws SqlException {
 
         ResultValue minValue = ResultValue.nullValue();
         for (ResultValue value : this.getColumnValues(cr)) {
             if (minValue.isNull()) {
                 minValue = value;
+                continue;
+            }
+            if (minValue.getValue() == null) {
                 continue;
             }
             if (value.getComparisonResult(minValue.getValue()) < 0) {

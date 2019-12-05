@@ -8,7 +8,7 @@ import sqlapi.predicates.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ResultRow {
+public final class ResultRow extends AbstractResultRow {
 
     @NotNull
     private final List<ResultValue> values;
@@ -117,42 +117,6 @@ public final class ResultRow {
         return leftValue.getValue() != null;
     }
 
-    @NotNull
-    public ResultValue evaluateColumnExpr(@NotNull ColumnExpression ce)
-            throws SqlException {
-
-        if (ce instanceof BinaryColumnExpression) {
-            return evaluateBinaryColumnExpr((BinaryColumnExpression) ce);
-        }
-        if (ce instanceof ColumnRef) {
-            return evaluateColumnRef((ColumnRef) ce);
-        }
-        if (ce instanceof ColumnValue) {
-            return new ResultValue(((ColumnValue) ce).getValue());
-        }
-        throw new UnsupportedColumnExprTypeException(ce);
-    }
-
-    @NotNull
-    private ResultValue evaluateBinaryColumnExpr(@NotNull BinaryColumnExpression bce)
-            throws SqlException {
-        ResultValue leftValue = this.evaluateColumnExpr(bce.getLeftOperand());
-        ResultValue rightValue = this.evaluateColumnExpr(bce.getRightOperand());
-
-        if (bce instanceof SumColumnExpression) {
-            return leftValue.add(rightValue);
-        }
-        if (bce instanceof DiffColumnExpression) {
-            return leftValue.subtract(rightValue);
-        }
-        if (bce instanceof ProductColumnExpression) {
-            return leftValue.multiply(rightValue);
-        }
-        if (bce instanceof DivisionColumnExpression) {
-            return leftValue.divide(rightValue);
-        }
-        throw new UnsupportedColumnExprTypeException(bce);
-    }
 
     @NotNull
     private ResultValue evaluateColumnRef(@NotNull String databaseName,
@@ -186,11 +150,16 @@ public final class ResultRow {
 
 
     @NotNull
-    ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
+    protected ResultValue evaluateColumnRef(@NotNull ColumnRef cr)
             throws NoSuchColumnException, AmbiguousColumnNameException {
 
         return this.evaluateColumnRef(cr.getDatabaseName(), cr.getTableName(),
                 cr.getColumnName());
+    }
+
+    @Override
+    protected ResultValue evaluateAggregateFunction(@NotNull AggregateFunction af) throws SqlException {
+        throw new UnsupportedColumnExprTypeException(af);
     }
 
 

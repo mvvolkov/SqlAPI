@@ -1,44 +1,37 @@
 package localFileDatabase.server.persistent;
 
-import sqlapi.exceptions.NoSuchColumnException;
-import sqlapi.exceptions.WrongValueTypeException;
+import sqlapi.exceptions.ConstraintViolationException;
+import sqlapi.exceptions.SqlException;
+import sqlapi.exceptions.UnsupportedColumnConstraintTypeException;
 import sqlapi.metadata.ColumnConstraint;
 import sqlapi.metadata.ColumnConstraintType;
 import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.SqlType;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
-public final class PersistentColumnMetadata implements Serializable, ColumnMetadata {
+public abstract class PersistentColumnMetadata implements Serializable, ColumnMetadata {
 
     public static final long serialVersionUID = 1318768379416289869L;
 
-    private final String columnName;
+    protected final String columnName;
 
-    private final SqlType sqlType;
+    final Collection<PersistentColumnConstraint> constraints;
 
-    private final Collection<PersistentColumnConstraint> constraints;
+    protected final PersistentTable table;
 
     private final Object defaultValue;
 
 
-    PersistentColumnMetadata(ColumnMetadata columnMetadata)
-            throws WrongValueTypeException {
+    PersistentColumnMetadata(ColumnMetadata columnMetadata, PersistentTable table) throws SqlException {
+        this.table = table;
         this.columnName = columnMetadata.getColumnName();
-        this.sqlType = columnMetadata.getSqlType();
-        constraints = new ArrayList<>();
-        Object defaultValue = null;
-        for (ColumnConstraint constraint : columnMetadata.getConstraints()) {
-            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
-                defaultValue = constraint.getParameters().get(0);
-                this.checkValueType(defaultValue);
-            }
-            constraints.add(new PersistentColumnConstraint(constraint));
-        }
-        this.defaultValue = defaultValue;
+        this.constraints = columnMetadata.getConstraints()
+                .stream().map(PersistentColumnConstraint::new).collect(Collectors.toList());
+        this.defaultValue = this.retrieveDefaultValue(columnMetadata.getConstraints());
     }
 
     @Override
@@ -46,92 +39,73 @@ public final class PersistentColumnMetadata implements Serializable, ColumnMetad
         return columnName;
     }
 
-    @Override
-    public SqlType getSqlType() {
-        return sqlType;
-    }
 
     @Override
     public Collection<ColumnConstraint> getConstraints() {
         return new ArrayList<>(constraints);
     }
 
-    int getSize() {
-        for (ColumnConstraint constraint : constraints) {
-            if (constraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
-                return (int) constraint.getParameters().get(0);
-            }
-        }
-        return -1;
-    }
+    @Override
+    public abstract SqlType getSqlType();
 
     Object getDefaultValue() {
         return defaultValue;
     }
 
-    void checkValueType(Object value) throws WrongValueTypeException {
-        if (value == null) {
-            return;
-        }
-        if (sqlType == SqlType.INTEGER) {
-            if (value instanceof Number) {
-                try {
-                    BigDecimal bd = BigDecimal.valueOf(((Number) value).doubleValue());
-                } catch (NumberFormatException nfe) {
-                    throw new WrongValueTypeException();
-                }
-            }
-            if (value instanceof String) {
-                try {
-                    BigDecimal bd = new BigDecimal(((String) value));
-                } catch (NumberFormatException nfe) {
-                    throw new WrongValueTypeException();
-                }
-            }
-        }
-        if (sqlType == SqlType.VARCHAR) {
-            if (!(value instanceof String)) {
-                throw new WrongValueTypeException();
-            }
-        }
-    }
-
-
-    private ColumnConstraint getConstraintOrNull(ColumnConstraintType type) {
-        for (ColumnConstraint constraint : this.getConstraints()) {
-            if (constraint.getConstraintType() == type) {
-                return constraint;
+    private Object retrieveDefaultValue(Collection<ColumnConstraint> constraints) throws SqlException {
+        for (ColumnConstraint constraint : constraints) {
+            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
+                return this.getCheckedValue(constraint.getParameters().get(0));
             }
         }
         return null;
     }
 
-    void validate(ColumnMetadata columnMetadata) throws NoSuchColumnException {
-        String columnName = columnMetadata.getColumnName();
-        if (columnMetadata.getSqlType() != this.getSqlType()) {
-            throw new NoSuchColumnException(columnName);
-        }
-        if (columnMetadata.getConstraints().size() != this.getConstraints().size()) {
-            throw new NoSuchColumnException(columnName);
-        }
-        for (ColumnConstraint constraint : columnMetadata.getConstraints()) {
+    abstract Object getCheckedValue(Object newValue) throws SqlException;
+
+
+    void checkConstraints(Object newValue)
+            throws ConstraintViolationException,
+            UnsupportedColumnConstraintTypeException {
+
+
+        for (ColumnConstraint constraint : constraints) {
             ColumnConstraintType type = constraint.getConstraintType();
-            ColumnConstraint existConstraint = this.getConstraintOrNull(type);
-            if (existConstraint == null) {
-                throw new NoSuchColumnException(columnName);
+            switch (type) {
+                case NOT_NULL:
+                    this.checkNotNullConstraint(newValue, columnName, type);
+                    break;
+                case UNIQUE:
+                    table.checkUniqueConstraint(newValue, columnName, type);
+                    break;
+                case PRIMARY_KEY:
+                    this.checkNotNullConstraint(newValue, columnName, type);
+                    table.checkUniqueConstraint(newValue, columnName, type);
+                    break;
+                case MAX_SIZE:
+                    this.checkMaxSize(newValue);
+                    break;
+                case DEFAULT_VALUE:
+                    break;
+                default:
+                    throw new UnsupportedColumnConstraintTypeException(type);
             }
-            if (type == ColumnConstraintType.MAX_SIZE) {
-                int size = (int) constraint.getParameters().get(0);
-                if (size != this.getSize()) {
-                    throw new NoSuchColumnException(columnName);
-                }
-            }
-            if (type == ColumnConstraintType.DEFAULT_VALUE) {
-                Object defaultValue = constraint.getParameters().get(0);
-                if (!defaultValue.equals(this.getDefaultValue())) {
-                    throw new NoSuchColumnException(columnName);
-                }
-            }
+        }
+    }
+
+    protected void checkMaxSize(Object newValue)
+            throws ConstraintViolationException,
+            UnsupportedColumnConstraintTypeException {
+        throw new UnsupportedColumnConstraintTypeException(ColumnConstraintType.MAX_SIZE);
+    }
+
+
+    private void checkNotNullConstraint(Object newValue, String ColumnName,
+                                        ColumnConstraintType type)
+            throws ConstraintViolationException {
+        if (newValue == null) {
+            throw new ConstraintViolationException(table.getDatabaseName(), table.getTableName(),
+                    ColumnName, type);
         }
     }
 }

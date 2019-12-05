@@ -1,15 +1,18 @@
 package sqlapi.exceptions;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 
-public class UnsupportedColumnExprTypeException extends SqlException {
+public final class UnsupportedColumnExprTypeException extends SqlException {
 
+    @NotNull
     private final ColumnExpression expr;
 
-    public UnsupportedColumnExprTypeException(ColumnExpression expr) {
+    public UnsupportedColumnExprTypeException(@NotNull ColumnExpression expr) {
         this.expr = expr;
     }
 
+    @NotNull
     public ColumnExpression getExpression() {
         return expr;
     }

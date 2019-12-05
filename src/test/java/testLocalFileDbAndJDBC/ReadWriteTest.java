@@ -113,8 +113,8 @@ public class ReadWriteTest extends AbstractTestRunner {
 
 
             // save databases
-            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-//            String tempDir = System.getProperty("java.io.tmpdir");
+//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
+            String tempDir = System.getProperty("java.io.tmpdir");
             String fileName = tempDir + "mpsReadWriteTest1";
             sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
 

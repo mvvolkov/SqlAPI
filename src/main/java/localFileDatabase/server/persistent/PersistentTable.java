@@ -31,12 +31,25 @@ public final class PersistentTable implements Serializable, TableMetadata {
     private final Collection<PersistentRow> rows = new ArrayList<>();
 
     PersistentTable(String databaseName, TableMetadata tableMetadata)
-            throws WrongValueTypeException {
+            throws SqlException {
         this.databaseName = databaseName;
         this.tableName = tableMetadata.getTableName();
         for (ColumnMetadata columnMetadata : tableMetadata.getColumnsMetadata()) {
-            this.columns.add(new PersistentColumnMetadata(columnMetadata));
+            switch (columnMetadata.getSqlType()) {
+                case VARCHAR:
+                    this.columns.add(new VarcharColumnMetadata(columnMetadata, this));
+                    break;
+                case INTEGER:
+                    this.columns.add(new IntegerColumnMetadata(columnMetadata, this));
+                    break;
+                default:
+                    throw new UnsupportedSqlTypeException(columnMetadata.getSqlType());
+            }
         }
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     @NotNull
@@ -104,9 +117,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
 
 
     public void insert(List<String> columnNames, List<ColumnValue> values)
-            throws WrongValueTypeException, ConstraintViolationException,
-            InvalidQueryException, UnsupportedColumnConstraintTypeException,
-            NoSuchColumnException {
+            throws SqlException {
 
         // check number of values
         int columnCount = columnNames.isEmpty() ? columns.size() : columnNames.size();
@@ -115,34 +126,33 @@ public final class PersistentTable implements Serializable, TableMetadata {
                     "Invalid insert query. Number of values differs from number of columns");
         }
 
-        Map<String, Object> columnToValueMap = new HashMap<>();
+        PersistentRow row = new PersistentRow();
 
         // insert values
         for (int i = 0; i < columnCount; i++) {
             String columnName = columnNames.isEmpty() ? columns.get(i).getColumnName()
                     : columnNames.get(i);
-            Object value = values.get(i).getValue();
-            this.checkConstraints(this.getColumnMetadata(columnName), value);
-            columnToValueMap.put(columnName, value);
+            PersistentColumnMetadata cm = this.getColumnMetadata(columnName);
+            Object value = cm.getCheckedValue(values.get(i).getValue());
+            row.setValue(columnName, value);
         }
 
         // insert default values for missing columns
-        if (columnToValueMap.size() != columns.size()) {
+        if (row.length() != columns.size()) {
             for (PersistentColumnMetadata columnMetadata : columns) {
                 String columnName = columnMetadata.getColumnName();
-                if (columnToValueMap.containsKey(columnName)) {
+                if (row.hasValue(columnName)) {
                     continue;
                 }
                 Object value = columnMetadata.getDefaultValue();
-                this.checkConstraints(columnMetadata, value);
-                columnToValueMap.put(columnName, value);
+                row.setValue(columnName, value);
             }
         }
-        rows.add(new PersistentRow(columnToValueMap));
+        rows.add(row);
     }
 
 
-    void delete(Predicate predicate)
+    private void delete(Predicate predicate)
             throws SqlException {
         if (predicate.isEmpty()) {
             rows.clear();
@@ -156,34 +166,25 @@ public final class PersistentTable implements Serializable, TableMetadata {
         rows.removeAll(rowsToDelete);
     }
 
-    void update(UpdateQuery query)
+    private void update(UpdateQuery query)
             throws SqlException {
 
         for (PersistentRow row : rows) {
-            ResultRow irr = this.createResultRow(row);
-            if (irr.matchPredicate(query.getPredicate())) {
-                for (AssignmentOperation ao : query.getAssignmentOperations()) {
-                    String columnName = ao.getColumnName();
-                    Object newValue = irr.evaluateColumnExpr(ao.getValue()).getValue();
-                    this.checkConstraints(this.getColumnMetadata(columnName), newValue);
-                    row.getValues().put(columnName, newValue);
-                }
+            ResultRow resultRow = this.createResultRow(row);
+            if (!resultRow.matchPredicate(query.getPredicate())) {
+                continue;
+            }
+            for (AssignmentOperation ao : query.getAssignmentOperations()) {
+                String columnName = ao.getColumnName();
+                Object newValue = resultRow.evaluateColumnExpr(ao.getValue()).getValue();
+                newValue = this.getColumnMetadata(columnName).getCheckedValue(newValue);
+                row.setValue(columnName, newValue);
             }
         }
     }
 
-
-    private void checkNotNullConstraint(Object newValue, String ColumnName,
-                                        ColumnConstraintType type)
-            throws ConstraintViolationException {
-        if (newValue == null) {
-            throw new ConstraintViolationException(databaseName, tableName,
-                    ColumnName, type);
-        }
-    }
-
-    private void checkUniqueConstraint(Object newValue, String columnName,
-                                       ColumnConstraintType type)
+    void checkUniqueConstraint(Object newValue, String columnName,
+                               ColumnConstraintType type)
             throws ConstraintViolationException {
         for (PersistentRow row : rows) {
             if (row.getValue(columnName).equals(newValue)) {
@@ -193,54 +194,6 @@ public final class PersistentTable implements Serializable, TableMetadata {
         }
     }
 
-    private void checkMaxSize(Object newValue, PersistentColumnMetadata cm,
-                              ColumnConstraintType type)
-            throws ConstraintViolationException,
-            UnsupportedColumnConstraintTypeException {
-        if (cm.getSize() != -1 && newValue != null) {
-            if (cm.getSqlType() == SqlType.VARCHAR) {
-                String strValue = (String) newValue;
-                if (strValue.length() > cm.getSize()) {
-                    throw new ConstraintViolationException(databaseName, tableName,
-                            cm.getColumnName(), type);
-                }
-                return;
-            }
-            throw new UnsupportedColumnConstraintTypeException(type);
-        }
-    }
-
-    private void checkConstraints(PersistentColumnMetadata cm,
-                                  Object newValue)
-            throws WrongValueTypeException, ConstraintViolationException,
-            UnsupportedColumnConstraintTypeException {
-
-        cm.checkValueType(newValue);
-
-        for (ColumnConstraint constraint : cm.getConstraints()) {
-            ColumnConstraintType type = constraint.getConstraintType();
-            switch (type) {
-                case NOT_NULL:
-                    this.checkNotNullConstraint(newValue, cm.getColumnName(), type);
-                    break;
-                case UNIQUE:
-                    this.checkUniqueConstraint(newValue, cm.getColumnName(), type);
-                    break;
-                case PRIMARY_KEY:
-                    this.checkNotNullConstraint(newValue, cm.getColumnName(), type);
-                    this.checkUniqueConstraint(newValue,
-                            cm.getColumnName(), type);
-                    break;
-                case MAX_SIZE:
-                    this.checkMaxSize(newValue, cm, type);
-                    break;
-                case DEFAULT_VALUE:
-                    break;
-                default:
-                    throw new UnsupportedColumnConstraintTypeException(type);
-            }
-        }
-    }
 
     public List<ResultHeader> getResultHeaders() {
         return columns.stream().map(this::createResultHeader).collect(
@@ -251,7 +204,6 @@ public final class PersistentTable implements Serializable, TableMetadata {
         return rows.stream().map(this::createResultRow).collect(
                 Collectors.toList());
     }
-
 
     private ResultRow createResultRow(PersistentRow row) {
         List<ResultValue> values = new ArrayList<>();
@@ -264,17 +216,5 @@ public final class PersistentTable implements Serializable, TableMetadata {
     private ResultHeader createResultHeader(PersistentColumnMetadata columnMetadata) {
         return new ResultHeader(databaseName, tableName,
                 columnMetadata.getColumnName());
-    }
-
-    void validate(TableMetadata tableMetadata)
-            throws NoSuchTableException, NoSuchColumnException {
-        if (columns.size() != tableMetadata.getColumnsMetadata().size()) {
-            throw new NoSuchTableException(tableName);
-        }
-        for (ColumnMetadata cm : tableMetadata.getColumnsMetadata()) {
-            PersistentColumnMetadata columnMetadata =
-                    this.getColumnMetadata(cm.getColumnName());
-            columnMetadata.validate(cm);
-        }
     }
 }

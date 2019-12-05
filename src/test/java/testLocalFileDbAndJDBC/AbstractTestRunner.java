@@ -5,7 +5,6 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDbServer;
-import mySqlJdbcServer.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -42,20 +41,20 @@ public abstract class AbstractTestRunner {
 
         servers.add(new Object[]{LocalFileDbServer.getInstance(), "DB1"});
 
-        servers.add(new Object[]{new MySQL_JDBC_Server(
-                "jdbc:mysql://sql7.freesqldatabase.com:3306",
-                "sql7314024", "9hc9cPjLjg"), "sql7314024"});
+//        servers.add(new Object[]{new MySQL_JDBC_Server(
+//                "jdbc:mysql://sql7.freesqldatabase.com:3306",
+//                "sql7314024", "9hc9cPjLjg"), "sql7314024"});
 
         // slow connection
 //        servers.add(new Object[]{new MySQL_JDBC_Server(
 //                "jdbc:mysql://db4free.net:3306",
 //                "mvolkov_test2019", "mpsjetbrains2019"), "mvolkov_test2019"});
 
-        servers.add(new Object[]{new MySQL_JDBC_Server(
-                "jdbc:mysql://localhost:3306/test2019?useUnicode=true"
-                        + "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode"
-                        + "=false&serverTimezone=Europe/Moscow",
-                "root", "mpsjetbrains2019"), "test2019"});
+//        servers.add(new Object[]{new MySQL_JDBC_Server(
+//                "jdbc:mysql://localhost:3306/test2019?useUnicode=true"
+//                        + "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode"
+//                        + "=false&serverTimezone=Europe/Moscow",
+//                "root", "mpsjetbrains2019"), "test2019"});
 
         return servers;
     }

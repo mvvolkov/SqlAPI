@@ -143,7 +143,7 @@ public final class LocalFileDbServer implements SqlServer {
             FileInputStream fis = new FileInputStream(query.getFileName());
             ois = new ObjectInputStream(fis);
             database = (PersistentDatabase) ois.readObject();
-            database.validate(query.getTables());
+//            database.validate(query.getTables());
             databases.add(database);
         } finally {
             if (ois != null) {
@@ -183,8 +183,7 @@ public final class LocalFileDbServer implements SqlServer {
     }
 
     private void createTable(@NotNull CreateTableQuery query)
-            throws NoSuchDatabaseException, TableAlreadyExistsException,
-            WrongValueTypeException {
+            throws SqlException {
         this.getDatabase(query.getDatabaseName())
                 .createTable(query.getTableMetadata());
     }

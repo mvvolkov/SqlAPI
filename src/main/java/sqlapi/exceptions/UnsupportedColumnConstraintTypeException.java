@@ -1,16 +1,19 @@
 package sqlapi.exceptions;
 
+import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.ColumnConstraintType;
 
-public class UnsupportedColumnConstraintTypeException extends SqlException {
+public final class UnsupportedColumnConstraintTypeException extends SqlException {
 
+    @NotNull
     private final ColumnConstraintType type;
 
 
-    public UnsupportedColumnConstraintTypeException(ColumnConstraintType type) {
+    public UnsupportedColumnConstraintTypeException(@NotNull ColumnConstraintType type) {
         this.type = type;
     }
 
+    @NotNull
     public ColumnConstraintType getColumnConstraintType() {
         return type;
     }
