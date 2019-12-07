@@ -8,15 +8,15 @@ import java.util.List;
 public class ParametrizedInputValueImpl extends InputValueImpl
         implements ParametrizedInputValue {
 
-    private boolean hasValue;
+    private boolean isEmpty = true;
 
     ParametrizedInputValueImpl(@NotNull String alias) {
         super(null, alias);
     }
 
     @Override
-    public boolean hasValue() {
-        return hasValue;
+    public boolean isEmpty() {
+        return isEmpty;
     }
 
     @Override public void setParameters(List<Object> parameters) {
@@ -25,14 +25,14 @@ public class ParametrizedInputValueImpl extends InputValueImpl
         }
         value = parameters.get(0);
         parameters.remove(0);
-        hasValue = true;
+        isEmpty = false;
     }
 
     @Override
     public String toString() {
-        if (hasValue) {
-            return super.toString();
+        if (isEmpty) {
+            return "??";
         }
-        return "??";
+        return super.toString();
     }
 }

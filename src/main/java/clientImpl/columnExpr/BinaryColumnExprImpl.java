@@ -1,10 +1,8 @@
 package clientImpl.columnExpr;
 
-import sqlapi.columnExpr.BinaryColumnExpression;
+import sqlapi.columnExpr.binaryExpr.BinaryColumnExpression;
 import sqlapi.columnExpr.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayDeque;
 
 abstract class BinaryColumnExprImpl extends ColumnExprImpl
         implements BinaryColumnExpression {

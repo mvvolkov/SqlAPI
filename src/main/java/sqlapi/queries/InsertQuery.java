@@ -5,7 +5,7 @@ import sqlapi.columnExpr.InputValue;
 
 import java.util.List;
 
-public interface InsertQuery extends TableActionQuery {
+public interface InsertQuery extends TableQuery {
 
     @NotNull List<String> getColumns();
 

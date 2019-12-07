@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-final class InsertFromSelectQueryImpl extends TableActionQueryImpl implements
+final class InsertFromSelectQueryImpl extends TableQueryImpl implements
         InsertFromSelectQuery {
 
     @NotNull

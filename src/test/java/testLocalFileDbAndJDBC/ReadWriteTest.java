@@ -1,145 +1,73 @@
 package testLocalFileDbAndJDBC;
 
-import clientImpl.columnExpr.ColumnExprFactory;
 import localFileDatabase.client.impl.FileQueryFactory;
-import clientImpl.metadata.MetadataFactory;
-import clientImpl.queries.QueryFactory;
-import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.SqlException;
-import sqlapi.metadata.TableMetadata;
-import sqlapi.queries.InsertQuery;
-import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.File;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 
 /**
- * Before each test we have two tables:
- * <p>
- * SELECT * FROM DB1.table1;
- * <p>
- * column1, column2, column3, column4
- * 10, 30, test1, t21
- * 11, 31, test2, null
- * 12, 32, test3, t43
- * 13, 33, test2, t653
- * 15, 34, test1, null
- * 16, null, test1, null
- * <p>
- * <p>
- * SELECT * FROM DB1.table2;
- * <p>
- * column5, column3
- * 22, test3
- * 23, test2
- * 25, test4
+ * Before the test the database is saved to a file
  */
 public class ReadWriteTest extends AbstractTestRunner {
+
+    private final String fileName = "sqlLocalFileDBReadWriteTest.db";
 
     public ReadWriteTest(SqlServer sqlServer, String database) {
         super(sqlServer, database);
     }
 
-    @Test
-    public void testReadAndWrite() {
-
+    @Override
+    public void setUp() {
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
-        SqlServer sqlServer = LocalFileDbServer.getInstance();
-        SqlServer sqlServer1 = LocalFileDbServer.getInstance();
-
+        super.setUp();
         try {
-
-            sqlServer.executeQuery(QueryFactory.createDatabase("DB1"));
-
-            TableMetadata tm1 = MetadataFactory.tableMetadata("table1", Arrays.asList(
-                    MetadataFactory.integer("column1",
-                            Collections.singletonList(MetadataFactory.primaryKey())),
-                    MetadataFactory.integer("column2", Collections
-                            .singletonList(
-                                    MetadataFactory.defaultVal(15))),
-                    MetadataFactory.varchar("column3", 20,
-                            Collections.singletonList(
-                                    MetadataFactory.notNull())),
-                    MetadataFactory.varchar("column4", 5)
-            ));
-
-            // Create a table
-            sqlServer.executeQuery(QueryFactory
-                    .createTable("DB1", tm1));
-
-            // Fill table1
-            InsertQuery query = QueryFactory.insert("DB1", "table1", Arrays.asList(
-                    ColumnExprFactory.parameter(),
-                    ColumnExprFactory.parameter(),
-                    ColumnExprFactory.parameter(),
-                    ColumnExprFactory.parameter()
-            ));
-            sqlServer.executeQuery(query, 10, 30, "test1", "t21");
-            sqlServer.executeQuery(query, 11, 31, "test2", null);
-            sqlServer.executeQuery(query, 12, 32, "test3", "t43");
-            sqlServer.executeQuery(query, 13, 33, "test2", "t653");
-            sqlServer.executeQuery(query, 15, 34, "test1", null);
-            sqlServer.executeQuery(query, 16, null, "test1", null);
-
-            TableMetadata tm2 = MetadataFactory.tableMetadata("table2",
-                    Arrays.asList(
-                            MetadataFactory.integer("column5", Collections
-                                    .singletonList(MetadataFactory
-                                            .primaryKey())),
-                            MetadataFactory.varchar("column3", 15)
-                    ));
-
-            // Create a table
-            sqlServer.executeQuery(QueryFactory.createTable("DB1", tm2));
-
-            // Fill table2
+            // save to file
             sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.values(22, "test3")));
-            sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.values(23, "test2")));
-            sqlServer.executeQuery(
-                    QueryFactory.insert("DB1", "table2",
-                            ColumnExprFactory.values(25, "test4")));
-
-
-            // save databases
-//            String tempDir = "C:\\Users\\mvvol\\IdeaProjects\\";
-            String tempDir = System.getProperty("java.io.tmpdir");
-            String fileName = tempDir + "mpsReadWriteTest1";
-            sqlServer.executeQuery(FileQueryFactory.saveDatabase(fileName, "DB1"));
-
-            sqlServer1.executeQuery(FileQueryFactory
-                    .readDatabase(fileName, "DB1", Arrays.asList(tm1, tm2)));
-
-            QueryResult queryResult = sqlServer1.getQueryResult(
-                    QueryFactory.select(TableRefFactory.dbTable("DB1", "table1")));
-
-            printResultSet(queryResult);
-
-            checkHeaders(queryResult.getHeaders(), "column1", "column2", "column3",
-                    "column4");
-            assertEquals(6, queryResult.getRows().size());
-            checkRowExists(queryResult, 10, 30, "test1", "t21");
-            checkRowExists(queryResult, 11, 31, "test2", null);
-            checkRowExists(queryResult, 12, 32, "test3", "t43");
-            checkRowExists(queryResult, 13, 33, "test2", "t653");
-            checkRowExists(queryResult, 15, 34, "test1", null);
-            checkRowExists(queryResult, 16, null, "test1", null);
-
+                    FileQueryFactory.saveDatabaseToFile(fileName, databaseName));
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();
         }
     }
+
+    @Test
+    public void testReadDatabase() {
+
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+        SqlServer sqlServer1 = LocalFileDbServer.getInstance();
+        try {
+            sqlServer1.executeQuery(
+                    FileQueryFactory.readDatabaseFromFile(fileName, databaseName));
+            sqlServer1.validateMetadata(databaseName, tm1, tm2);
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
+            fail();
+        }
+    }
+
+    @Override public void tearDown() {
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+        // delete file
+        File file = new File(fileName);
+        if (file.delete()) {
+            System.out.println(fileName + " is deleted!");
+        } else {
+            System.out.println("Delete file operation is failed.");
+        }
+        super.tearDown();
+    }
+
+
 }

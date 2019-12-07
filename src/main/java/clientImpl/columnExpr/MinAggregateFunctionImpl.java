@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.MinAggregateFunction;
+import sqlapi.columnExpr.aggregate.MinAggregateFunction;
 
 final class MinAggregateFunctionImpl extends AggregateFunctionImpl implements MinAggregateFunction {
 

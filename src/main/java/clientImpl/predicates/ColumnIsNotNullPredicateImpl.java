@@ -4,8 +4,6 @@ import sqlapi.columnExpr.ColumnRef;
 import sqlapi.predicates.ColumnIsNotNullPredicate;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayDeque;
-
 final class ColumnIsNotNullPredicateImpl extends PredicateImpl
         implements ColumnIsNotNullPredicate {
 

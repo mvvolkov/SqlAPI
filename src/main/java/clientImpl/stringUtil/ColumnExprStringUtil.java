@@ -1,6 +1,8 @@
 package clientImpl.stringUtil;
 
 import sqlapi.columnExpr.*;
+import sqlapi.columnExpr.aggregate.*;
+import sqlapi.columnExpr.binaryExpr.*;
 import sqlapi.exceptions.UnsupportedAggregateFunctionTypeException;
 import sqlapi.exceptions.UnsupportedColumnExprTypeException;
 
@@ -44,7 +46,7 @@ public class ColumnExprStringUtil {
     public static String getInputValueString(InputValue cv) {
         StringBuilder sb = new StringBuilder();
         if (cv instanceof ParametrizedInputValue &&
-                !((ParametrizedInputValue) cv).hasValue()) {
+                ((ParametrizedInputValue) cv).isEmpty()) {
             sb.append("??");
         } else {
             Object value = cv.getValue();

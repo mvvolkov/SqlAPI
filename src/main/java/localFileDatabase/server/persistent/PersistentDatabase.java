@@ -1,7 +1,9 @@
 package localFileDatabase.server.persistent;
 
+import localFileDatabase.server.LocalFileDbServer;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.TableMetadata;
+import sqlapi.queries.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,8 +17,20 @@ public final class PersistentDatabase implements Serializable {
 
     private final Collection<PersistentTable> tables = new ArrayList<>();
 
-    public PersistentDatabase(String name) {
+
+    transient private LocalFileDbServer server;
+
+    public PersistentDatabase(String name, LocalFileDbServer server) {
         this.name = name;
+        this.server = server;
+    }
+
+    public LocalFileDbServer getServer() {
+        return server;
+    }
+
+    public void setServer(LocalFileDbServer server) {
+        this.server = server;
     }
 
     public String getName() {
@@ -27,8 +41,20 @@ public final class PersistentDatabase implements Serializable {
         return new ArrayList<>(tables);
     }
 
+    public void executeQuery(DatabaseQuery query) throws SqlException {
 
-    public void createTable(TableMetadata tableMetadata)
+        if (query instanceof CreateTableQuery) {
+            this.createTable(((CreateTableQuery) query).getTableMetadata());
+        } else if (query instanceof DropTableQuery) {
+            this.dropTable(((DropTableQuery) query).getTableName());
+        } else if (query instanceof TableQuery) {
+            this.getTable(((TableQuery) query).getTableName())
+                    .executeQuery((TableQuery) query);
+        }
+    }
+
+
+    private void createTable(TableMetadata tableMetadata)
             throws SqlException {
 
         PersistentTable table = this.getTableOrNull(tableMetadata.getTableName());
@@ -36,10 +62,10 @@ public final class PersistentDatabase implements Serializable {
             throw new TableAlreadyExistsException(name,
                     tableMetadata.getTableName());
         }
-        tables.add(new PersistentTable(name, tableMetadata));
+        tables.add(new PersistentTable(tableMetadata, this));
     }
 
-    public void dropTable(String tableName) throws NoSuchTableException {
+    private void dropTable(String tableName) throws NoSuchTableException {
         PersistentTable table = this.getTable(tableName);
         tables.remove(table);
     }
@@ -61,13 +87,4 @@ public final class PersistentDatabase implements Serializable {
         }
         return table;
     }
-
-//    public void validate(Collection<TableMetadata> tableMetadataCollection)
-//            throws NoSuchTableException, NoSuchColumnException {
-//
-//        for (TableMetadata tableMetadata : tableMetadataCollection) {
-//            PersistentTable table = this.getTable(tableMetadata.getTableName());
-//            table.validate(tableMetadata);
-//        }
-//    }
 }

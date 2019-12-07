@@ -5,7 +5,6 @@ import sqlapi.columnExpr.ColumnRef;
 import sqlapi.columnExpr.InputValue;
 import sqlapi.predicates.ColumnInPredicate;
 
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.stream.Collectors;
 

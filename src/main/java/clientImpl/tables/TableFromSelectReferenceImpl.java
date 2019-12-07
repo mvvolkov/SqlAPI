@@ -4,8 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.SelectQuery;
 import sqlapi.tables.TableFromSelectReference;
 
-import java.util.ArrayDeque;
-
 final class TableFromSelectReferenceImpl implements TableFromSelectReference {
 
     private final SelectQuery selectQuery;

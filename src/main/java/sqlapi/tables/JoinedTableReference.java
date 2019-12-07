@@ -3,7 +3,6 @@ package sqlapi.tables;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.predicates.Predicate;
 
-import java.util.ArrayDeque;
 import java.util.List;
 
 public interface JoinedTableReference extends TableReference {

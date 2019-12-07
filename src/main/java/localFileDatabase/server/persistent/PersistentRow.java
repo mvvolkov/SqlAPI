@@ -14,10 +14,6 @@ public final class PersistentRow implements Serializable {
         this.values = new HashMap<>();
     }
 
-    public Map<String, Object> getValues() {
-        return values;
-    }
-
     public Object getValue(String columnName) {
         return values.get(columnName);
     }

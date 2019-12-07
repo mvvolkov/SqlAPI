@@ -1,5 +1,6 @@
 package clientImpl.queries;
 
+import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
@@ -11,9 +12,7 @@ import sqlapi.predicates.Predicate;
 import sqlapi.queries.*;
 import sqlapi.tables.TableReference;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class QueryFactory {
 
@@ -49,8 +48,44 @@ public class QueryFactory {
 
     public static @NotNull InsertQuery insert(@NotNull String databaseName,
                                               @NotNull String tableName,
+                                              @NotNull List<String> columns,
+                                              InputValue... values) {
+        return insert(databaseName, tableName, columns, Arrays.asList(values));
+    }
+
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              @NotNull List<String> columns,
+                                              Object... values) {
+        List<InputValue> inputValues = new ArrayList<>();
+        for (Object obj : values) {
+            inputValues.add(ColumnExprFactory.value(obj));
+        }
+        return insert(databaseName, tableName, columns, inputValues);
+    }
+
+
+
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
                                               @NotNull List<InputValue> values) {
         return insert(databaseName, tableName, Collections.emptyList(), values);
+    }
+
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              InputValue... values) {
+        return insert(databaseName, tableName, Arrays.asList(values));
+    }
+
+    public static @NotNull InsertQuery insert(@NotNull String databaseName,
+                                              @NotNull String tableName,
+                                              Object... values) {
+        List<InputValue> inputValues = new ArrayList<>();
+        for (Object obj : values) {
+            inputValues.add(ColumnExprFactory.value(obj));
+        }
+        return insert(databaseName, tableName, inputValues);
     }
 
     public static @NotNull InsertFromSelectQueryImpl insert(@NotNull String databaseName,

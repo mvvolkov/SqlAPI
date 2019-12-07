@@ -2,7 +2,7 @@ package clientImpl.predicates;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.predicates.LessThanPredicate;
+import sqlapi.predicates.binaryPredicate.LessThanPredicate;
 
 final class LessThanPredicateImpl extends BinaryPredicateImpl implements LessThanPredicate {
 

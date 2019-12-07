@@ -1,10 +1,8 @@
 package clientImpl.predicates;
 
-import sqlapi.predicates.CombinedPredicate;
+import sqlapi.predicates.combined.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayDeque;
 
 abstract class CombinedPredicateImpl extends PredicateImpl
         implements CombinedPredicate {

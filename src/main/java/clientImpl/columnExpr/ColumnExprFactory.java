@@ -3,9 +3,11 @@ package clientImpl.columnExpr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.columnExpr.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import sqlapi.columnExpr.aggregate.*;
+import sqlapi.columnExpr.binaryExpr.DiffColumnExpression;
+import sqlapi.columnExpr.binaryExpr.DivisionColumnExpression;
+import sqlapi.columnExpr.binaryExpr.ProductColumnExpression;
+import sqlapi.columnExpr.binaryExpr.SumColumnExpression;
 
 public class ColumnExprFactory {
 
@@ -31,13 +33,6 @@ public class ColumnExprFactory {
         return valueWithAlias(value, "");
     }
 
-    public static @NotNull List<InputValue> values(Object... objects) {
-        List<InputValue> inputValues = new ArrayList<>();
-        for (Object obj : objects) {
-            inputValues.add(value(obj));
-        }
-        return inputValues;
-    }
 
     // *************************** ColumnRef **********************************
 

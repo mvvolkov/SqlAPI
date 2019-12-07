@@ -1,15 +1,12 @@
 package testLocalFileDbAndJDBC;
 
 import clientImpl.metadata.MetadataFactory;
-import clientImpl.queries.QueryFactory;
 import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
+import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.*;
 import sqlapi.server.SqlServer;
-
-import java.util.Collection;
-import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -42,208 +39,204 @@ public class MetadataTest extends AbstractTestRunner {
     }
 
     @Test
-    public void testDatabases() throws SqlException {
+    public void testReadDatabaseWrongNumberOfTables() {
+
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
-        Collection<String> databases = sqlServer.getDatabases();
-        assertEquals(1, databases.size());
-        assertEquals(databaseName, databases.iterator().next());
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
     }
 
     @Test
-    public void testTables() {
+    public void testReadDatabaseWrongTableName() {
+
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
+
+        TableMetadata tm2 = MetadataFactory.table("table3",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
         try {
-            Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
-            assertEquals(tables.size(), 2);
-            TableMetadata table1 = null;
-            TableMetadata table2 = null;
-            for (TableMetadata table : tables) {
-                if (table.getTableName().equals("table1")) {
-                    table1 = table;
-                }
-                if (table.getTableName().equals("table2")) {
-                    table2 = table;
-                }
-            }
-            assertNotNull(table1);
-            assertNotNull(table2);
-            checkTable1(table1);
-            checkTable2(table2);
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-            fail();
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
         }
-    }
-
-    /**
-     * CREATE TABLE DB1.table1(column1 INTEGER PRIMARY KEY, column2 INTEGER DEFAULT 15,
-     * column3 VARCHAR(20) NOT NULL, column4 VARCHAR(5));
-     */
-    private static void checkTable1(TableMetadata table) {
-        assertEquals(4, table.getColumnsMetadata().size());
-        ColumnMetadata column1 = null;
-        ColumnMetadata column2 = null;
-        ColumnMetadata column3 = null;
-        ColumnMetadata column4 = null;
-        for (ColumnMetadata column : table.getColumnsMetadata()) {
-            if (column.getColumnName().equals("column1")) {
-                column1 = column;
-            }
-            if (column.getColumnName().equals("column2")) {
-                column2 = column;
-            }
-            if (column.getColumnName().equals("column3")) {
-                column3 = column;
-            }
-            if (column.getColumnName().equals("column4")) {
-                column4 = column;
-            }
-        }
-        assertNotNull(column1);
-        assertSame(SqlType.INTEGER, column1.getSqlType());
-        assertEquals(1, column1.getConstraints().size());
-        assertTrue(columnHasConstraint(column1, ColumnConstraintType.PRIMARY_KEY));
-        assertNotNull(column2);
-        assertSame(SqlType.INTEGER, column2.getSqlType());
-        assertEquals(1, column2.getConstraints().size());
-        assertTrue(columnHasConstraint(column2, ColumnConstraintType.DEFAULT_VALUE));
-        assertEquals(15, getColumnDefaultValue(column2));
-        assertNotNull(column3);
-        assertSame(SqlType.VARCHAR, column3.getSqlType());
-        assertEquals(2, column3.getConstraints().size());
-        assertTrue(columnHasConstraint(column3, ColumnConstraintType.NOT_NULL));
-        assertTrue(columnHasConstraint(column3, ColumnConstraintType.MAX_SIZE));
-        assertEquals(20, getColumnMaxSize(column3));
-        assertNotNull(column4);
-        assertSame(SqlType.VARCHAR, column4.getSqlType());
-        assertEquals(1, column4.getConstraints().size());
-        assertTrue(columnHasConstraint(column4, ColumnConstraintType.MAX_SIZE));
-        assertEquals(5, getColumnMaxSize(column4));
-    }
-
-    /**
-     * CREATE TABLE DB1.table2(column5 INTEGER PRIMARY KEY, column3 VARCHAR(15));
-     */
-    private static void checkTable2(TableMetadata table) {
-        assertEquals(2, table.getColumnsMetadata().size());
-        ColumnMetadata column1 = null;
-        ColumnMetadata column2 = null;
-        for (ColumnMetadata column : table.getColumnsMetadata()) {
-            if (column.getColumnName().equals("column5")) {
-                column1 = column;
-            }
-            if (column.getColumnName().equals("column3")) {
-                column2 = column;
-            }
-        }
-        assertNotNull(column1);
-        assertSame(SqlType.INTEGER, column1.getSqlType());
-        assertEquals(1, column1.getConstraints().size());
-        assertTrue(columnHasConstraint(column1, ColumnConstraintType.PRIMARY_KEY));
-        assertNotNull(column2);
-        assertSame(SqlType.VARCHAR, column2.getSqlType());
-        assertEquals(1, column2.getConstraints().size());
-        assertTrue(columnHasConstraint(column2, ColumnConstraintType.MAX_SIZE));
-        assertEquals(15, getColumnMaxSize(column2));
-    }
-
-    private static boolean columnHasConstraint(ColumnMetadata column,
-                                               ColumnConstraintType type) {
-        for (ColumnConstraint constraint : column.getConstraints()) {
-            if (constraint.getConstraintType() == type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static int getColumnMaxSize(ColumnMetadata column) {
-        for (ColumnConstraint constraint : column.getConstraints()) {
-            if (constraint.getConstraintType() == ColumnConstraintType.MAX_SIZE) {
-                return (int) constraint.getParameters().get(0);
-            }
-        }
-        return -1;
-    }
-
-    private static Object getColumnDefaultValue(ColumnMetadata column) {
-        for (ColumnConstraint constraint : column.getConstraints()) {
-            if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
-                return constraint.getParameters().get(0);
-            }
-        }
-        return null;
+        fail();
     }
 
     @Test
-    public void testDropTable() {
+    public void testReadDatabaseWrongColumnsNumber() {
+
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column4", 5));
+
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
         try {
-            sqlServer.executeQuery(QueryFactory.createTable(databaseName,
-                    MetadataFactory.tableMetadata("table4",
-                            Collections.singletonList(MetadataFactory.integer("id")))));
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
+    }
 
-            Collection<TableMetadata> tables = sqlServer.getTables(databaseName);
-            assertEquals(3, tables.size());
-            TableMetadata table1 = null;
-            TableMetadata table2 = null;
-            TableMetadata table3 = null;
-            for (TableMetadata table : tables) {
-                if (table.getTableName().equals("table1")) {
-                    table1 = table;
-                }
-                if (table.getTableName().equals("table2")) {
-                    table2 = table;
-                }
-                if (table.getTableName().equals("table4")) {
-                    table3 = table;
-                }
-            }
-            assertNotNull(table1);
-            assertNotNull(table2);
-            assertNotNull(table3);
+    @Test
+    public void testReadDatabaseWrongColumnName() {
 
-            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table2"));
-            tables = sqlServer.getTables(databaseName);
-            assertEquals(tables.size(), 2);
-            table1 = null;
-            table2 = null;
-            for (TableMetadata table : tables) {
-                if (table.getTableName().equals("table1")) {
-                    table1 = table;
-                }
-                if (table.getTableName().equals("table4")) {
-                    table2 = table;
-                }
-            }
-            assertNotNull(table1);
-            assertNotNull(table2);
-
-            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table4"));
-            tables = sqlServer.getTables(databaseName);
-            assertEquals(tables.size(), 1);
-            table1 = null;
-            for (TableMetadata table : tables) {
-                if (table.getTableName().equals("table1")) {
-                    table1 = table;
-                }
-            }
-            assertNotNull(table1);
-
-            sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table1"));
-            tables = sqlServer.getTables(databaseName);
-            assertEquals(tables.size(), 0);
-        } catch (SqlException e) {
-            System.out.println(e.getMessage());
-            fail();
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
         }
 
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column13", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
 
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void testReadDatabaseWrongColumnConstraintsNumber() {
+
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20),
+                MetadataFactory.varchar("column4", 5));
+
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void testReadDatabaseWrongColumnDefaultValue() {
+
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(16)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
+
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void testReadDatabaseWrongColumnMaxSize() {
+
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 6));
+
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (FailedDatabaseValidationException fe) {
+            System.out.println(fe.getMessage());
+            return;
+        }
+        fail();
+    }
+
+
+    @Test
+    public void testReadDatabaseSuccess() {
+
+        if (!(sqlServer instanceof LocalFileDbServer)) {
+            return;
+        }
+
+        TableMetadata tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
+
+        TableMetadata tm2 = MetadataFactory.table("table2",
+                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
+
+        try {
+            sqlServer.validateMetadata(databaseName, tm1, tm2);
+        } catch (SqlException se) {
+            System.out.println(se.getMessage());
+            fail();
+        }
     }
 }

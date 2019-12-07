@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.SumColumnExpression;
+import sqlapi.columnExpr.binaryExpr.SumColumnExpression;
 
 final class SumColumnExpressionImpl extends BinaryColumnExprImpl implements SumColumnExpression {
 

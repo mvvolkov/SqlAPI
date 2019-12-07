@@ -9,7 +9,6 @@ import sqlapi.queries.SelectQuery;
 import sqlapi.tables.DatabaseTableReference;
 import sqlapi.tables.TableReference;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,13 +58,6 @@ final class SelectQueryImpl implements SelectQuery {
         return groupByColumns;
     }
 
-    private ArrayDeque<Object> getParametersStack(Object... values) {
-        ArrayDeque<Object> parameters = new ArrayDeque<>();
-        for (int i = values.length - 1; i >= 0; i--) {
-            parameters.push(values[i]);
-        }
-        return parameters;
-    }
 
     @Override public void setParameters(Object... values) {
         List<Object> parameters = new ArrayList<>(Arrays.asList(values));

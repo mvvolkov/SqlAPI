@@ -1,7 +1,7 @@
 package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.AvgAggregateFunction;
+import sqlapi.columnExpr.aggregate.AvgAggregateFunction;
 import sqlapi.columnExpr.ColumnExpression;
 
 final class AvgAggregateFunctionImpl extends AggregateFunctionImpl implements AvgAggregateFunction {

@@ -2,7 +2,7 @@ package clientImpl.predicates;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.predicates.GreaterThanOrEqualsPredicate;
+import sqlapi.predicates.binaryPredicate.GreaterThanOrEqualsPredicate;
 
 final class GreaterThanOrEqualsPredicateImpl extends BinaryPredicateImpl implements GreaterThanOrEqualsPredicate {
 

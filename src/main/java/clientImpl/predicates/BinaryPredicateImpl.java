@@ -1,10 +1,8 @@
 package clientImpl.predicates;
 
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.predicates.BinaryPredicate;
+import sqlapi.predicates.binaryPredicate.BinaryPredicate;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayDeque;
 
 abstract class BinaryPredicateImpl extends PredicateImpl implements BinaryPredicate {
 

@@ -8,7 +8,7 @@ import sqlapi.predicates.Predicate;
 
 import java.util.List;
 
-public interface SelectQuery {
+public interface SelectQuery extends ParametrizedQuery {
 
     @NotNull List<TableReference> getTableReferences();
 
@@ -17,6 +17,4 @@ public interface SelectQuery {
     @NotNull List<SelectedItem> getSelectedItems();
 
     @NotNull List<ColumnRef> getGroupByColumns();
-
-    void setParameters(Object... values);
 }

@@ -1,24 +1,29 @@
 package localFileDatabase.server;
 
 import clientImpl.stringUtil.QueryStringUtil;
+import localFileDatabase.client.api.DatabaseFileQuery;
 import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import localFileDatabase.client.api.SaveDatabaseToFileQuery;
 import localFileDatabase.server.intermediate.InternalQueryResult;
+import localFileDatabase.server.persistent.PersistentColumnConstraint;
+import localFileDatabase.server.persistent.PersistentColumnMetadata;
 import localFileDatabase.server.persistent.PersistentDatabase;
 import localFileDatabase.server.persistent.PersistentTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sqlapi.exceptions.*;
+import sqlapi.metadata.ColumnConstraint;
+import sqlapi.metadata.ColumnConstraintType;
+import sqlapi.metadata.ColumnMetadata;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
-import sqlapi.tables.DatabaseTableReference;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 
 public final class LocalFileDbServer implements SqlServer {
@@ -38,8 +43,8 @@ public final class LocalFileDbServer implements SqlServer {
     public void executeQuery(@NotNull SqlQuery query, Object... parameters)
             throws SqlException {
 
-        if (query instanceof TableActionQuery) {
-            ((TableActionQuery) query).setParameters(parameters);
+        if (query instanceof ParametrizedQuery) {
+            ((ParametrizedQuery) query).setParameters(parameters);
         }
 
         try {
@@ -47,38 +52,17 @@ public final class LocalFileDbServer implements SqlServer {
         } catch (SqlException se) {
             System.out.println(se.getMessage());
         }
-        if (query instanceof CreateDatabaseQuery) {
+
+        if (query instanceof DatabaseQuery) {
+            DatabaseQuery databaseQuery = (DatabaseQuery) query;
+            this.getDatabase(databaseQuery.getDatabaseName()).executeQuery(databaseQuery);
+        } else if (query instanceof CreateDatabaseQuery) {
             this.createDatabase((CreateDatabaseQuery) query);
-            return;
-        } else if (query instanceof ReadDatabaseFromFileQuery) {
-            try {
-                this.readDatabase((ReadDatabaseFromFileQuery) query);
-            } catch (IOException | ClassNotFoundException e) {
-                throw new WrappedException(e);
-            }
-            return;
-        } else if (query instanceof SaveDatabaseToFileQuery) {
-            try {
-                this.saveDatabase((SaveDatabaseToFileQuery) query);
-            } catch (IOException e) {
-                throw new WrappedException(e);
-            }
-            return;
-        } else if (query instanceof CreateTableQuery) {
-            this.createTable((CreateTableQuery) query);
-            return;
-        } else if (query instanceof DropTableQuery) {
-            this.dropTable((DropTableQuery) query);
-            return;
-        } else if (query instanceof TableActionQuery) {
-            if (query instanceof InsertFromSelectQuery) {
-                this.executeInsertFromSelectQuery((InsertFromSelectQuery) query);
-                return;
-            }
-            this.executeTableQuery((TableActionQuery) query);
-            return;
+        } else if (query instanceof DatabaseFileQuery) {
+            this.executeDatabaseFileQuery((DatabaseFileQuery) query);
+        } else {
+            throw new UnsupportedQueryTypeException(query);
         }
-        throw new UnsupportedQueryTypeException(query);
     }
 
 
@@ -97,18 +81,6 @@ public final class LocalFileDbServer implements SqlServer {
 
 
     @Override
-    public @NotNull Collection<String> getDatabases() {
-        return databases.stream().map(PersistentDatabase::getName)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
-            throws NoSuchDatabaseException {
-        return this.getDatabase(databaseName).getTables();
-    }
-
-    @Override
     public void connect() {
     }
 
@@ -116,12 +88,6 @@ public final class LocalFileDbServer implements SqlServer {
     public void close() {
     }
 
-    @NotNull
-    public PersistentTable getTable(@NotNull DatabaseTableReference tableReference) throws
-            NoSuchTableException, NoSuchDatabaseException {
-        return this.getDatabase(tableReference.getDatabaseName())
-                .getTable(tableReference.getTableName());
-    }
 
     private void createDatabase(@NotNull CreateDatabaseQuery query)
             throws DatabaseAlreadyExistsException {
@@ -133,13 +99,27 @@ public final class LocalFileDbServer implements SqlServer {
             }
             throw new DatabaseAlreadyExistsException(databaseName);
         }
-        databases.add(new PersistentDatabase(databaseName));
+        databases.add(new PersistentDatabase(databaseName, this));
+    }
+
+    private void executeDatabaseFileQuery(@NotNull DatabaseFileQuery query)
+            throws SqlException {
+        try {
+            if (query instanceof ReadDatabaseFromFileQuery) {
+                this.readDatabase((ReadDatabaseFromFileQuery) query);
+            } else if (query instanceof SaveDatabaseToFileQuery) {
+                this.saveDatabase((SaveDatabaseToFileQuery) query);
+            } else {
+                throw new UnsupportedQueryTypeException(query);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            throw new WrappedException(e);
+        }
     }
 
 
     private void readDatabase(@NotNull ReadDatabaseFromFileQuery query)
-            throws IOException, ClassNotFoundException, NoSuchTableException,
-            NoSuchColumnException {
+            throws IOException, ClassNotFoundException {
         PersistentDatabase database = this.getDatabaseOrNull(query.getDatabaseName());
         if (database != null) {
             databases.remove(database);
@@ -150,13 +130,99 @@ public final class LocalFileDbServer implements SqlServer {
             FileInputStream fis = new FileInputStream(query.getFileName());
             ois = new ObjectInputStream(fis);
             database = (PersistentDatabase) ois.readObject();
-//            database.validate(query.getTables());
+            database.setServer(this);
             databases.add(database);
         } finally {
             if (ois != null) {
                 ois.close();
             }
         }
+    }
+
+    @Override public void validateMetadata(String databaseName, TableMetadata... tables)
+            throws FailedDatabaseValidationException {
+        PersistentDatabase database = this.getDatabaseOrNull(databaseName);
+        if (database == null) {
+            throw new FailedDatabaseValidationException(databaseName);
+        }
+        if (!validateDatabase(database, Arrays.asList(tables))) {
+            throw new FailedDatabaseValidationException(databaseName);
+        }
+    }
+
+    private static boolean validateDatabase(PersistentDatabase database,
+                                            Collection<TableMetadata> tables) {
+
+        if (database.getTables().size() != tables.size()) {
+            return false;
+        }
+
+        for (TableMetadata tableMetadata : tables) {
+            PersistentTable table;
+            try {
+                table = database.getTable(tableMetadata.getTableName());
+            } catch (NoSuchTableException e) {
+                return false;
+            }
+            if (!validateTable(table, tableMetadata)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean validateTable(PersistentTable table,
+                                         TableMetadata tableMetadata) {
+        if (table.getColumnsMetadata().size() !=
+                tableMetadata.getColumnsMetadata().size()) {
+            return false;
+        }
+        for (ColumnMetadata cm : tableMetadata.getColumnsMetadata()) {
+            PersistentColumnMetadata pcm;
+            try {
+                pcm = table.getColumnMetadata(cm.getColumnName());
+            } catch (NoSuchColumnException e) {
+                return false;
+            }
+            if (!validateColumn(pcm, cm)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean validateColumn(PersistentColumnMetadata pcm,
+                                          ColumnMetadata cm) {
+        if (pcm.getSqlType() != pcm.getSqlType()) {
+            return false;
+        }
+        if (cm.getConstraints().size() != pcm.getConstraints().size()) {
+            return false;
+        }
+        for (ColumnConstraint constraint : cm.getConstraints()) {
+            PersistentColumnConstraint pcc =
+                    pcm.getColumnConstraintOrNull(
+                            constraint.getConstraintType());
+            if (pcc == null) {
+                return false;
+            }
+            if (constraint.getConstraintType() ==
+                    ColumnConstraintType.DEFAULT_VALUE) {
+                Object defaultValue = constraint.getParameters().get(0);
+                if (!defaultValue.equals(pcc.getParameters().get(0))) {
+                    return false;
+                }
+            }
+            if (constraint.getConstraintType() ==
+                    ColumnConstraintType.MAX_SIZE) {
+                int maxSize1 = (int) constraint.getParameters().get(0);
+                int maxSize2 = (int) pcc.getParameters().get(0);
+                if (maxSize1 != maxSize2) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 
@@ -175,33 +241,9 @@ public final class LocalFileDbServer implements SqlServer {
         }
     }
 
-    private void executeInsertFromSelectQuery(@NotNull InsertFromSelectQuery query)
-            throws SqlException {
-        QueryResult queryResult = new InternalQueryResult(this).getQueryResult(
-                (query.getSelectQuery()));
-        this.getDatabase(query.getDatabaseName()).getTable(query.getTableName())
-                .insert(query, queryResult);
-    }
-
-
-    private void executeTableQuery(@NotNull TableActionQuery query) throws SqlException {
-        this.getDatabase(query.getDatabaseName()).getTable(query.getTableName())
-                .executeQuery(query);
-    }
-
-    private void createTable(@NotNull CreateTableQuery query)
-            throws SqlException {
-        this.getDatabase(query.getDatabaseName())
-                .createTable(query.getTableMetadata());
-    }
-
-    private void dropTable(@NotNull DropTableQuery query)
-            throws NoSuchDatabaseException, NoSuchTableException {
-        this.getDatabase(query.getDatabaseName()).dropTable(query.getTableName());
-    }
 
     @NotNull
-    private PersistentDatabase getDatabase(@NotNull String name)
+    public PersistentDatabase getDatabase(@NotNull String name)
             throws NoSuchDatabaseException {
         PersistentDatabase database = this.getDatabaseOrNull(name);
         if (database != null) {
@@ -219,6 +261,4 @@ public final class LocalFileDbServer implements SqlServer {
         }
         return null;
     }
-
-
 }

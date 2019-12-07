@@ -4,8 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-
 class InputValueImpl extends ColumnExprImpl implements InputValue {
 
     @Nullable

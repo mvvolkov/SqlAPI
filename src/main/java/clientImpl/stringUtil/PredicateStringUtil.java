@@ -2,6 +2,10 @@ package clientImpl.stringUtil;
 
 import sqlapi.exceptions.UnsupportedPredicateTypeException;
 import sqlapi.predicates.*;
+import sqlapi.predicates.binaryPredicate.*;
+import sqlapi.predicates.combined.AndPredicate;
+import sqlapi.predicates.combined.CombinedPredicate;
+import sqlapi.predicates.combined.OrPredicate;
 
 import java.util.stream.Collectors;
 

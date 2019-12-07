@@ -22,7 +22,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
 
     public static final long serialVersionUID = 9082226890498779849L;
 
-    private final String databaseName;
+    private final PersistentDatabase database;
 
     private final String tableName;
 
@@ -30,9 +30,9 @@ public final class PersistentTable implements Serializable, TableMetadata {
 
     private final Collection<PersistentRow> rows = new ArrayList<>();
 
-    PersistentTable(String databaseName, TableMetadata tableMetadata)
+    PersistentTable(TableMetadata tableMetadata, PersistentDatabase database)
             throws SqlException {
-        this.databaseName = databaseName;
+        this.database = database;
         this.tableName = tableMetadata.getTableName();
         for (ColumnMetadata columnMetadata : tableMetadata.getColumnsMetadata()) {
             switch (columnMetadata.getSqlType()) {
@@ -48,8 +48,24 @@ public final class PersistentTable implements Serializable, TableMetadata {
         }
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public void executeQuery(TableQuery query) throws SqlException {
+        if (query instanceof InsertQuery) {
+            this.insert((InsertQuery) query);
+        } else if (query instanceof DeleteQuery) {
+            this.delete((DeleteQuery) query);
+        } else if (query instanceof UpdateQuery) {
+            this.update((UpdateQuery) query);
+        } else if (query instanceof InsertFromSelectQuery) {
+            InsertFromSelectQuery insert = (InsertFromSelectQuery) query;
+            this.insert(insert,
+                    database.getServer().getQueryResult(insert.getSelectQuery()));
+        } else {
+            throw new UnsupportedQueryTypeException(query);
+        }
+    }
+
+    String getDatabaseName() {
+        return database.getName();
     }
 
     @NotNull
@@ -63,11 +79,8 @@ public final class PersistentTable implements Serializable, TableMetadata {
         return new ArrayList<>(columns);
     }
 
-    public List<PersistentColumnMetadata> getColumns() {
-        return columns;
-    }
 
-    private PersistentColumnMetadata getColumnMetadata(String columnName)
+    public PersistentColumnMetadata getColumnMetadata(String columnName)
             throws NoSuchColumnException {
         for (PersistentColumnMetadata cm : columns) {
             if (cm.getColumnName().equals(columnName)) {
@@ -77,29 +90,13 @@ public final class PersistentTable implements Serializable, TableMetadata {
         throw new NoSuchColumnException(columnName);
     }
 
-    public void executeQuery(TableActionQuery query) throws SqlException {
-        if (query instanceof InsertQuery) {
-            this.insert((InsertQuery) query);
-            return;
-        }
-        if (query instanceof DeleteQuery) {
-            this.delete((DeleteQuery) query);
-            return;
-        }
-        if (query instanceof UpdateQuery) {
-            this.update((UpdateQuery) query);
-            return;
-        }
-        throw new UnsupportedQueryTypeException(query);
-    }
-
 
     private void insert(InsertQuery query)
             throws SqlException {
         this.insert(query.getColumns(), query.getInputValues());
     }
 
-    public void insert(InsertFromSelectQuery query, QueryResult queryResult)
+    private void insert(InsertFromSelectQuery query, QueryResult queryResult)
             throws SqlException {
         for (QueryResultRow row : queryResult.getRows()) {
             List<InputValue> values = new ArrayList<>();
@@ -116,7 +113,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
     }
 
 
-    public void insert(List<String> columnNames, List<InputValue> values)
+    private void insert(List<String> columnNames, List<InputValue> values)
             throws SqlException {
 
         // check number of values
@@ -183,12 +180,12 @@ public final class PersistentTable implements Serializable, TableMetadata {
         }
     }
 
-    void checkUniqueConstraint(Object newValue, String columnName,
-                               ColumnConstraintType type)
+    public void checkUniqueConstraint(Object newValue, String columnName,
+                                      ColumnConstraintType type)
             throws ConstraintViolationException {
         for (PersistentRow row : rows) {
             if (row.getValue(columnName).equals(newValue)) {
-                throw new ConstraintViolationException(databaseName, tableName,
+                throw new ConstraintViolationException(this.getDatabaseName(), tableName,
                         columnName, type);
             }
         }
@@ -208,13 +205,14 @@ public final class PersistentTable implements Serializable, TableMetadata {
     private ResultRow createResultRow(PersistentRow row) {
         List<ResultValue> values = new ArrayList<>();
         for (PersistentColumnMetadata cm : columns) {
-            values.add(new ResultValue(this.createResultHeader(cm), row.getValue(cm.getColumnName())));
+            values.add(new ResultValue(this.createResultHeader(cm),
+                    row.getValue(cm.getColumnName())));
         }
         return new ResultRow(values);
     }
 
     private ResultHeader createResultHeader(PersistentColumnMetadata columnMetadata) {
-        return new ResultHeader(databaseName, tableName,
+        return new ResultHeader(this.getDatabaseName(), tableName,
                 columnMetadata.getColumnName());
     }
 }

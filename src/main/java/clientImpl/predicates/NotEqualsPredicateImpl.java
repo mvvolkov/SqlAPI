@@ -2,7 +2,7 @@ package clientImpl.predicates;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.predicates.NotEqualsPredicate;
+import sqlapi.predicates.binaryPredicate.NotEqualsPredicate;
 
 final class NotEqualsPredicateImpl extends BinaryPredicateImpl implements NotEqualsPredicate {
 

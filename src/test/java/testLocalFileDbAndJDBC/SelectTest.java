@@ -57,42 +57,42 @@ public class SelectTest extends AbstractTestRunner {
     @Override
     public void setUp() {
         super.setUp();
-
+        System.out.println("===== SET UP =====");
         try {
             // Create one more table
-            sqlServer.executeQuery(QueryFactory
-                    .createTable(databaseName,
-                            MetadataFactory.tableMetadata("table3", Arrays.asList(
-                                    MetadataFactory.varchar("column11", 20, Collections
-                                            .singletonList(MetadataFactory.primaryKey())),
-                                    MetadataFactory.varchar("column12", 20,
-                                            Arrays.asList(MetadataFactory.notNull(),
-                                                    MetadataFactory
-                                                            .defaultVal("default"))),
-                                    MetadataFactory.integer("column13", Collections
-                                            .singletonList(MetadataFactory.notNull()))
-                            ))));
+            sqlServer.executeQuery(
+                    QueryFactory.createTable(databaseName, MetadataFactory.table("table3",
+                            MetadataFactory.varchar("column11", 20,
+                                    MetadataFactory.primaryKey()),
+                            MetadataFactory.varchar("column12", 20,
+                                    MetadataFactory.notNull(),
+                                    MetadataFactory.defaultVal("default")),
+                            MetadataFactory
+                                    .integer("column13", MetadataFactory.notNull()))));
 
             // Fill table3
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table3",
-                    ColumnExprFactory.values("test3", "cc", 41)));
+                    "test3", "cc", 41));
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table3",
-                    ColumnExprFactory.values("ccc", "t43", 38)));
+                    "ccc", "t43", 38));
             getTableData(databaseName, "table3");
-            System.out.println("===== END OF SET UP =====");
-
         } catch (SqlException e) {
             System.out.println(e.getMessage());
+        } finally {
+            System.out.println("===== END OF SET UP =====");
         }
     }
 
     @After
     @Override
     public void tearDown() {
+        System.out.println("===== TEAR DOWN =====");
         try {
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table3"));
         } catch (SqlException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+        } finally {
+            System.out.println("===== END OF TEAR DOWN =====");
         }
         super.tearDown();
     }
@@ -391,11 +391,9 @@ public class SelectTest extends AbstractTestRunner {
 
             // 1.
             QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory
-                            .innerJoin(databaseName, "table2", databaseName, "table1",
-                                    PredicateFactory
-                                            .equals("table2", "column3", "table1",
-                                                    "column3"))));
+                    TableRefFactory.innerJoin(databaseName, "table2", databaseName,
+                            "table1", PredicateFactory.equals("table2", "column3",
+                                    "table1", "column3"))));
 
             printResultSet(queryResult);
 
@@ -409,11 +407,9 @@ public class SelectTest extends AbstractTestRunner {
 
             // 2.
             queryResult = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory
-                            .innerJoin(databaseName, "table2", databaseName, "table1",
-                                    PredicateFactory
-                                            .equals("table2", "column3", "table1",
-                                                    "column3")),
+                    TableRefFactory.innerJoin(databaseName, "table2", databaseName,
+                            "table1", PredicateFactory.equals("table2", "column3",
+                                    "table1", "column3")),
                     Arrays.asList(
                             ColumnExprFactory.columnRef("column5"),
                             ColumnExprFactory.columnRef("column1"),
@@ -432,14 +428,11 @@ public class SelectTest extends AbstractTestRunner {
 
             // 3.
             queryResult = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory
-                            .innerJoin(databaseName, "table2", databaseName, "table1",
-                                    PredicateFactory.isNotNull("column2").and(
-                                            PredicateFactory.equals("column5",
-                                                    ColumnExprFactory.diff("column2",
-                                                            ColumnExprFactory
-                                                                    .value(9))
-                                            )))));
+                    TableRefFactory.innerJoin(databaseName, "table2", databaseName,
+                            "table1", PredicateFactory.isNotNull("column2").and(
+                                    PredicateFactory.equals("column5",
+                                            ColumnExprFactory.diff("column2",
+                                                    ColumnExprFactory.value(9)))))));
 
             printResultSet(queryResult);
 
@@ -452,18 +445,16 @@ public class SelectTest extends AbstractTestRunner {
 
             // 4.
             queryResult = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory.innerJoin(
-                            TableRefFactory
-                                    .innerJoin(databaseName, "table2", databaseName,
-                                            "table1",
-                                            PredicateFactory.isNotNull("column2").and(
-                                                    PredicateFactory.equals("column5",
+                    TableRefFactory.innerJoin(TableRefFactory.innerJoin(databaseName,
+                            "table2", databaseName, "table1",
+                            PredicateFactory.isNotNull("column2").and(
+                                    PredicateFactory.equals("column5",
+                                            ColumnExprFactory
+                                                    .diff("column2",
                                                             ColumnExprFactory
-                                                                    .diff("column2",
-                                                                            ColumnExprFactory
-                                                                                    .value(
-                                                                                            9))
-                                                    ))),
+                                                                    .value(
+                                                                            9))
+                                    ))),
                             databaseName, "table3",
                             PredicateFactory
                                     .equals("table2", "column3", "table3", "column11").or(
@@ -498,11 +489,9 @@ public class SelectTest extends AbstractTestRunner {
     public void testLeftOuterJoin() {
         try {
             QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
-                    TableRefFactory
-                            .leftOuterJoin(databaseName, "table2", databaseName, "table3",
-                                    PredicateFactory
-                                            .equals("table2", "column3", "table3",
-                                                    "column11"))));
+                    TableRefFactory.leftOuterJoin(databaseName, "table2", databaseName,
+                            "table3", PredicateFactory.equals("table2", "column3",
+                                    "table3", "column11"))));
 
             printResultSet(queryResult);
 
@@ -530,9 +519,8 @@ public class SelectTest extends AbstractTestRunner {
         try {
             QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.select(
                     TableRefFactory.rightOuterJoin(databaseName, "table1", databaseName,
-                            "table3",
-                            PredicateFactory
-                                    .equals("table1", "column4", "table3", "column12"))));
+                            "table3", PredicateFactory.equals("table1", "column4",
+                                    "table3", "column12"))));
 
             printResultSet(queryResult);
 
@@ -568,8 +556,7 @@ public class SelectTest extends AbstractTestRunner {
                                     Arrays.asList(
                                             ColumnExprFactory.columnRef("column2"),
                                             ColumnExprFactory.columnRef("column3")
-                                    )), "t1")
-                    ),
+                                    )), "t1")),
                     PredicateFactory
                             .equals(ColumnExprFactory.columnRef("table2", "column3"),
                                     ColumnExprFactory.columnRef("t1", "column3"))));
@@ -603,7 +590,6 @@ public class SelectTest extends AbstractTestRunner {
     @Test
     public void testGroupByCount() {
 
-
         try {
             QueryResult queryResult = sqlServer.getQueryResult(QueryFactory.selectGrouped(
                     TableRefFactory.dbTable(databaseName, "table1"),
@@ -629,6 +615,12 @@ public class SelectTest extends AbstractTestRunner {
         }
     }
 
+    /**
+     * SELECT COUNT(*) AS COUNT_ALL FROM DB1.table1;
+     * <p>
+     * COUNT_ALL
+     * 6
+     */
     @Test
     public void testCountAll() {
         try {
@@ -648,6 +640,12 @@ public class SelectTest extends AbstractTestRunner {
         }
     }
 
+    /**
+     * SELECT COUNT(column4) AS COUNT_column4 FROM DB1.table1;
+     * <p>
+     * COUNT_column4
+     * 3
+     */
     @Test
     public void testCountColumn() {
         try {
@@ -668,6 +666,12 @@ public class SelectTest extends AbstractTestRunner {
         }
     }
 
+    /**
+     * SELECT SUM(column1) AS SUM_column1, SUM(column2) AS SUM_column2 FROM DB1.table1;
+     * <p>
+     * SUM_column1, SUM_column2
+     * 77.0, 160.0
+     */
     @Test
     public void testSum() {
         try {
@@ -689,6 +693,12 @@ public class SelectTest extends AbstractTestRunner {
         }
     }
 
+    /**
+     * SELECT AVG(column1) AS AVG_column1, AVG(column2) AS AVG_column2 FROM DB1.table1;
+     * <p>
+     * AVG_column1, AVG_column2
+     * 12.8333, 32.0000
+     */
     @Test
     public void testAverage() {
         try {

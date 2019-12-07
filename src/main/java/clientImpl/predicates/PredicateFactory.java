@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.columnExpr.InputValue;
-import sqlapi.predicates.CombinedPredicate;
+import sqlapi.predicates.combined.CombinedPredicate;
 import sqlapi.predicates.Predicate;
 
 import java.util.List;

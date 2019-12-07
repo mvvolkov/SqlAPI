@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.CountAggregateFunction;
+import sqlapi.columnExpr.aggregate.CountAggregateFunction;
 
 final class CountAggregateFunctionImpl extends AggregateFunctionImpl implements CountAggregateFunction {
 

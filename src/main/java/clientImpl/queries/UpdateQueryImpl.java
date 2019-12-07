@@ -8,7 +8,7 @@ import sqlapi.queries.UpdateQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
-final class UpdateQueryImpl extends TableActionQueryImpl
+final class UpdateQueryImpl extends TableQueryImpl
         implements UpdateQuery {
 
     private final @NotNull Collection<AssignmentOperation> assignmentOperations;

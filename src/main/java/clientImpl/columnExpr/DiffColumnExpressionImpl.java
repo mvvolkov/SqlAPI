@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.DiffColumnExpression;
+import sqlapi.columnExpr.binaryExpr.DiffColumnExpression;
 
 final class DiffColumnExpressionImpl extends BinaryColumnExprImpl implements DiffColumnExpression {
 

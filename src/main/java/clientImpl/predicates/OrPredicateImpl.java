@@ -1,7 +1,7 @@
 package clientImpl.predicates;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.predicates.OrPredicate;
+import sqlapi.predicates.combined.OrPredicate;
 import sqlapi.predicates.Predicate;
 
 final class OrPredicateImpl extends CombinedPredicateImpl implements OrPredicate {

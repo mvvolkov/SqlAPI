@@ -26,11 +26,13 @@ public abstract class PersistentColumnMetadata implements Serializable, ColumnMe
     private final Object defaultValue;
 
 
-    PersistentColumnMetadata(ColumnMetadata columnMetadata, PersistentTable table) throws SqlException {
+    PersistentColumnMetadata(ColumnMetadata columnMetadata, PersistentTable table)
+            throws SqlException {
         this.table = table;
         this.columnName = columnMetadata.getColumnName();
         this.constraints = columnMetadata.getConstraints()
-                .stream().map(PersistentColumnConstraint::new).collect(Collectors.toList());
+                .stream().map(PersistentColumnConstraint::new)
+                .collect(Collectors.toList());
         this.defaultValue = this.retrieveDefaultValue(columnMetadata.getConstraints());
     }
 
@@ -45,14 +47,25 @@ public abstract class PersistentColumnMetadata implements Serializable, ColumnMe
         return new ArrayList<>(constraints);
     }
 
+    public PersistentColumnConstraint getColumnConstraintOrNull(
+            ColumnConstraintType type) {
+        for (PersistentColumnConstraint constraint : constraints) {
+            if (constraint.getConstraintType() == type) {
+                return constraint;
+            }
+        }
+        return null;
+    }
+
     @Override
     public abstract SqlType getSqlType();
 
-    Object getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 
-    private Object retrieveDefaultValue(Collection<ColumnConstraint> constraints) throws SqlException {
+    private Object retrieveDefaultValue(Collection<ColumnConstraint> constraints)
+            throws SqlException {
         for (ColumnConstraint constraint : constraints) {
             if (constraint.getConstraintType() == ColumnConstraintType.DEFAULT_VALUE) {
                 return this.getCheckedValue(constraint.getParameters().get(0));
@@ -104,7 +117,8 @@ public abstract class PersistentColumnMetadata implements Serializable, ColumnMe
                                         ColumnConstraintType type)
             throws ConstraintViolationException {
         if (newValue == null) {
-            throw new ConstraintViolationException(table.getDatabaseName(), table.getTableName(),
+            throw new ConstraintViolationException(table.getDatabaseName(),
+                    table.getTableName(),
                     ColumnName, type);
         }
     }

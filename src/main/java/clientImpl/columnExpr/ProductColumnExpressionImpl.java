@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.ProductColumnExpression;
+import sqlapi.columnExpr.binaryExpr.ProductColumnExpression;
 
 final class ProductColumnExpressionImpl extends BinaryColumnExprImpl implements ProductColumnExpression {
 

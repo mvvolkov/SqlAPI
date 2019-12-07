@@ -6,8 +6,6 @@ import sqlapi.tables.JoinedTableReference;
 import sqlapi.tables.TableReference;
 import sqlapi.predicates.Predicate;
 
-import java.util.ArrayDeque;
-
 abstract class JoinedTableReferenceImpl implements JoinedTableReference {
 
 

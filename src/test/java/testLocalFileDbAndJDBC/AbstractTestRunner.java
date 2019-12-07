@@ -5,12 +5,13 @@ import clientImpl.metadata.MetadataFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import localFileDatabase.server.LocalFileDbServer;
-import mySqlJdbcServer.MySQL_JDBC_Server;
+import mySQL_JDBC_Server.MySQL_JDBC_Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import sqlapi.exceptions.SqlException;
+import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.InsertQuery;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.queryResult.QueryResultRow;
@@ -30,28 +31,45 @@ public abstract class AbstractTestRunner {
 
     protected final String databaseName;
 
+    protected final TableMetadata tm1;
+
+    protected final TableMetadata tm2;
+
     public AbstractTestRunner(SqlServer sqlServer, String databaseName) {
         this.sqlServer = sqlServer;
         this.databaseName = databaseName;
+
+        tm1 = MetadataFactory.table("table1",
+                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
+                MetadataFactory
+                        .integer("column2", MetadataFactory.defaultVal(15)),
+                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
+                MetadataFactory.varchar("column4", 5));
+
+        tm2 = MetadataFactory.table("table2", MetadataFactory.integer("column5",
+                MetadataFactory.primaryKey()),
+                MetadataFactory.varchar("column3", 15));
     }
 
     @Parameterized.Parameters
     public static Iterable<Object[]> getServers() {
 
-
         Collection<Object[]> servers = new ArrayList<>();
 
+        // local SQL server
         servers.add(new Object[]{LocalFileDbServer.getInstance(), "DB1"});
 
+        // free online MySQL server
         servers.add(new Object[]{new MySQL_JDBC_Server(
                 "jdbc:mysql://sql7.freesqldatabase.com:3306",
                 "sql7314024", "9hc9cPjLjg"), "sql7314024"});
 
-        // slow connection
+//        // free online MySQL server
 //        servers.add(new Object[]{new MySQL_JDBC_Server(
 //                "jdbc:mysql://db4free.net:3306",
 //                "mvolkov_test2019", "mpsjetbrains2019"), "mvolkov_test2019"});
 
+//        // local MySQL server
 //        servers.add(new Object[]{new MySQL_JDBC_Server(
 //                "jdbc:mysql://localhost:3306/test2019?useUnicode=true"
 //                        + "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode"
@@ -80,76 +98,52 @@ public abstract class AbstractTestRunner {
 
     @After
     public void tearDown() {
+        System.out.println("===== TEAR DOWN =====");
         try {
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table1"));
             sqlServer.executeQuery(QueryFactory.dropTable(databaseName, "table2"));
             sqlServer.close();
         } catch (SqlException e) {
             System.out.println(e.getMessage());
+        } finally {
+            System.out.println("===== END OF TEAR DOWN =====");
         }
     }
 
     private void createTable1() throws SqlException {
         // Create a table
-        sqlServer.executeQuery(QueryFactory
-                .createTable(databaseName,
-                        MetadataFactory.tableMetadata("table1", Arrays.asList(
-                                MetadataFactory.integer("column1",
-                                        Collections.singletonList(
-                                                MetadataFactory.primaryKey())),
-                                MetadataFactory.integer("column2", Collections
-                                        .singletonList(
-                                                MetadataFactory.defaultVal(15))),
-                                MetadataFactory.varchar("column3", 20,
-                                        Collections.singletonList(
-                                                MetadataFactory.notNull())),
-                                MetadataFactory.varchar("column4", 5)
-                        ))));
+        sqlServer.executeQuery(QueryFactory.createTable(databaseName, tm1));
 
         // Fill table1
-        InsertQuery query = QueryFactory.insert(databaseName, "table1",
-                Arrays.asList(
-                        ColumnExprFactory.parameter(),
-                        ColumnExprFactory.parameter(),
-                        ColumnExprFactory.parameter(),
-                        ColumnExprFactory.parameter()
-                ));
-        sqlServer.executeQuery(query, 10, 30, "test1", "t21");
-        sqlServer.executeQuery(query, 11, 31, "test2", null);
-        sqlServer.executeQuery(query, 12, 32, "test3", "t43");
-        sqlServer.executeQuery(query, 13, 33, "test2", "t653");
-        sqlServer.executeQuery(query, 15, 34, "test1", null);
-        sqlServer.executeQuery(query, 16, null, "test1", null);
+        InsertQuery insert = QueryFactory.insert(databaseName, "table1",
+                ColumnExprFactory.parameter(),
+                ColumnExprFactory.parameter(),
+                ColumnExprFactory.parameter(),
+                ColumnExprFactory.parameter());
+
+        sqlServer.executeQuery(insert, 10, 30, "test1", "t21");
+        sqlServer.executeQuery(insert, 11, 31, "test2", null);
+        sqlServer.executeQuery(insert, 12, 32, "test3", "t43");
+        sqlServer.executeQuery(insert, 13, 33, "test2", "t653");
+        sqlServer.executeQuery(insert, 15, 34, "test1", null);
+        sqlServer.executeQuery(insert, 16, null, "test1", null);
     }
 
     private void createTable2() throws SqlException {
         // Create a table
-        sqlServer.executeQuery(
-                QueryFactory
-                        .createTable(databaseName,
-                                MetadataFactory.tableMetadata("table2",
-                                        Arrays.asList(
-                                                MetadataFactory.integer("column5",
-                                                        Collections
-                                                                .singletonList(
-                                                                        MetadataFactory
-                                                                                .primaryKey())),
-                                                MetadataFactory.varchar("column3", 15)
-                                        ))));
+        sqlServer.executeQuery(QueryFactory.createTable(databaseName, tm2));
 
         // Fill table2
-        InsertQuery query = QueryFactory.insert(databaseName, "table2",
-                Arrays.asList(
-                        ColumnExprFactory.parameter(),
-                        ColumnExprFactory.parameter()
-                ));
-        sqlServer.executeQuery(query, 22, "test3");
-        sqlServer.executeQuery(query, 23, "test2");
-        sqlServer.executeQuery(query, 25, "test4");
+        InsertQuery insert = QueryFactory.insert(databaseName, "table2",
+                ColumnExprFactory.parameter(),
+                ColumnExprFactory.parameter());
+        sqlServer.executeQuery(insert, 22, "test3");
+        sqlServer.executeQuery(insert, 23, "test2");
+        sqlServer.executeQuery(insert, 25, "test4");
     }
 
 
-    QueryResult getTableData(String dbName, String tableName)
+    protected QueryResult getTableData(String dbName, String tableName)
             throws SqlException {
         QueryResult queryResult = sqlServer.getQueryResult(
                 QueryFactory.select(TableRefFactory.dbTable(dbName, tableName)));
@@ -157,7 +151,7 @@ public abstract class AbstractTestRunner {
         return queryResult;
     }
 
-    static void printResultSet(QueryResult queryResult) {
+    protected static void printResultSet(QueryResult queryResult) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.join(", ", queryResult.getHeaders()));
@@ -171,14 +165,14 @@ public abstract class AbstractTestRunner {
         System.out.println(sb);
     }
 
-    static void checkHeaders(List<String> headers1, String... headers2) {
+    protected static void checkHeaders(List<String> headers1, String... headers2) {
         assertEquals(headers2.length, headers1.size());
         for (int i = 0; i < headers1.size(); i++) {
             assertEquals(headers2[i], headers1.get(i));
         }
     }
 
-    static void checkRowExists(QueryResult queryResult, Object... values) {
+    protected static void checkRowExists(QueryResult queryResult, Object... values) {
         assertEquals(values.length, queryResult.getHeaders().size());
 
         for (QueryResultRow row : queryResult.getRows()) {

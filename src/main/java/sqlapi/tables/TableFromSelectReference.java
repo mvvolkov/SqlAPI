@@ -3,7 +3,6 @@ package sqlapi.tables;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.queries.SelectQuery;
 
-import java.util.ArrayDeque;
 import java.util.List;
 
 public interface TableFromSelectReference extends TableReference {

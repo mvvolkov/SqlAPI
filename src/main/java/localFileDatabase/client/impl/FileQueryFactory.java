@@ -1,22 +1,22 @@
 package localFileDatabase.client.impl;
 
-import org.jetbrains.annotations.NotNull;
 import localFileDatabase.client.api.ReadDatabaseFromFileQuery;
 import localFileDatabase.client.api.SaveDatabaseToFileQuery;
-import sqlapi.metadata.TableMetadata;
-
-import java.util.Collection;
+import org.jetbrains.annotations.NotNull;
 
 public class FileQueryFactory {
 
     private FileQueryFactory() {
     }
 
-    public static @NotNull ReadDatabaseFromFileQuery readDatabase(@NotNull String fileName, @NotNull String databaseName, @NotNull Collection<TableMetadata> tables) {
-        return new ReadDatabaseFromFileQueryImpl(fileName, databaseName, tables);
+    public static @NotNull ReadDatabaseFromFileQuery readDatabaseFromFile(
+            @NotNull String fileName, @NotNull String databaseName) {
+        return new ReadDatabaseFromFileQueryImpl(fileName, databaseName);
     }
 
-    public static @NotNull SaveDatabaseToFileQuery saveDatabase(@NotNull String fileName, @NotNull String databaseName) {
+    public static @NotNull SaveDatabaseToFileQuery saveDatabaseToFile(
+            @NotNull String fileName,
+            @NotNull String databaseName) {
         return new SaveDatabaseToFileQueryImpl(fileName, databaseName);
     }
 }

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.columnExpr.InputValue;
 
-import java.util.ArrayDeque;
 import java.util.List;
 
 public interface ColumnInPredicate extends Predicate {

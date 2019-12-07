@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.DivisionColumnExpression;
+import sqlapi.columnExpr.binaryExpr.DivisionColumnExpression;
 
 final class DivisionColumnExpressionImpl extends BinaryColumnExprImpl implements DivisionColumnExpression {
 

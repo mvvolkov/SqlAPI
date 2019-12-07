@@ -113,7 +113,7 @@ public final class ResultValue {
         }
         BigDecimal bd1 = getBigDecimal(value);
         BigDecimal bd2 = getBigDecimal(anotherValue);
-        // The scele = 4 is used here to match the result of MySQL server.
+        // The scale = 4 is used here to match the result of MySQL server.
         return new ResultValue(new ResultHeader(),
                 bd1.divide(bd2, 4, RoundingMode.FLOOR));
     }

@@ -2,7 +2,7 @@ package clientImpl.columnExpr;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.ColumnExpression;
-import sqlapi.columnExpr.SumAggregateFunction;
+import sqlapi.columnExpr.aggregate.SumAggregateFunction;
 
 final class SumAggregateFunctionImpl extends AggregateFunctionImpl implements SumAggregateFunction {
 

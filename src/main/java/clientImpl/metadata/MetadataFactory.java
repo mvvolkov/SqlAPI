@@ -3,10 +3,7 @@ package clientImpl.metadata;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.metadata.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MetadataFactory {
 
@@ -32,19 +29,25 @@ public class MetadataFactory {
                 Collections.singletonList(size));
     }
 
-    public static @NotNull ColumnMetadata integer(@NotNull String columnName) {
-        return new ColumnMetadataImpl(columnName, SqlType.INTEGER,
-                Collections.emptyList());
-    }
 
     public static @NotNull ColumnMetadata integer(@NotNull String columnName,
                                                   @NotNull Collection<ColumnConstraint> constraints) {
         return new ColumnMetadataImpl(columnName, SqlType.INTEGER, constraints);
     }
 
+    public static @NotNull ColumnMetadata integer(@NotNull String columnName,
+                                                  ColumnConstraint... constraints) {
+        return integer(columnName, Arrays.asList(constraints));
+    }
+
     public static @NotNull ColumnMetadata varchar(@NotNull String columnName, int size) {
         return new ColumnMetadataImpl(columnName, SqlType.VARCHAR,
                 Collections.singleton(maxSize(size)));
+    }
+
+    public static @NotNull ColumnMetadata varchar(@NotNull String columnName, int size,
+                                                  ColumnConstraint... constraints) {
+        return varchar(columnName, size, Arrays.asList(constraints));
     }
 
     public static @NotNull ColumnMetadata varchar(@NotNull String columnName, int size,
@@ -55,8 +58,13 @@ public class MetadataFactory {
     }
 
 
-    public static TableMetadata tableMetadata(String tableName,
-                                              List<ColumnMetadata> columnsMetadata) {
+    public static TableMetadata table(String tableName,
+                                      List<ColumnMetadata> columnsMetadata) {
         return new TableMetadataImpl(tableName, columnsMetadata);
+    }
+
+    public static TableMetadata table(String tableName,
+                                      ColumnMetadata... columnsMetadata) {
+        return table(tableName, Arrays.asList(columnsMetadata));
     }
 }

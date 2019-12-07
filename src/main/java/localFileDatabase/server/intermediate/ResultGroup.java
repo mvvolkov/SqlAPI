@@ -3,6 +3,7 @@ package localFileDatabase.server.intermediate;
 import localFileDatabase.server.LocalFileDbServer;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.*;
+import sqlapi.columnExpr.aggregate.*;
 import sqlapi.exceptions.*;
 import sqlapi.misc.SelectedItem;
 import sqlapi.tables.DatabaseTableReference;
@@ -49,7 +50,8 @@ final class ResultGroup extends AbstractResultRow {
             if (selectedItem instanceof DatabaseTableReference) {
                 DatabaseTableReference tableRef = (DatabaseTableReference) selectedItem;
                 List<ResultHeader> tableHeaders =
-                        server.getTable(tableRef).getResultHeaders();
+                        server.getDatabase(tableRef.getDatabaseName())
+                                .getTable(tableRef.getTableName()).getResultHeaders();
                 for (ResultHeader header : tableHeaders) {
                     newValues.add(this.evaluateHeaderValue(header));
                 }
@@ -77,7 +79,7 @@ final class ResultGroup extends AbstractResultRow {
     private ResultValue evaluateHeaderValue(@NotNull ResultHeader header)
             throws SqlException {
 
-        if (!groupedByColumns.isEmpty() &&
+        if (rows.size() > 1 &&
                 !groupedByColumns.contains(new ResultHeader(header.getColumnName()))) {
             throw new InvalidQueryException("Column can not be used outside aggregate " +
                     "function: " + header.getColumnName());

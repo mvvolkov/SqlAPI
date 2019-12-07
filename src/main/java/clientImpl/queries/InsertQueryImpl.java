@@ -4,13 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
 import sqlapi.queries.InsertQuery;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class InsertQueryImpl extends TableActionQueryImpl implements InsertQuery {
+final class InsertQueryImpl extends TableQueryImpl implements InsertQuery {
 
     @NotNull
     private final List<String> columns;

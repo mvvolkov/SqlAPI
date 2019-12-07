@@ -78,14 +78,11 @@ public class DeleteTest extends AbstractTestRunner {
 
         System.out.println("testDeletePredicateIsNull:");
         try {
-            QueryResult queryResult = this.getTableData(databaseName, "table1");
-            assertEquals(4, queryResult.getHeaders().size());
-            assertEquals(6, queryResult.getRows().size());
 
             sqlServer.executeQuery(QueryFactory.delete(databaseName, "table1",
                     PredicateFactory.isNull("column4")));
 
-            queryResult = this.getTableData(databaseName, "table1");
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
             assertEquals(3, queryResult.getRows().size());
             checkRowExists(queryResult, 10, 30, "test1", "t21");
@@ -112,14 +109,11 @@ public class DeleteTest extends AbstractTestRunner {
 
         System.out.println("testDeletePredicateIsNotNull:");
         try {
-            QueryResult queryResult = this.getTableData(databaseName, "table1");
-            assertEquals(4, queryResult.getHeaders().size());
-            assertEquals(6, queryResult.getRows().size());
 
             sqlServer.executeQuery(QueryFactory.delete(databaseName, "table1",
                     PredicateFactory.isNotNull("column4")));
 
-            queryResult = this.getTableData(databaseName, "table1");
+            QueryResult queryResult = this.getTableData(databaseName, "table1");
             assertEquals(4, queryResult.getHeaders().size());
             assertEquals(3, queryResult.getRows().size());
             checkRowExists(queryResult, 11, 31, "test2", null);

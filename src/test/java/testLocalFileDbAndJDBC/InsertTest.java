@@ -54,8 +54,8 @@ public class InsertTest extends AbstractTestRunner {
     public void testPrimaryKeyConstraint() {
         System.out.println("testPrimaryKeyConstraint:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(10, 42, "test", null)));
+            sqlServer.executeQuery(
+                    QueryFactory.insert(databaseName, "table1", 10, 42, "test", null));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column1", ce.getColumnName());
@@ -79,8 +79,8 @@ public class InsertTest extends AbstractTestRunner {
     public void testNotNullConstraint() {
         System.out.println("testNotNullConstraint:");
         try {
-            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(21, 43, null, "")));
+            sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1", 21, 43,
+                    null, ""));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column3", ce.getColumnName());
@@ -115,7 +115,7 @@ public class InsertTest extends AbstractTestRunner {
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column2", "column3", "column1"),
-                    ColumnExprFactory.values(35, "test15", 17)));
+                    35, "test15", 17));
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             checkRowExists(queryResult, 17, 35, "test15", null);
         } catch (SqlException se) {
@@ -134,7 +134,7 @@ public class InsertTest extends AbstractTestRunner {
         System.out.println("testInsertWrongType:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    ColumnExprFactory.values(17, "t35", "39", null)));
+                    17, "t35", "39", null));
         } catch (WrongValueTypeException wvte) {
             System.out.println(wvte.getMessage());
             return;
@@ -157,8 +157,7 @@ public class InsertTest extends AbstractTestRunner {
         System.out.println("testInsertWrongNumberOfValues:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList("column2", "column3", "column1"),
-                    ColumnExprFactory.values("test15", 17)));
+                    Arrays.asList("column2", "column3", "column1"), "test15", 17));
 
         } catch (InvalidQueryException iqe) {
             System.out.println(iqe.getMessage());
@@ -198,8 +197,7 @@ public class InsertTest extends AbstractTestRunner {
         System.out.println("testInsertDefaultValue:");
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
-                    Arrays.asList("column3", "column1"),
-                    ColumnExprFactory.values("test15", 17)));
+                    Arrays.asList("column3", "column1"), "test15", 17));
 
             QueryResult queryResult = this.getTableData(databaseName, "table1");
             checkRowExists(queryResult, 17, 15, "test15", null);
@@ -221,7 +219,7 @@ public class InsertTest extends AbstractTestRunner {
         try {
             sqlServer.executeQuery(QueryFactory.insert(databaseName, "table1",
                     Arrays.asList("column3", "column1", "column4"),
-                    ColumnExprFactory.values("test15", 17, "t12345")));
+                    "test15", 17, "t12345"));
         } catch (ConstraintViolationException ce) {
             System.out.println(ce.getMessage());
             assertEquals("column4", ce.getColumnName());

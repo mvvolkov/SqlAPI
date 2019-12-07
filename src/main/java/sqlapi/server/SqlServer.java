@@ -1,16 +1,14 @@
 package sqlapi.server;
 
 import org.jetbrains.annotations.NotNull;
+import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.SelectQuery;
 import sqlapi.queries.SqlQuery;
 import sqlapi.queryResult.QueryResult;
 
-import java.util.Collection;
-
 public interface SqlServer {
-
 
     void executeQuery(@NotNull SqlQuery query, Object... parameters) throws SqlException;
 
@@ -18,11 +16,8 @@ public interface SqlServer {
                                         Object... parameters)
             throws SqlException;
 
-
-    @NotNull Collection<String> getDatabases() throws SqlException;
-
-    @NotNull Collection<TableMetadata> getTables(@NotNull String databaseName)
-            throws SqlException;
+    void validateMetadata(String databaseName, TableMetadata... tables)
+            throws FailedDatabaseValidationException;
 
     void connect() throws SqlException;
 

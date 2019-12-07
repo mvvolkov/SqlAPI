@@ -1,7 +1,7 @@
 package sqlapi.exceptions;
 
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.AggregateFunction;
+import sqlapi.columnExpr.aggregate.AggregateFunction;
 
 public final class UnsupportedAggregateFunctionTypeException extends SqlException {
 

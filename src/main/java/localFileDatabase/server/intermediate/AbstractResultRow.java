@@ -2,6 +2,8 @@ package localFileDatabase.server.intermediate;
 
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.*;
+import sqlapi.columnExpr.aggregate.AggregateFunction;
+import sqlapi.columnExpr.binaryExpr.*;
 import sqlapi.exceptions.MissingParameterException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.UnsupportedColumnExprTypeException;
@@ -23,7 +25,7 @@ public abstract class AbstractResultRow {
         }
         if (ce instanceof InputValue) {
             if (ce instanceof ParametrizedInputValue &&
-                    !((ParametrizedInputValue) ce).hasValue()) {
+                    ((ParametrizedInputValue) ce).isEmpty()) {
                 throw new MissingParameterException();
             }
             return new ResultValue(((InputValue) ce).getValue());

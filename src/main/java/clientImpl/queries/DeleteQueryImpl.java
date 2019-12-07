@@ -4,11 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.predicates.Predicate;
 import sqlapi.queries.DeleteQuery;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-final class DeleteQueryImpl extends TableActionQueryImpl
+final class DeleteQueryImpl extends TableQueryImpl
         implements DeleteQuery {
 
     private final @NotNull Predicate predicate;

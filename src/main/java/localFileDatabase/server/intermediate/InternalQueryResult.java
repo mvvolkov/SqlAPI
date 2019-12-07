@@ -5,7 +5,7 @@ import localFileDatabase.server.output.QueryResultImpl;
 import localFileDatabase.server.output.QueryResultRowImpl;
 import localFileDatabase.server.persistent.PersistentTable;
 import org.jetbrains.annotations.NotNull;
-import sqlapi.columnExpr.AggregateFunction;
+import sqlapi.columnExpr.aggregate.AggregateFunction;
 import sqlapi.columnExpr.ColumnExpression;
 import sqlapi.columnExpr.ColumnRef;
 import sqlapi.exceptions.AmbiguousColumnNameException;
@@ -130,7 +130,8 @@ public final class InternalQueryResult {
     private InternalQueryResult getDataFromPersistentTable(
             @NotNull DatabaseTableReference dtr)
             throws SqlException {
-        PersistentTable table = server.getTable(dtr);
+        PersistentTable table =
+                server.getDatabase(dtr.getDatabaseName()).getTable(dtr.getTableName());
         return new InternalQueryResult(server, table.getResultHeaders(),
                 table.getResultRows());
     }
@@ -368,10 +369,6 @@ public final class InternalQueryResult {
         if (groupByColumns.isEmpty()) {
             for (SelectedItem se : selectedItems) {
                 if (se instanceof AggregateFunction) {
-                    List<ResultHeader> headers = new ArrayList<>();
-                    for (ResultHeader header : this.headers) {
-                        headers.add(new ResultHeader(header.getColumnName()));
-                    }
                     return Collections
                             .singletonList(
                                     new ResultGroup(server, Collections.emptyList(),
