@@ -16,11 +16,11 @@ public class ColumnExprFactory {
 
     // *************************** ColumnValue **********************************
 
-    public static @NotNull InputValue parameterWithAlias(@NotNull String alias) {
+    public static @NotNull ParametrizedInputValue parameterWithAlias(@NotNull String alias) {
         return new ParametrizedInputValueImpl(alias);
     }
 
-    public static @NotNull InputValue parameter() {
+    public static @NotNull ParametrizedInputValue parameter() {
         return parameterWithAlias("");
     }
 
