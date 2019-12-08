@@ -1,6 +1,7 @@
 package testLocalFileDbAndJDBC;
 
 import clientImpl.metadata.MetadataFactory;
+import clientImpl.queries.QueryFactory;
 import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.FailedDatabaseValidationException;
@@ -13,23 +14,10 @@ import static org.junit.Assert.*;
 /**
  * Before each test we have two tables:
  * <p>
- * SELECT * FROM DB1.table1;
+ * CREATE TABLE DB1.table1(column1 INTEGER PRIMARY KEY,
+ * column2 INTEGER DEFAULT 15, column3 VARCHAR(20) NOT NULL, column4 VARCHAR(5));
  * <p>
- * column1, column2, column3, column4
- * 10, 30, test1, t21
- * 11, 31, test2, null
- * 12, 32, test3, t43
- * 13, 33, test2, t653
- * 15, 34, test1, null
- * 16, null, test1, null
- * <p>
- * <p>
- * SELECT * FROM DB1.table2;
- * <p>
- * column5, column3
- * 22, test3
- * 23, test2
- * 25, test4
+ * CREATE TABLE DB1.table2(column5 INTEGER PRIMARY KEY, column3 VARCHAR(15));
  */
 public class MetadataTest extends AbstractTestRunner {
 
@@ -45,17 +33,13 @@ public class MetadataTest extends AbstractTestRunner {
             return;
         }
 
-        TableMetadata tm1 = MetadataFactory.table("table1",
-                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
-                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
-                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
-                MetadataFactory.varchar("column4", 5));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -66,21 +50,18 @@ public class MetadataTest extends AbstractTestRunner {
         if (!(sqlServer instanceof LocalFileDbServer)) {
             return;
         }
-        TableMetadata tm1 = MetadataFactory.table("table1",
-                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
-                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
-                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
-                MetadataFactory.varchar("column4", 5));
 
         TableMetadata tm2 = MetadataFactory.table("table3",
                 MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
                 MetadataFactory.varchar("column3", 15));
 
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -97,15 +78,13 @@ public class MetadataTest extends AbstractTestRunner {
                 MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
                 MetadataFactory.varchar("column4", 5));
 
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -123,15 +102,13 @@ public class MetadataTest extends AbstractTestRunner {
                 MetadataFactory.varchar("column13", 20, MetadataFactory.notNull()),
                 MetadataFactory.varchar("column4", 5));
 
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -149,15 +126,13 @@ public class MetadataTest extends AbstractTestRunner {
                 MetadataFactory.varchar("column3", 20),
                 MetadataFactory.varchar("column4", 5));
 
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -175,15 +150,13 @@ public class MetadataTest extends AbstractTestRunner {
                 MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
                 MetadataFactory.varchar("column4", 5));
 
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -201,15 +174,13 @@ public class MetadataTest extends AbstractTestRunner {
                 MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
                 MetadataFactory.varchar("column4", 6));
 
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (FailedDatabaseValidationException fe) {
             System.out.println(fe.getMessage());
             return;
+        } catch (SqlException e) {
+            System.out.println(e.getMessage());
         }
         fail();
     }
@@ -222,18 +193,8 @@ public class MetadataTest extends AbstractTestRunner {
             return;
         }
 
-        TableMetadata tm1 = MetadataFactory.table("table1",
-                MetadataFactory.integer("column1", MetadataFactory.primaryKey()),
-                MetadataFactory.integer("column2", MetadataFactory.defaultVal(15)),
-                MetadataFactory.varchar("column3", 20, MetadataFactory.notNull()),
-                MetadataFactory.varchar("column4", 5));
-
-        TableMetadata tm2 = MetadataFactory.table("table2",
-                MetadataFactory.integer("column5", MetadataFactory.primaryKey()),
-                MetadataFactory.varchar("column3", 15));
-
         try {
-            sqlServer.validateMetadata(databaseName, tm1, tm2);
+            sqlServer.executeQuery(QueryFactory.validateDatabase(databaseName, tm1, tm2));
         } catch (SqlException se) {
             System.out.println(se.getMessage());
             fail();

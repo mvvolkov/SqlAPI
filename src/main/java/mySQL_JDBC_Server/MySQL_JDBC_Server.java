@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.WrappedException;
-import sqlapi.metadata.TableMetadata;
 import sqlapi.queries.*;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.queryResult.QueryResultRow;
@@ -72,6 +71,10 @@ public class MySQL_JDBC_Server implements SqlServer {
         String queryString = QueryStringUtil.getQueryString(query);
         System.out.println(queryString);
 
+        if (query instanceof ValidateDatabaseQuery) {
+            this.validateMetadata((ValidateDatabaseQuery) query);
+        }
+
         try (Statement statement = connection.createStatement()) {
             if (query instanceof TableQuery) {
                 statement.executeUpdate(queryString);
@@ -116,7 +119,7 @@ public class MySQL_JDBC_Server implements SqlServer {
         }
     }
 
-    @Override public void validateMetadata(String databaseName, TableMetadata... tables)
+    private void validateMetadata(ValidateDatabaseQuery query)
             throws FailedDatabaseValidationException {
         // TODO to be done
     }

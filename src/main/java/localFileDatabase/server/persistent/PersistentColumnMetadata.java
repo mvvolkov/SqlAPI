@@ -1,6 +1,7 @@
 package localFileDatabase.server.persistent;
 
 import sqlapi.exceptions.ConstraintViolationException;
+import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.exceptions.SqlException;
 import sqlapi.exceptions.UnsupportedColumnConstraintTypeException;
 import sqlapi.metadata.ColumnConstraint;
@@ -47,7 +48,7 @@ public abstract class PersistentColumnMetadata implements Serializable, ColumnMe
         return new ArrayList<>(constraints);
     }
 
-    public PersistentColumnConstraint getColumnConstraintOrNull(
+    private PersistentColumnConstraint getColumnConstraintOrNull(
             ColumnConstraintType type) {
         for (PersistentColumnConstraint constraint : constraints) {
             if (constraint.getConstraintType() == type) {
@@ -59,6 +60,47 @@ public abstract class PersistentColumnMetadata implements Serializable, ColumnMe
 
     @Override
     public abstract SqlType getSqlType();
+
+    public void validate(ColumnMetadata cm) throws FailedDatabaseValidationException {
+        String fullColumnName = table.getDatabaseName() +
+                "." + table.getTableName() + "." + columnName;
+        if (this.getSqlType() != cm.getSqlType()) {
+            throw new FailedDatabaseValidationException(
+                    "type of the column " + fullColumnName + " is " + this.getSqlType() +
+                            " rather than " + cm.getSqlType());
+        }
+        if (cm.getConstraints().size() != this.getConstraints().size()) {
+            throw new FailedDatabaseValidationException("number of constraints for " +
+                    "column " + fullColumnName + " is different");
+        }
+        for (ColumnConstraint constraint : cm.getConstraints()) {
+            PersistentColumnConstraint pcc =
+                    this.getColumnConstraintOrNull(
+                            constraint.getConstraintType());
+            if (pcc == null) {
+                throw new FailedDatabaseValidationException(
+                        "constraint " + constraint.getConstraintType()
+                                + "not found for the column " + fullColumnName);
+            }
+            if (constraint.getConstraintType() ==
+                    ColumnConstraintType.DEFAULT_VALUE) {
+                Object defaultValue = constraint.getParameters().get(0);
+                if (!defaultValue.equals(pcc.getParameters().get(0))) {
+                    throw new FailedDatabaseValidationException("wrong default value " +
+                            "for the column " + fullColumnName);
+                }
+            }
+            if (constraint.getConstraintType() ==
+                    ColumnConstraintType.MAX_SIZE) {
+                int maxSize1 = (int) constraint.getParameters().get(0);
+                int maxSize2 = (int) pcc.getParameters().get(0);
+                if (maxSize1 != maxSize2) {
+                    throw new FailedDatabaseValidationException("wrong max size " +
+                            "for the column " + fullColumnName);
+                }
+            }
+        }
+    }
 
     public Object getDefaultValue() {
         return defaultValue;

@@ -13,15 +13,15 @@ public final class PersistentDatabase implements Serializable {
 
     public static final long serialVersionUID = -5620084460569971790L;
 
-    private final String name;
+    private final String databaseName;
 
     private final Collection<PersistentTable> tables = new ArrayList<>();
 
 
     transient private LocalFileDbServer server;
 
-    public PersistentDatabase(String name, LocalFileDbServer server) {
-        this.name = name;
+    public PersistentDatabase(String databaseName, LocalFileDbServer server) {
+        this.databaseName = databaseName;
         this.server = server;
     }
 
@@ -33,8 +33,8 @@ public final class PersistentDatabase implements Serializable {
         this.server = server;
     }
 
-    public String getName() {
-        return name;
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     public Collection<TableMetadata> getTables() {
@@ -43,7 +43,9 @@ public final class PersistentDatabase implements Serializable {
 
     public void executeQuery(DatabaseQuery query) throws SqlException {
 
-        if (query instanceof CreateTableQuery) {
+        if (query instanceof ValidateDatabaseQuery) {
+            this.validate(((ValidateDatabaseQuery) query).getTables());
+        } else if (query instanceof CreateTableQuery) {
             this.createTable(((CreateTableQuery) query).getTableMetadata());
         } else if (query instanceof DropTableQuery) {
             this.dropTable(((DropTableQuery) query).getTableName());
@@ -53,13 +55,32 @@ public final class PersistentDatabase implements Serializable {
         }
     }
 
+    private void validate(Collection<TableMetadata> otherTables)
+            throws FailedDatabaseValidationException {
+
+        if (tables.size() != otherTables.size()) {
+            throw new FailedDatabaseValidationException("number of tables is different " +
+                    "in database " + databaseName);
+        }
+        for (TableMetadata tableMetadata : otherTables) {
+            try {
+                this.getTable(tableMetadata.getTableName())
+                        .validate(tableMetadata.getColumnsMetadata());
+            } catch (NoSuchTableException e) {
+                throw new FailedDatabaseValidationException(
+                        "table " + tableMetadata.getTableName() + " not found in the " +
+                                "database " + databaseName);
+            }
+        }
+    }
+
 
     private void createTable(TableMetadata tableMetadata)
             throws SqlException {
 
         PersistentTable table = this.getTableOrNull(tableMetadata.getTableName());
         if (table != null) {
-            throw new TableAlreadyExistsException(name,
+            throw new TableAlreadyExistsException(databaseName,
                     tableMetadata.getTableName());
         }
         tables.add(new PersistentTable(tableMetadata, this));

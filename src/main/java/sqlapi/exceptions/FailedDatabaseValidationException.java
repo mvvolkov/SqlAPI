@@ -1,19 +1,17 @@
 package sqlapi.exceptions;
 
-public class FailedDatabaseValidationException extends SqlException {
+import org.jetbrains.annotations.NotNull;
 
-    public String getDatabaseName() {
-        return databaseName;
+public final class FailedDatabaseValidationException extends SqlException {
+
+    @NotNull
+    private final String message;
+
+    public FailedDatabaseValidationException(@NotNull String message) {
+        this.message = message;
     }
-
-    private final String databaseName;
-
-    public FailedDatabaseValidationException(String databaseName) {
-        this.databaseName = databaseName;
-    }
-
 
     @Override public String getMessage() {
-        return "Failed validation for database " + databaseName;
+        return "Failed validation: " + message;
     }
 }

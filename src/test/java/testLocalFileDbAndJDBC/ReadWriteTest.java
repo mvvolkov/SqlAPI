@@ -1,5 +1,6 @@
 package testLocalFileDbAndJDBC;
 
+import clientImpl.queries.QueryFactory;
 import localFileDatabase.client.impl.FileQueryFactory;
 import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
@@ -46,9 +47,11 @@ public class ReadWriteTest extends AbstractTestRunner {
         }
         SqlServer sqlServer1 = LocalFileDbServer.getInstance();
         try {
+            // read from file and validate
             sqlServer1.executeQuery(
                     FileQueryFactory.readDatabaseFromFile(fileName, databaseName));
-            sqlServer1.validateMetadata(databaseName, tm1, tm2);
+            sqlServer1.executeQuery(QueryFactory.validateDatabase(databaseName, tm1,
+                    tm2));
         } catch (SqlException e) {
             System.out.println(e.getMessage());
             fail();

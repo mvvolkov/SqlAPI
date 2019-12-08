@@ -65,7 +65,7 @@ public final class PersistentTable implements Serializable, TableMetadata {
     }
 
     String getDatabaseName() {
-        return database.getName();
+        return database.getDatabaseName();
     }
 
     @NotNull
@@ -187,6 +187,24 @@ public final class PersistentTable implements Serializable, TableMetadata {
             if (row.getValue(columnName).equals(newValue)) {
                 throw new ConstraintViolationException(this.getDatabaseName(), tableName,
                         columnName, type);
+            }
+        }
+    }
+
+    public void validate(List<ColumnMetadata> otherColumns)
+            throws FailedDatabaseValidationException {
+        if (columns.size() != otherColumns.size()) {
+            throw new FailedDatabaseValidationException(
+                    "number of columns for table " + database.getDatabaseName() + "."
+                            + tableName + " is different");
+        }
+        for (ColumnMetadata cm : otherColumns) {
+            try {
+                this.getColumnMetadata(cm.getColumnName()).validate(cm);
+            } catch (NoSuchColumnException e) {
+                throw new FailedDatabaseValidationException(
+                        "column " + cm.getColumnName() + " not found in the table " +
+                                database.getDatabaseName() + "." + tableName);
             }
         }
     }

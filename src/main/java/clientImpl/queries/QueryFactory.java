@@ -4,6 +4,7 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
+import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.misc.SelectedItem;
 import sqlapi.columnExpr.ColumnRef;
@@ -27,6 +28,19 @@ public class QueryFactory {
     public static @NotNull CreateDatabaseQuery createDatabaseIfNotExists(
             @NotNull String databaseName) {
         return new CreateDatabaseQueryImpl(databaseName, true);
+    }
+
+    public static @NotNull ValidateDatabaseQuery validateDatabase(
+            @NotNull String databaseName,
+            @NotNull Collection<TableMetadata> tables) throws
+            FailedDatabaseValidationException {
+        return new ValidateDatabaseQueryImpl(databaseName, tables);
+    }
+
+    public static @NotNull ValidateDatabaseQuery validateDatabase(
+            @NotNull String databaseName,
+            TableMetadata... tables) throws FailedDatabaseValidationException {
+        return validateDatabase(databaseName, Arrays.asList(tables));
     }
 
     public static @NotNull CreateTableQuery createTable(@NotNull String databaseName,
@@ -63,7 +77,6 @@ public class QueryFactory {
         }
         return insert(databaseName, tableName, columns, inputValues);
     }
-
 
 
     public static @NotNull InsertQuery insert(@NotNull String databaseName,
