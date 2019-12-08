@@ -4,6 +4,7 @@ import clientImpl.columnExpr.ColumnExprFactory;
 import clientImpl.predicates.PredicateFactory;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
+import sqlapi.columnExpr.ParametrizedInputValue;
 import sqlapi.exceptions.FailedDatabaseValidationException;
 import sqlapi.misc.AssignmentOperation;
 import sqlapi.misc.SelectedItem;
@@ -73,7 +74,11 @@ public class QueryFactory {
                                               Object... values) {
         List<InputValue> inputValues = new ArrayList<>();
         for (Object obj : values) {
-            inputValues.add(ColumnExprFactory.value(obj));
+            if (obj instanceof InputValue) {
+                inputValues.add((InputValue) obj);
+            } else {
+                inputValues.add(ColumnExprFactory.value(obj));
+            }
         }
         return insert(databaseName, tableName, columns, inputValues);
     }
@@ -96,7 +101,11 @@ public class QueryFactory {
                                               Object... values) {
         List<InputValue> inputValues = new ArrayList<>();
         for (Object obj : values) {
-            inputValues.add(ColumnExprFactory.value(obj));
+            if (obj instanceof InputValue) {
+                inputValues.add((InputValue) obj);
+            } else {
+                inputValues.add(ColumnExprFactory.value(obj));
+            }
         }
         return insert(databaseName, tableName, inputValues);
     }

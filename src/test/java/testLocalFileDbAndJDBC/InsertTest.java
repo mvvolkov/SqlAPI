@@ -1,13 +1,16 @@
 package testLocalFileDbAndJDBC;
 
 import clientImpl.columnExpr.ColumnExprFactory;
+import clientImpl.metadata.MetadataFactory;
 import clientImpl.predicates.PredicateFactory;
 import clientImpl.queries.QueryFactory;
 import clientImpl.tables.TableRefFactory;
 import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
+import localFileDatabase.server.LocalFileDbServer;
 import org.junit.Test;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.ColumnConstraintType;
+import sqlapi.queries.InsertQuery;
 import sqlapi.queryResult.QueryResult;
 import sqlapi.server.SqlServer;
 
@@ -69,6 +72,7 @@ public class InsertTest extends AbstractTestRunner {
         }
         fail();
     }
+
 
     /**
      * INSERT INTO DB1.table1 VALUES (21, 43, NULL);

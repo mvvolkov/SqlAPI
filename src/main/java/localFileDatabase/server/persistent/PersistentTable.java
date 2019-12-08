@@ -6,6 +6,7 @@ import localFileDatabase.server.intermediate.ResultRow;
 import localFileDatabase.server.intermediate.ResultValue;
 import org.jetbrains.annotations.NotNull;
 import sqlapi.columnExpr.InputValue;
+import sqlapi.columnExpr.ParametrizedInputValue;
 import sqlapi.exceptions.*;
 import sqlapi.metadata.*;
 import sqlapi.misc.AssignmentOperation;
@@ -130,7 +131,13 @@ public final class PersistentTable implements Serializable, TableMetadata {
             String columnName = columnNames.isEmpty() ? columns.get(i).getColumnName()
                     : columnNames.get(i);
             PersistentColumnMetadata cm = this.getColumnMetadata(columnName);
-            Object value = cm.getCheckedValue(values.get(i).getValue());
+            InputValue inputValue = values.get(i);
+            if (inputValue instanceof ParametrizedInputValue) {
+                if (((ParametrizedInputValue) inputValue).isEmpty()) {
+                    throw new MissingParameterException();
+                }
+            }
+            Object value = cm.getCheckedValue(inputValue.getValue());
             row.setValue(columnName, value);
         }
 
