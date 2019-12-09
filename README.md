@@ -21,7 +21,7 @@ The server implementation for the API is done using collections in memory. It is
  - INSERT queries: insert values to all columns, insert values to selected columns, insert from select subquery
  - DELETE queries: delete all rows, delete rows matching a predicate
  - supported predicates: IN, IS NULL, IS NOT NULL, =, !=, >, >=, <, <=, AND, OR
- - column expressions can be used in the predicates (for example col1 > col2 + 15)
+ - column expressions can be used in the predicates, INSERT and UPDATE queries  (for example col1 > col2 + 15)
  - UPDATE queries with predicates. column expressions can be used in assignments
  - SELECT queries:
     - selected items:
@@ -40,7 +40,7 @@ The server implementation for the API is done using collections in memory. It is
     - GROUP BY clause is supported
     - aggregate functions COUNT, SUM, MAX, MIN, AVG are supported. they can be use even if GROUP BY clause is not
      presented in a query, COUNT(*) is also supported.
-    - aggregate functions can be use as a part of expression (for example SUM(column1) + column2 + 1) 
+    - aggregate functions can be used as a part of expression (for example SUM(column1) + column2 + 1) 
             
   
  To be done for the server implementation with collections in memory:
