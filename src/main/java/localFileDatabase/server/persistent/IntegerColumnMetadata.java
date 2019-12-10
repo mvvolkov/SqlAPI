@@ -27,7 +27,7 @@ final class IntegerColumnMetadata extends PersistentColumnMetadata {
             try {
                 newValue = Integer.valueOf((String) value);
             } catch (NumberFormatException nfe) {
-                throw new WrappedException(nfe);
+                throw new WrongValueTypeException(Integer.class.getSimpleName(), value);
             }
         } else {
             throw new WrongValueTypeException(Integer.class.getSimpleName(), value);
